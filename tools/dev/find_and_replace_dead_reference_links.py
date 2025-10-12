@@ -112,12 +112,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    try:
-        json_data = load_json(args.file)
-        replace_links_in_files(json_data)
-    except Exception as exc:  # pylint: disable=broad-except
-        print(f"An error occurred: {exc}")
-
-
+    json_data = load_json(args.file)
+    replace_links_in_files(json_data)
 if __name__ == "__main__":
     main()
