@@ -72,7 +72,7 @@ PATH
       pdf-reader
       pg
       puma
-      rack (~> 2.2)
+      rack (>= 2.2, < 4.0)
       railties
       rasn1 (= 0.14.0)
       rb-readline
@@ -377,7 +377,7 @@ GEM
       ruby2_keywords (~> 0.0.1)
     mutex_m (0.3.0)
     nessus_rest (0.1.6)
-    net-imap (0.5.6)
+    net-imap (0.5.7)
       date
       net-protocol
     net-ldap (0.19.0)
@@ -436,7 +436,7 @@ GEM
     puma (6.6.0)
       nio4r (~> 2.0)
     racc (1.8.1)
-    rack (2.2.19)
+    rack (2.2.20)
     rack-protection (3.2.0)
       base64 (>= 0.1.0)
       rack (~> 2.2, >= 2.2.4)
@@ -621,7 +621,7 @@ GEM
     thor (1.4.0)
     tilt (2.6.0)
     timecop (0.9.10)
-    timeout (0.4.3)
+    timeout (0.4.4)
     toml (0.2.0)
       parslet (~> 1.8.0)
     tsort (0.2.0)
