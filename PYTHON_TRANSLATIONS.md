@@ -420,6 +420,159 @@ python3 scripts/meterpreter/file_collector.py -i results.txt -l ./downloads
 - Replace call/jmp references
 - Fix read/write handle/filename references
 
+### 39. tools/modules/committer_count.rb → tools/modules/committer_count.py
+**Purpose:** Display git commit statistics by author over a given period
+
+**Key Features:**
+- Count commits per author since a specific date
+- Support flexible date formats (1y, 6m, 12w, 100d, YYYY-MM-DD)
+- Sort by commit count descending
+
+**Usage:**
+```bash
+python3 tools/modules/committer_count.py 2011-01-01 | head -10  # Since a particular date
+python3 tools/modules/committer_count.py 1y   | head -10        # Last year
+python3 tools/modules/committer_count.py 6m   | head -10        # Last six months
+python3 tools/modules/committer_count.py 12w  | head -10        # Last twelve weeks
+```
+
+### 40. tools/modules/module_author.rb → tools/modules/module_author.py
+**Purpose:** List modules by author and count modules per author
+
+**Key Features:**
+- Display all modules with their authors
+- Count and display modules per author
+- Filter by module type
+- Regex matching against author field
+- Sort by author or reverse sort
+
+**Usage:**
+```bash
+python3 tools/modules/module_author.py --help
+python3 tools/modules/module_author.py -f Exploit -s
+python3 tools/modules/module_author.py -x "hdm" -r
+```
+
+### 41. tools/modules/module_commits.rb → tools/modules/module_commits.py
+**Purpose:** Check commit history of modules and sort by commit count
+
+**Key Features:**
+- Analyze git commit history for module files
+- Show commits per author for each module
+- Sort modules by total commit count
+- Works with both individual files and directories
+
+**Usage:**
+```bash
+python3 tools/modules/module_commits.py modules/exploits
+python3 tools/modules/module_commits.py modules/exploits/windows/smb/ms17_010_eternalblue.rb
+```
+
+### 42. tools/modules/module_description.rb → tools/modules/module_description.py
+**Purpose:** List modules with their descriptions
+
+**Key Features:**
+- Display all modules with descriptions
+- Filter by module type
+- Framework integration placeholder
+
+**Usage:**
+```bash
+python3 tools/modules/module_description.py --help
+python3 tools/modules/module_description.py -f Exploit
+```
+
+### 43. tools/modules/module_license.rb → tools/modules/module_license.py
+**Purpose:** List modules by licensing terms
+
+**Key Features:**
+- Display module licenses (MSF, GPL, BSD, ART, UNK)
+- Filter by module type
+- Sort by license or module type
+- Regex matching against license field
+
+**Usage:**
+```bash
+python3 tools/modules/module_license.py --help
+python3 tools/modules/module_license.py -s -f Exploit
+python3 tools/modules/module_license.py -x "MSF"
+```
+
+### 44. tools/modules/module_payloads.rb → tools/modules/module_payloads.py
+**Purpose:** List exploit modules by compatible payloads
+
+**Key Features:**
+- Show compatible payloads for each exploit
+- Framework integration placeholder
+
+**Usage:**
+```bash
+python3 tools/modules/module_payloads.py
+```
+
+### 45. tools/modules/module_ports.rb → tools/modules/module_ports.py
+**Purpose:** List modules by default ports they use
+
+**Key Features:**
+- Extract RPORT datastore values
+- List autofilter_ports
+- Sort by port number
+- Framework integration placeholder
+
+**Usage:**
+```bash
+python3 tools/modules/module_ports.py
+```
+
+### 46. tools/modules/module_targets.rb → tools/modules/module_targets.py
+**Purpose:** List all modules with their targets
+
+**Key Features:**
+- Display module targets
+- Sort by target name
+- Regex filter for target matching
+- Framework integration placeholder
+
+**Usage:**
+```bash
+python3 tools/modules/module_targets.py --help
+python3 tools/modules/module_targets.py -s
+python3 tools/modules/module_targets.py -x "Windows"
+```
+
+### 47. tools/modules/payload_lengths.rb → tools/modules/payload_lengths.py
+**Purpose:** List payload modules with their lengths
+
+**Key Features:**
+- Display payload sizes (no encoding or BadChar handling)
+- Support for command-line datastore options
+- Architecture and platform filtering
+- Framework integration placeholder
+
+**Usage:**
+```bash
+python3 tools/modules/payload_lengths.py
+python3 tools/modules/payload_lengths.py ARCH=x64 PLATFORM=windows
+```
+
+### 48. tools/modules/module_disclodate.rb → tools/modules/module_disclodate.py
+**Purpose:** List modules by disclosure date
+
+**Key Features:**
+- Display modules with disclosure dates
+- Filter by date range (start and end dates)
+- Filter by module type
+- Exclude modules with no disclosure date
+- Sort by disclosure date
+- Regex matching against module names
+
+**Usage:**
+```bash
+python3 tools/modules/module_disclodate.py --help
+python3 tools/modules/module_disclodate.py -s -d 2020-01-01 -D 2023-12-31
+python3 tools/modules/module_disclodate.py -n -f Exploit
+```
+
 ## Common Patterns
 
 1. **Module Structure**: Ruby modules are translated to Python classes or module-level functions
