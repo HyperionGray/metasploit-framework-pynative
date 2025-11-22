@@ -185,12 +185,13 @@ class ChromPwnPanelIntegration(BaseIntegration):
         
         # Check if port is available
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex((self.host, self.port))
-        
-        if result == 0:
-            missing.append(f'Port {self.port} already in use')
-        
-        sock.close()
+        try:
+            result = sock.connect_ex((self.host, self.port))
+            
+            if result == 0:
+                missing.append(f'Port {self.port} already in use')
+        finally:
+            sock.close()
         
         return (len(missing) == 0, missing)
     

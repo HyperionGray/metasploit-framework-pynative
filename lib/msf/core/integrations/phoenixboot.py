@@ -59,9 +59,13 @@ class PhoenixBootIntegration(BaseIntegration):
             missing.append(f'Write access to {state_dir}')
         
         # Check if running with sufficient privileges for persistence
-        if os.getuid() != 0 and sys.platform != 'win32':
-            # Non-root on Unix - limited capabilities
-            pass  # Still functional, just limited
+        try:
+            if hasattr(os, 'getuid') and os.getuid() != 0 and sys.platform != 'win32':
+                # Non-root on Unix - limited capabilities
+                pass  # Still functional, just limited
+        except AttributeError:
+            # Windows doesn't have getuid
+            pass
         
         return (len(missing) == 0, missing)
     
@@ -198,7 +202,7 @@ fi
         """Add systemd service persistence."""
         result = {'success': False, 'method': 'systemd'}
         
-        if os.getuid() != 0:
+        if hasattr(os, 'getuid') and os.getuid() != 0:
             result['error'] = 'Root privileges required for systemd persistence'
             return result
         

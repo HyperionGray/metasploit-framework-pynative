@@ -60,12 +60,12 @@ class RFKillaIntegration(BaseIntegration):
             if os.path.exists(path) and os.access(path, os.X_OK):
                 return path
         
-        # Try to find in PATH
+        # Try to find in PATH using cross-platform method
         try:
-            result = subprocess.run(['which', 'rfkilla'], 
-                                  capture_output=True, text=True, timeout=5)
-            if result.returncode == 0 and result.stdout.strip():
-                return result.stdout.strip()
+            import shutil
+            path = shutil.which('rfkilla')
+            if path:
+                return path
         except Exception:
             pass
         
