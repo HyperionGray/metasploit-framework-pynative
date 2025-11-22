@@ -149,6 +149,7 @@ class Core
       "connect"    => "Communicate with a host",
       "color"      => "Toggle color",
       "debug"      => "Display information useful for debugging",
+      "detach"     => "Detach from the current interactive session",
       "exit"       => "Exit the console",
       "features"   => "Display the list of not yet released features that can be opted in to",
       "get"        => "Gets the value of a context-specific variable",
@@ -645,6 +646,29 @@ class Core
   end
 
   alias cmd_quit cmd_exit
+
+  #
+  # Detach from the current interactive session
+  #
+  def cmd_detach_help
+    print_line "Usage: detach"
+    print_line
+    print_line "Detach from the current interactive session and return to the main console."
+    print_line "This is equivalent to pressing Ctrl+Z in a traditional shell session."
+    print_line
+  end
+
+  def cmd_detach(*args)
+    if driver.active_session
+      session_name = driver.active_session.name
+      print_status("Detaching from session #{driver.active_session.sid} (#{session_name})...")
+      driver.active_session = nil
+      driver.update_prompt
+      print_good("Returned to main console")
+    else
+      print_error("No active session to detach from")
+    end
+  end
 
   def cmd_features_help
     print_line <<~CMD_FEATURE_HELP
@@ -1750,13 +1774,15 @@ class Core
             session.response_timeout = response_timeout
             session.on_run_command_error_proc = log_on_timeout_error("Send timed out. Timeout currently #{session.response_timeout} seconds, you can configure this with %grnsessions --interact <id> --timeout <value>%clr")
           end
-          print_status("Starting interaction with #{session.name}...\n") unless quiet
+          print_status("Starting interaction with #{session.name}...") unless quiet
+          print_line("Use 'detach' or press Ctrl+Z to return to the main console\n") unless quiet
           begin
-            self.active_session = session
-
-            sid = session.interact(driver.input.dup, driver.output)
-            self.active_session = nil
-            driver.input.reset_tab_completion if driver.input.supports_readline
+            driver.active_session = session
+            driver.update_prompt
+            
+            # Instead of spawning a new console, we stay in the main loop
+            # Commands will be routed to the session via unknown_command
+            sid = nil
           ensure
             if session.respond_to?(:response_timeout) && last_known_timeout
               session.response_timeout = last_known_timeout
