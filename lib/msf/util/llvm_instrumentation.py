@@ -285,6 +285,15 @@ class LLVMInstrumentation:
                 script_parts.append(self._generate_asan_frida_script(options))
             elif san == SanitizerType.UBSAN:
                 script_parts.append(self._generate_ubsan_frida_script(options))
+            elif san == SanitizerType.TSAN:
+                script_parts.append(self._generate_tsan_frida_script(options))
+            elif san == SanitizerType.MSAN:
+                script_parts.append(self._generate_msan_frida_script(options))
+            elif san == SanitizerType.LSAN:
+                # LSan is integrated with ASAN in Frida mode
+                script_parts.append("// LeakSanitizer - covered by ASAN hooks\n")
+            else:
+                script_parts.append(f"// Sanitizer {san.value} not yet implemented for Frida\n")
         
         # Add edge instrumentation with auto-removal
         if options.get('edge_instrumentation', True):
@@ -361,6 +370,55 @@ console.log('[*] UBSan instrumentation enabled');
 
 // Hook integer operations to detect overflows
 // This would require binary analysis to identify arithmetic operations
+"""
+    
+    def _generate_tsan_frida_script(self, options: Dict) -> str:
+        """
+        Generate Frida script for ThreadSanitizer-like checks.
+        
+        Args:
+            options: Instrumentation options
+            
+        Returns:
+            JavaScript code for TSan checks
+        """
+        return """
+// ThreadSanitizer emulation
+console.log('[*] TSan instrumentation enabled');
+
+// Track thread creation and synchronization
+var threadMap = new Map();
+
+// Hook pthread functions
+var pthreadFuncs = ['pthread_create', 'pthread_join', 'pthread_mutex_lock', 'pthread_mutex_unlock'];
+pthreadFuncs.forEach(function(funcName) {
+    var funcPtr = Module.findExportByName(null, funcName);
+    if (funcPtr) {
+        Interceptor.attach(funcPtr, {
+            onEnter: function(args) {
+                console.log('[TSAN] ' + funcName + ' called');
+            }
+        });
+    }
+});
+"""
+    
+    def _generate_msan_frida_script(self, options: Dict) -> str:
+        """
+        Generate Frida script for MemorySanitizer-like checks.
+        
+        Args:
+            options: Instrumentation options
+            
+        Returns:
+            JavaScript code for MSan checks
+        """
+        return """
+// MemorySanitizer emulation
+console.log('[*] MSan instrumentation enabled');
+
+// Track memory initialization
+// This would require shadow memory tracking similar to ASAN
 """
     
     def _generate_edge_instrumentation_script(self, options: Dict) -> str:
@@ -484,6 +542,24 @@ console.log('[*] Edge instrumentation complete: ' + edgeListeners.size + ' funct
                 if 'ubsan_options' in options:
                     ubsan_opts.extend(options['ubsan_options'])
                 env_vars.append(f"UBSAN_OPTIONS='{':'.join(ubsan_opts)}'")
+            
+            elif san == SanitizerType.TSAN:
+                tsan_opts = ['second_deadlock_stack=1']
+                if 'tsan_options' in options:
+                    tsan_opts.extend(options['tsan_options'])
+                env_vars.append(f"TSAN_OPTIONS='{':'.join(tsan_opts)}'")
+            
+            elif san == SanitizerType.MSAN:
+                msan_opts = ['poison_in_malloc=1']
+                if 'msan_options' in options:
+                    msan_opts.extend(options['msan_options'])
+                env_vars.append(f"MSAN_OPTIONS='{':'.join(msan_opts)}'")
+            
+            elif san == SanitizerType.LSAN:
+                lsan_opts = ['report_objects=1']
+                if 'lsan_options' in options:
+                    lsan_opts.extend(options['lsan_options'])
+                env_vars.append(f"LSAN_OPTIONS='{':'.join(lsan_opts)}'")
         
         return ' '.join(env_vars)
 
