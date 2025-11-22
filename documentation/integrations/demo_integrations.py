@@ -15,8 +15,9 @@ import sys
 import os
 import time
 
-# Add to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+# Add to path - go up two directories to reach the root
+root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, root_dir)
 
 from lib.msf.core.integrations import IntegrationRegistry
 from lib.msf.core.integrations.rfkilla import RFKillaIntegration
