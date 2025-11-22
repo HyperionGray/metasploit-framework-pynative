@@ -654,7 +654,7 @@ class Core
     print_line "Usage: detach"
     print_line
     print_line "Detach from the current interactive session and return to the main console."
-    print_line "This is equivalent to pressing Ctrl+Z in a traditional shell session."
+    print_line "This returns you to the main MSF console prompt while leaving the session running."
     print_line
   end
 
@@ -662,6 +662,12 @@ class Core
     if driver.active_session
       session_name = driver.active_session.name
       print_status("Detaching from session #{driver.active_session.sid} (#{session_name})...")
+      
+      # Reset the session's UI if it supports it
+      if driver.active_session.respond_to?(:reset_ui)
+        driver.active_session.reset_ui
+      end
+      
       driver.active_session = nil
       driver.update_prompt
       print_good("Returned to main console")
@@ -1779,8 +1785,13 @@ class Core
           # use prompt-based interaction instead of spawning new shell
           if session.respond_to?(:console) && session.console
             print_status("Starting interaction with #{session.name}...") unless quiet
-            print_line("Use 'detach' or press Ctrl+Z to return to the main console\n") unless quiet
+            print_line("Use 'detach' to return to the main console\n") unless quiet
             begin
+              # Initialize console with current driver's input/output
+              if session.respond_to?(:init_ui)
+                session.init_ui(driver.input, driver.output)
+              end
+              
               driver.active_session = session
               driver.update_prompt
               
