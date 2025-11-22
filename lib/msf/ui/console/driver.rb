@@ -527,7 +527,13 @@ protected
       begin
         active_session.console.run_single(line)
         return :handled
-      rescue => e
+      rescue Interrupt
+        # User interrupted, allow it to propagate
+        raise
+      rescue Rex::TimeoutError => e
+        print_error("Session command timeout: #{e.message}")
+        elog("Session command timeout", e)
+      rescue StandardError => e
         print_error("Error running command in session: #{e.message}")
         elog("Session command error", e)
       end

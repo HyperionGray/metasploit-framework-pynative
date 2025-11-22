@@ -126,10 +126,8 @@ If commands aren't being routed to the session:
 - Try using `detach` and re-entering the session
 - Check that the session is still active with `sessions -l`
 
-### Want the old behavior back?
-For command shells, the traditional behavior is automatically used. For other session types, you can:
-1. Use the session's native interact method directly (not implemented in this version)
-2. Or use the new behavior which should be more convenient
+### Want to switch between traditional and new behavior?
+Command shells automatically use the traditional spawning behavior. For console-based sessions, the new venv-style behavior is the default and provides a better user experience.
 
 ## Future Enhancements
 

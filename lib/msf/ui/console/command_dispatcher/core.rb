@@ -660,8 +660,10 @@ class Core
 
   def cmd_detach(*args)
     if driver.active_session
-      session_name = driver.active_session.name
-      print_status("Detaching from session #{driver.active_session.sid} (#{session_name})...")
+      # Sanitize session info to prevent potential injection
+      session_sid = driver.active_session.sid.to_i
+      session_name = driver.active_session.name.to_s.gsub(/[^[:print:]]/, '')
+      print_status("Detaching from session #{session_sid} (#{session_name})...")
       
       # Reset the session's UI if it supports it
       if driver.active_session.respond_to?(:reset_ui)
@@ -1795,9 +1797,9 @@ class Core
               driver.active_session = session
               driver.update_prompt
               
-              # Instead of spawning a new console, we stay in the main loop
+              # Exit the loop - we stay in the main console loop
               # Commands will be routed to the session via unknown_command
-              sid = nil
+              break
             ensure
               if session.respond_to?(:response_timeout) && last_known_timeout
                 session.response_timeout = last_known_timeout
