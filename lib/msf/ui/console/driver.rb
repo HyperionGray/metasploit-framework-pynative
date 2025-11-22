@@ -522,8 +522,8 @@ protected
   # executable.  This is only allowed if command passthru has been permitted
   #
   def unknown_command(method, line)
-    # If we have an active session, try to route the command to it
-    if active_session
+    # If we have an active session with console support, route commands to it
+    if active_session && active_session.respond_to?(:console) && active_session.console
       begin
         active_session.console.run_single(line)
         return :handled

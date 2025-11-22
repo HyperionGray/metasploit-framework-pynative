@@ -1774,19 +1774,40 @@ class Core
             session.response_timeout = response_timeout
             session.on_run_command_error_proc = log_on_timeout_error("Send timed out. Timeout currently #{session.response_timeout} seconds, you can configure this with %grnsessions --interact <id> --timeout <value>%clr")
           end
-          print_status("Starting interaction with #{session.name}...") unless quiet
-          print_line("Use 'detach' or press Ctrl+Z to return to the main console\n") unless quiet
-          begin
-            driver.active_session = session
-            driver.update_prompt
-            
-            # Instead of spawning a new console, we stay in the main loop
-            # Commands will be routed to the session via unknown_command
-            sid = nil
-          ensure
-            if session.respond_to?(:response_timeout) && last_known_timeout
-              session.response_timeout = last_known_timeout
-              session.on_run_command_error_proc = nil
+          
+          # New behavior: For sessions with console support (meterpreter, SQL, etc.)
+          # use prompt-based interaction instead of spawning new shell
+          if session.respond_to?(:console) && session.console
+            print_status("Starting interaction with #{session.name}...") unless quiet
+            print_line("Use 'detach' or press Ctrl+Z to return to the main console\n") unless quiet
+            begin
+              driver.active_session = session
+              driver.update_prompt
+              
+              # Instead of spawning a new console, we stay in the main loop
+              # Commands will be routed to the session via unknown_command
+              sid = nil
+            ensure
+              if session.respond_to?(:response_timeout) && last_known_timeout
+                session.response_timeout = last_known_timeout
+                session.on_run_command_error_proc = nil
+              end
+            end
+          else
+            # Old behavior: For stream-based sessions (command shells)
+            # spawn traditional interactive session
+            print_status("Starting interaction with #{session.name}...\n") unless quiet
+            begin
+              self.active_session = session
+
+              sid = session.interact(driver.input.dup, driver.output)
+              self.active_session = nil
+              driver.input.reset_tab_completion if driver.input.supports_readline
+            ensure
+              if session.respond_to?(:response_timeout) && last_known_timeout
+                session.response_timeout = last_known_timeout
+                session.on_run_command_error_proc = nil
+              end
             end
           end
         else
