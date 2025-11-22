@@ -104,14 +104,15 @@ class MetasploitModule < Msf::Auxiliary
     print_status("Running: #{cmd.join(' ')}")
 
     begin
-      output = `#{cmd.join(' ')} 2>&1`
-      status = $?.exitstatus
+      # Use system with array form to avoid command injection
+      require 'open3'
+      output, status = Open3.capture2e(*cmd)
 
-      if verbose || status != 0
+      if verbose || status.exitstatus != 0
         print_line(output)
       end
 
-      if status == 0
+      if status.exitstatus == 0
         print_good("Instrumentation successful!")
         print_good("Output: #{output_path}")
         

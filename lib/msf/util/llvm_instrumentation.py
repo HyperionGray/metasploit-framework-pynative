@@ -65,7 +65,8 @@ class LLVMInstrumentation:
         Returns:
             Dictionary mapping tool names to their paths
         """
-        tools = ['clang', 'clang++', 'llvm-link', 'opt', 'llc', 'llvm-dis']
+        # Only search for tools we actually use
+        tools = ['clang', 'clang++']
         paths = {}
         
         for tool in tools:
@@ -313,8 +314,7 @@ class LLVMInstrumentation:
         """
         return """
 // AddressSanitizer emulation
-var asanShadowBase = null;
-var hitEdges = new Set();
+// Track memory allocations and accesses
 
 // Hook memory allocation functions
 Interceptor.attach(Module.findExportByName(null, 'malloc'), {
@@ -535,31 +535,31 @@ console.log('[*] Edge instrumentation complete: ' + edgeListeners.size + ' funct
                 ]
                 if 'asan_options' in options:
                     asan_opts.extend(options['asan_options'])
-                env_vars.append(f"ASAN_OPTIONS='{':'.join(asan_opts)}'")
+                env_vars.append(f'ASAN_OPTIONS="{":".join(asan_opts)}"')
             
             elif san == SanitizerType.UBSAN:
                 ubsan_opts = ['print_stacktrace=1']
                 if 'ubsan_options' in options:
                     ubsan_opts.extend(options['ubsan_options'])
-                env_vars.append(f"UBSAN_OPTIONS='{':'.join(ubsan_opts)}'")
+                env_vars.append(f'UBSAN_OPTIONS="{":".join(ubsan_opts)}"')
             
             elif san == SanitizerType.TSAN:
                 tsan_opts = ['second_deadlock_stack=1']
                 if 'tsan_options' in options:
                     tsan_opts.extend(options['tsan_options'])
-                env_vars.append(f"TSAN_OPTIONS='{':'.join(tsan_opts)}'")
+                env_vars.append(f'TSAN_OPTIONS="{":".join(tsan_opts)}"')
             
             elif san == SanitizerType.MSAN:
                 msan_opts = ['poison_in_malloc=1']
                 if 'msan_options' in options:
                     msan_opts.extend(options['msan_options'])
-                env_vars.append(f"MSAN_OPTIONS='{':'.join(msan_opts)}'")
+                env_vars.append(f'MSAN_OPTIONS="{":".join(msan_opts)}"')
             
             elif san == SanitizerType.LSAN:
                 lsan_opts = ['report_objects=1']
                 if 'lsan_options' in options:
                     lsan_opts.extend(options['lsan_options'])
-                env_vars.append(f"LSAN_OPTIONS='{':'.join(lsan_opts)}'")
+                env_vars.append(f'LSAN_OPTIONS="{":".join(lsan_opts)}"')
         
         return ' '.join(env_vars)
 
