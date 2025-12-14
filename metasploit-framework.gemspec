@@ -74,7 +74,7 @@ Gem::Specification.new do |spec|
   # are needed when there's no database
   spec.add_runtime_dependency 'metasploit-model'
   # Needed for Meterpreter
-  spec.add_runtime_dependency 'metasploit-payloads', '2.0.235'
+  spec.add_runtime_dependency 'metasploit-payloads', '2.0.237'
   # Needed for the next-generation POSIX Meterpreter
   spec.add_runtime_dependency 'metasploit_payloads-mettle', '1.0.45'
   # Needed by msfgui and other rpc components
@@ -157,8 +157,9 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'net-ldap'
   spec.add_runtime_dependency 'net-smtp'
   spec.add_runtime_dependency 'net-sftp'
+  spec.add_runtime_dependency 'rest-client'
   spec.add_runtime_dependency 'winrm'
-  # Pinned to avoid WinRM warnings: https://github.com/WinRb/WinRM/issues/355 - if bumping verify windows/winrm/winrm_script_exec works against metasploitable with vagrant/vagrant creds 
+  # Pinned to avoid WinRM warnings: https://github.com/WinRb/WinRM/issues/355 - if bumping verify windows/winrm/winrm_script_exec works against metasploitable with vagrant/vagrant creds
   spec.add_runtime_dependency 'rexml', '3.4.1'
   spec.add_runtime_dependency 'ffi', '< 1.17.0'
 
