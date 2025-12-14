@@ -10,7 +10,9 @@
 #     reason: <why it's legacy>
 #     alternative: <recommended alternative>
 #     date_marked: <YYYY-MM-DD>
-#     removal_date: <YYYY-MM-DD> (optional - when it will be removed)
+#
+# Note: removal_date field can be added if there's a specific plan to remove the module.
+# Most legacy modules are kept indefinitely for historical reference.
 
 ---
 

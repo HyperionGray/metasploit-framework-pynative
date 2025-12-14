@@ -74,8 +74,12 @@ class LegacyModuleChecker:
                 year = int(match.group(1))
                 return match.group(1), year
             
+        except (IOError, OSError) as e:
+            # Log file access errors but continue processing other modules
+            print(f"Warning: Could not read {module_path}: {e}", file=sys.stderr)
         except Exception as e:
-            pass
+            # Log unexpected errors but continue
+            print(f"Warning: Error parsing {module_path}: {e}", file=sys.stderr)
         
         return None, None
     
@@ -86,7 +90,9 @@ class LegacyModuleChecker:
                 content = f.read()
             
             return 'Msf::Module::Deprecated' in content
-        except:
+        except Exception as e:
+            # Silently return False if we can't read the file
+            # This is a best-effort check
             return False
     
     def get_module_type(self, module_path: Path) -> str:
