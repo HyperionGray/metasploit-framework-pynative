@@ -149,6 +149,7 @@ class Core
       "connect"    => "Communicate with a host",
       "color"      => "Toggle color",
       "debug"      => "Display information useful for debugging",
+      "detach"     => "Detach from the current interactive session",
       "exit"       => "Exit the console",
       "features"   => "Display the list of not yet released features that can be opted in to",
       "get"        => "Gets the value of a context-specific variable",
@@ -645,6 +646,37 @@ class Core
   end
 
   alias cmd_quit cmd_exit
+
+  #
+  # Detach from the current interactive session
+  #
+  def cmd_detach_help
+    print_line "Usage: detach"
+    print_line
+    print_line "Detach from the current interactive session and return to the main console."
+    print_line "This returns you to the main MSF console prompt while leaving the session running."
+    print_line
+  end
+
+  def cmd_detach(*args)
+    if driver.active_session
+      # Sanitize session info to prevent potential injection
+      session_sid = driver.active_session.sid.to_i
+      session_name = driver.active_session.name.to_s.gsub(/[^[:print:]]/, '')
+      print_status("Detaching from session #{session_sid} (#{session_name})...")
+      
+      # Reset the session's UI if it supports it
+      if driver.active_session.respond_to?(:reset_ui)
+        driver.active_session.reset_ui
+      end
+      
+      driver.active_session = nil
+      driver.update_prompt
+      print_good("Returned to main console")
+    else
+      print_error("No active session to detach from")
+    end
+  end
 
   def cmd_features_help
     print_line <<~CMD_FEATURE_HELP
@@ -1750,17 +1782,45 @@ class Core
             session.response_timeout = response_timeout
             session.on_run_command_error_proc = log_on_timeout_error("Send timed out. Timeout currently #{session.response_timeout} seconds, you can configure this with %grnsessions --interact <id> --timeout <value>%clr")
           end
-          print_status("Starting interaction with #{session.name}...\n") unless quiet
-          begin
-            self.active_session = session
+          
+          # New behavior: For sessions with console support (meterpreter, SQL, etc.)
+          # use prompt-based interaction instead of spawning new shell
+          if session.respond_to?(:console) && session.console
+            print_status("Starting interaction with #{session.name}...") unless quiet
+            print_line("Use 'detach' to return to the main console\n") unless quiet
+            begin
+              # Initialize console with current driver's input/output
+              if session.respond_to?(:init_ui)
+                session.init_ui(driver.input, driver.output)
+              end
+              
+              driver.active_session = session
+              driver.update_prompt
+              
+              # Exit the loop - we stay in the main console loop
+              # Commands will be routed to the session via unknown_command
+              break
+            ensure
+              if session.respond_to?(:response_timeout) && last_known_timeout
+                session.response_timeout = last_known_timeout
+                session.on_run_command_error_proc = nil
+              end
+            end
+          else
+            # Old behavior: For stream-based sessions (command shells)
+            # spawn traditional interactive session
+            print_status("Starting interaction with #{session.name}...\n") unless quiet
+            begin
+              self.active_session = session
 
-            sid = session.interact(driver.input.dup, driver.output)
-            self.active_session = nil
-            driver.input.reset_tab_completion if driver.input.supports_readline
-          ensure
-            if session.respond_to?(:response_timeout) && last_known_timeout
-              session.response_timeout = last_known_timeout
-              session.on_run_command_error_proc = nil
+              sid = session.interact(driver.input.dup, driver.output)
+              self.active_session = nil
+              driver.input.reset_tab_completion if driver.input.supports_readline
+            ensure
+              if session.respond_to?(:response_timeout) && last_known_timeout
+                session.response_timeout = last_known_timeout
+                session.on_run_command_error_proc = nil
+              end
             end
           end
         else
