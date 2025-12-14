@@ -1,0 +1,264 @@
+# Legacy Module Database
+#
+# This file tracks modules that are marked as legacy/deprecated.
+# These modules are maintained for historical reference but are not
+# recommended for primary use.
+#
+# Format:
+#   module_path:
+#     category: <category_name>
+#     reason: <why it's legacy>
+#     alternative: <recommended alternative>
+#     date_marked: <YYYY-MM-DD>
+#     removal_date: <YYYY-MM-DD> (optional - when it will be removed)
+
+---
+
+# ============================================================================
+# CATEGORY: Low-Quality Fuzzers
+# These are simple mutation-based fuzzers without feedback or coverage guidance.
+# Use AFL++, libFuzzer, or Honggfuzz instead.
+# ============================================================================
+
+auxiliary/fuzzers/http/http_get_uri_strings:
+  category: low_quality_fuzzer
+  reason: |
+    Simple string-based HTTP URI fuzzer without coverage guidance.
+    No feedback mechanism, inefficient compared to modern fuzzers.
+  alternative: |
+    Use AFL++ with HTTP protocol support, or specialized web fuzzers like:
+    - ffuf (Fast web fuzzer)
+    - wfuzz (Web application fuzzer)
+    - Burp Suite Intruder
+    - OWASP ZAP fuzzer
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/http/http_get_uri_long:
+  category: low_quality_fuzzer
+  reason: |
+    Simple length-based fuzzer. No coverage guidance or intelligent mutation.
+  alternative: |
+    Use AFL++ or modern fuzzers with protocol support.
+    For web applications, use ffuf or specialized tools.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/http/http_form_field:
+  category: low_quality_fuzzer
+  reason: |
+    Basic form field fuzzer without intelligence.
+  alternative: |
+    Use Burp Suite Intruder, OWASP ZAP, or ffuf for web form fuzzing.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/ftp/client_ftp:
+  category: low_quality_fuzzer
+  reason: |
+    Simple FTP client fuzzer. Better tools exist.
+  alternative: |
+    Use AFL++ with FTP protocol support, or dedicated protocol fuzzers like boofuzz.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/ftp/ftp_pre_post:
+  category: low_quality_fuzzer
+  reason: |
+    Basic FTP command fuzzer without coverage guidance.
+  alternative: |
+    Use boofuzz or AFL++ with FTP support.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/smtp/smtp_fuzzer:
+  category: low_quality_fuzzer
+  reason: |
+    Simple SMTP fuzzer. No coverage guidance.
+  alternative: |
+    Use AFL++ with SMTP protocol support or boofuzz.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/dns/dns_fuzzer:
+  category: low_quality_fuzzer
+  reason: |
+    Basic DNS protocol fuzzer without intelligence.
+  alternative: |
+    Use AFL++ with DNS protocol support, or specialized DNS fuzzers.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/ssh/ssh_version_2:
+  category: low_quality_fuzzer
+  reason: |
+    Simple SSH version string fuzzer.
+  alternative: |
+    Use AFL++ with SSH protocol support or boofuzz.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/ssh/ssh_version_corrupt:
+  category: low_quality_fuzzer
+  reason: |
+    Basic SSH version corruption fuzzer.
+  alternative: |
+    Use modern fuzzers with SSH protocol support.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/ssh/ssh_version_15:
+  category: low_quality_fuzzer
+  reason: |
+    SSH 1.5 version fuzzer - obsolete protocol version.
+  alternative: |
+    Use modern fuzzers. SSH 1.5 is deprecated.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/ssh/ssh_kexinit_corrupt:
+  category: low_quality_fuzzer
+  reason: |
+    Basic SSH key exchange fuzzer without coverage.
+  alternative: |
+    Use AFL++ or boofuzz for SSH fuzzing.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/ntp/ntp_protocol_fuzzer:
+  category: low_quality_fuzzer
+  reason: |
+    Simple NTP protocol fuzzer without intelligence.
+  alternative: |
+    Use AFL++ with NTP protocol support.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/smb/smb_create_pipe:
+  category: low_quality_fuzzer
+  reason: |
+    Basic SMB named pipe fuzzer.
+  alternative: |
+    Use AFL++ or specialized SMB fuzzers.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/smb/smb_create_pipe_corrupt:
+  category: low_quality_fuzzer
+  reason: |
+    Simple SMB corruption fuzzer.
+  alternative: |
+    Use modern coverage-guided fuzzers.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/smb/smb_ntlm1_login_corrupt:
+  category: low_quality_fuzzer
+  reason: |
+    Basic NTLM login fuzzer. NTLMv1 is deprecated.
+  alternative: |
+    Use modern SMB security testing tools. NTLMv1 should not be used.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/smb/smb_tree_connect:
+  category: low_quality_fuzzer
+  reason: |
+    Simple SMB tree connect fuzzer.
+  alternative: |
+    Use AFL++ with SMB protocol support.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/smb/smb_tree_connect_corrupt:
+  category: low_quality_fuzzer
+  reason: |
+    Basic SMB corruption fuzzer.
+  alternative: |
+    Use modern coverage-guided fuzzers.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/smb/smb2_negotiate_corrupt:
+  category: low_quality_fuzzer
+  reason: |
+    Simple SMB2 negotiation fuzzer.
+  alternative: |
+    Use modern fuzzers with SMB2 protocol support.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/smb/smb_negotiate_corrupt:
+  category: low_quality_fuzzer
+  reason: |
+    Basic SMB negotiation fuzzer.
+  alternative: |
+    Use AFL++ or specialized SMB fuzzers.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/tds/tds_login_username:
+  category: low_quality_fuzzer
+  reason: |
+    Simple TDS login fuzzer.
+  alternative: |
+    Use modern database protocol fuzzers.
+  date_marked: 2024-12-14
+
+auxiliary/fuzzers/tds/tds_login_corrupt:
+  category: low_quality_fuzzer
+  reason: |
+    Basic TDS protocol corruption fuzzer.
+  alternative: |
+    Use AFL++ with TDS/SQL Server protocol support.
+  date_marked: 2024-12-14
+
+# ============================================================================
+# CATEGORY: Redundant Enumeration Tools
+# These duplicate functionality of standard tools like nmap, masscan, etc.
+# Use the standard tools directly - they're better maintained and more reliable.
+# ============================================================================
+
+# Note: Many scanner modules will be added here after analysis
+# The ones that provide unique value (like exploit-specific scanners) remain active
+
+# Examples to be evaluated:
+# - auxiliary/scanner/portscan/* (use nmap instead)
+# - auxiliary/scanner/discovery/* (use nmap/masscan instead)
+# - Many auxiliary/scanner/http/* modules duplicate dirb/gobuster/ffuf
+
+# ============================================================================
+# CATEGORY: Ancient Exploits (Pre-2010)
+# These target systems that are largely obsolete.
+# Maintained for historical reference only.
+# ============================================================================
+
+# Note: This section will be populated with exploits from before 2010 after
+# comprehensive analysis. Age alone isn't sufficient - we need to consider
+# if the target systems are still in use.
+
+# Examples:
+# - Most Windows XP exploits (except in special cases)
+# - Ancient Unix vulnerabilities (unless target is still common)
+# - Legacy application exploits for software no longer maintained
+
+# ============================================================================
+# CATEGORY: Proof-of-Concept Only (Old and Unreliable)
+# These are PoCs that don't work reliably and haven't been updated recently.
+# ============================================================================
+
+# Note: This requires manual review of modules marked with low reliability
+# scores and old disclosure dates.
+
+# ============================================================================
+# CATEGORY: Poor Tool Integrations
+# These are half-baked wrappers around tools where direct usage is better.
+# ============================================================================
+
+# Note: This requires analysis of modules that wrap external tools poorly.
+
+# ============================================================================
+# NOTES ON CATEGORIZATION
+# ============================================================================
+#
+# This is a living document. Modules are added as they are identified.
+# 
+# Criteria for marking as legacy:
+# 1. Better alternatives exist and are readily available
+# 2. Module represents outdated techniques or targets
+# 3. Module is unreliable or poorly maintained
+# 4. Module provides no unique value
+#
+# Modules NOT marked as legacy:
+# 1. Well-maintained modules with unique functionality
+# 2. Modules for currently relevant targets (even if old)
+# 3. Modules that integrate well with modern tooling
+# 4. Educational modules that teach valuable concepts
+#
+# Process for adding modules:
+# 1. Identify candidate based on criteria
+# 2. Verify better alternative exists
+# 3. Document reason and alternative
+# 4. Add to this file
+# 5. Optionally mark in module itself with Msf::Module::Deprecated
