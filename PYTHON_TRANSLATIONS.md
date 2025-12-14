@@ -573,6 +573,115 @@ python3 tools/modules/module_disclodate.py -s -d 2020-01-01 -D 2023-12-31
 python3 tools/modules/module_disclodate.py -n -f Exploit
 ```
 
+### 49. lib/rex/text.rb → lib/rex/text.py
+**Purpose:** Text manipulation utilities for Metasploit
+
+**Key Features:**
+- `pattern_create()` - Create cyclic patterns for exploit development
+- `pattern_offset()` - Find offset of substring/integer in pattern
+- `decode_base64()` - Base64 decoding
+- `to_ascii()` - Convert bytes to ASCII string
+
+**Usage:**
+```python
+from rex.text import Text
+
+# Create a 100-byte pattern
+pattern = Text.pattern_create(100)
+
+# Find offset of a specific value
+offset = Text.pattern_offset(pattern, "Aa3A")
+print(f"Offset: {offset}")
+```
+
+### 50. tools/exploit/pattern_create.rb → tools/exploit/pattern_create.py
+**Purpose:** Create cyclic patterns for buffer overflow exploitation
+
+**Key Features:**
+- Generate patterns of specified length
+- Support for custom character sets
+- Used to identify buffer overflow offsets
+
+**Usage:**
+```bash
+python3 tools/exploit/pattern_create.py -l 200
+python3 tools/exploit/pattern_create.py -l 50 -s ABC,def,123
+```
+
+### 51. tools/exploit/pattern_offset.rb → tools/exploit/pattern_offset.py
+**Purpose:** Find offset of a pattern value
+
+**Key Features:**
+- Locate exact matches in patterns
+- Support for hex values and 4-byte strings
+- Find approximate matches with byte adjustments
+- Essential for exploit development
+
+**Usage:**
+```bash
+python3 tools/exploit/pattern_offset.py -q Aa3A
+python3 tools/exploit/pattern_offset.py -q 41304141 -l 8192
+python3 tools/exploit/pattern_offset.py -q AAAA -s ABC,def,123
+```
+
+### 52. tools/password/cpassword_decrypt.rb → tools/password/cpassword_decrypt.py
+**Purpose:** Decrypt Group Policy Preferences (GPP) cpassword strings
+
+**Key Features:**
+- Decrypt cpassword values using Microsoft's public AES key
+- Useful for extracting passwords from groups.xml and scheduledtasks.xml
+- Handles UTF-16LE encoding and PKCS7 padding
+
+**Usage:**
+```bash
+python3 tools/password/cpassword_decrypt.py AzVJmXh/J9KrU5n0czX1uBPLSUjzFE8j7dOltPD8tLk
+# Output: [+] The decrypted AES password is: testpassword
+```
+
+**Dependencies:**
+- pycryptodome (install with: `pip install pycryptodome`)
+
+### 53. scripts/meterpreter/hashdump.rb → scripts/meterpreter/hashdump.py
+**Purpose:** Dump Windows password hashes via Meterpreter
+
+**Key Features:**
+- Extract SAM database password hashes
+- Boot key and hboot key calculation
+- Password hint extraction
+- Framework placeholder for meterpreter integration
+
+**Usage:**
+```bash
+# Within Meterpreter session:
+python3 scripts/meterpreter/hashdump.py
+python3 scripts/meterpreter/hashdump.py -p 445
+
+# Note: Standalone mode shows usage information
+```
+
+**Note:** This is a reference implementation. Actual hash dumping requires a live Meterpreter session.
+
+### 54. scripts/meterpreter/scraper.rb → scripts/meterpreter/scraper.py
+**Purpose:** Comprehensive system information gathering
+
+**Key Features:**
+- Network configuration and routing
+- System information (OS, computer name)
+- User and group enumeration
+- Share and service enumeration
+- Password hash dumping
+- Registry hive export (HKLM, HKCU, HKCC, HKCR, HKU)
+
+**Usage:**
+```bash
+# Within Meterpreter session:
+python3 scripts/meterpreter/scraper.py
+
+# Output stored in: logs/scripts/scraper/<host>_<timestamp>
+```
+
+**Note:** This is a reference implementation. Actual scraping requires a live Meterpreter session.
+
 ## Common Patterns
 
 1. **Module Structure**: Ruby modules are translated to Python classes or module-level functions
