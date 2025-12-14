@@ -232,10 +232,20 @@ class SliverIntegration(BaseIntegration):
             generate_parts = ['generate', '--os', str(os), '--arch', str(arch), '--format', str(format)]
             
             if mtls_host:
-                mtls_port = int(mtls_port)
+                try:
+                    mtls_port = int(mtls_port)
+                    if mtls_port < 1 or mtls_port > 65535:
+                        return {'success': False, 'error': 'Invalid mTLS port number'}
+                except (ValueError, TypeError):
+                    return {'success': False, 'error': 'mTLS port must be a valid integer'}
                 generate_parts.extend(['--mtls', f'{mtls_host}:{mtls_port}'])
             elif http_host:
-                http_port = int(http_port)
+                try:
+                    http_port = int(http_port)
+                    if http_port < 1 or http_port > 65535:
+                        return {'success': False, 'error': 'Invalid HTTP port number'}
+                except (ValueError, TypeError):
+                    return {'success': False, 'error': 'HTTP port must be a valid integer'}
                 generate_parts.extend(['--http', f'{http_host}:{http_port}'])
             else:
                 return {
