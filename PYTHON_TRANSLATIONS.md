@@ -36,6 +36,22 @@ python3 modules/exploits/example_webapp.py --host 192.168.1.100 --username admin
 python3 modules/exploits/example_webapp.py --host target.example.com --check-only --verbose
 ```
 
+### 57. modules/exploits/linux/http/chamilo_bigupload_webshell.rb → modules/exploits/linux/http/chamilo_bigupload_webshell.py
+**Purpose:** Chamilo v1.11.24 Unrestricted File Upload PHP Webshell (CVE-2023-4220)
+
+**Key Features:**
+- Unrestricted file upload vulnerability in Chamilo LMS
+- Bypasses file extension checks via 'post-unsupported' action
+- Uploads PHP webshell to accessible directory
+- Automatic vulnerability detection
+- Cleanup support for uploaded files
+
+**Usage:**
+```bash
+python3 modules/exploits/linux/http/chamilo_bigupload_webshell.py --host 192.168.1.100
+python3 modules/exploits/linux/http/chamilo_bigupload_webshell.py --host target.example.com --check-only --verbose
+```
+
 ## Translated Files
 
 ### 1. lib/rex/proto/smb/utils.rb → lib/rex/proto/smb/utils.py
