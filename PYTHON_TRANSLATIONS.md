@@ -2,6 +2,40 @@
 
 This document summarizes the Ruby files that have been translated to Python in this repository.
 
+## Recent Exploit Module Conversions (2024)
+
+### 55. modules/exploits/linux/http/apache_hugegraph_gremlin_rce.rb → modules/exploits/linux/http/apache_hugegraph_gremlin_rce.py
+**Purpose:** Apache HugeGraph Gremlin RCE (CVE-2024-27348)
+
+**Key Features:**
+- Remote Code Execution in Apache HugeGraph Server versions before 1.3.0
+- Gremlin sandbox bypass vulnerability
+- Java reflection-based command execution
+- Automatic version detection and vulnerability checking
+
+**Usage:**
+```bash
+python3 modules/exploits/linux/http/apache_hugegraph_gremlin_rce.py --host 192.168.1.100 --port 8080
+python3 modules/exploits/linux/http/apache_hugegraph_gremlin_rce.py --host target.example.com --check-only
+```
+
+### 56. modules/exploits/example_webapp.rb → modules/exploits/example_webapp.py
+**Purpose:** Sample web application exploit demonstrating common patterns
+
+**Key Features:**
+- Educational example showing exploit development techniques
+- Version detection and vulnerability checking
+- Multiple authentication methods (Basic Auth and form-based)
+- Command injection through POST parameters
+- File upload via multipart form-data
+- Comprehensive error handling
+
+**Usage:**
+```bash
+python3 modules/exploits/example_webapp.py --host 192.168.1.100 --username admin --password pass123
+python3 modules/exploits/example_webapp.py --host target.example.com --check-only --verbose
+```
+
 ## Translated Files
 
 ### 1. lib/rex/proto/smb/utils.rb → lib/rex/proto/smb/utils.py
