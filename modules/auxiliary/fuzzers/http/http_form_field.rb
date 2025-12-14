@@ -5,6 +5,12 @@
 
 class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
+  include Msf::Module::Deprecated
+
+  deprecated(
+    Date.new(2026, 12, 31),
+    'This is a basic form field fuzzer. Use Burp Suite Intruder, OWASP ZAP, or ffuf for web form fuzzing instead.'
+  )
 
   def initialize(info = {})
     super(

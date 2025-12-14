@@ -7,6 +7,12 @@ require 'English'
 class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Tcp
   include Msf::Auxiliary::Fuzzer
+  include Msf::Module::Deprecated
+
+  deprecated(
+    Date.new(2026, 12, 31),
+    'This is a simple string-based fuzzer without coverage guidance. Use AFL++, libFuzzer, or specialized web fuzzers like ffuf or wfuzz instead.'
+  )
 
   def initialize(info = {})
     super(
