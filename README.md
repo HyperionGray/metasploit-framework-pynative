@@ -89,6 +89,50 @@ python3 examples/pf_task_example.py --mode exploit
 - [Exploit Writing Guide](documentation/EXPLOIT_WRITING_GUIDE.md) - Comprehensive exploitation tutorial
 - [Module Categorization](documentation/MODULE_CATEGORIZATION.md) - Understanding legacy vs. active modules
 
+## Modern Shell Catchers and C2 Frameworks
+
+This fork integrates professional-grade shell handling and C2 capabilities that scale well for red team operations:
+
+### Shell Catchers
+- **pwncat-cs** - Advanced shell handler with automatic privilege escalation, persistence, and post-exploitation modules
+- **Villain** - Modern web-based UI for managing multiple shells at scale
+
+### C2 Frameworks
+- **Sliver** - Professional Go-based C2 with mTLS, WireGuard, HTTP(S), and DNS protocols
+- **Havoc** - Modern C2 with GUI teamserver, sleep obfuscation, and indirect syscalls for evasion
+
+**Quick Start:**
+```bash
+# Catch shells with pwncat-cs (auto privilege escalation)
+use auxiliary/server/pwncat_listener
+set LHOST 0.0.0.0
+set LPORT 4444
+run
+
+# Start Sliver C2 for persistent access
+use auxiliary/integration/sliver_c2
+set ACTION start_server
+run
+
+# Start Havoc teamserver for team operations
+use auxiliary/integration/havoc_c2
+set ACTION start_teamserver
+run
+```
+
+**Documentation:**
+- [Shell Catcher & C2 Guide](documentation/SHELL_CATCHER_C2_GUIDE.md) - Comprehensive integration guide
+- [Quick Reference](documentation/SHELL_CATCHER_C2_QUICKSTART.md) - Quick command reference
+- [Integration README](lib/msf/core/integrations/README.md) - Technical integration details
+
+**Why These Tools?**
+- ✅ Scale better than basic netcat/multi-handler
+- ✅ Automatic privilege escalation (pwncat-cs)
+- ✅ Professional session management
+- ✅ Secure encrypted communications
+- ✅ Team collaboration features
+- ✅ Modern evasion techniques
+
 ## Contributing
 
 To contribute to Metasploit:
