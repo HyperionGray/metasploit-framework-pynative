@@ -52,6 +52,31 @@ python3 modules/exploits/linux/http/chamilo_bigupload_webshell.py --host 192.168
 python3 modules/exploits/linux/http/chamilo_bigupload_webshell.py --host target.example.com --check-only --verbose
 ```
 
+### 58. tools/exploit/find_badchars.rb → tools/exploit/find_badchars.py
+**Purpose:** Find bad characters for exploit development
+
+**Key Features:**
+- Assists in deducing bad characters for input paths
+- Compares expected vs actual memory contents
+- Supports multiple input formats (raw, WinDbg, GDB, hex)
+- Identifies which bytes were corrupted in memory
+- Essential tool for buffer overflow exploitation
+
+**Usage:**
+```bash
+# Read from stdin in raw format
+python3 tools/exploit/find_badchars.py -b "\\x00\\xff" < memory.bin
+
+# Read from file in WinDbg format
+python3 tools/exploit/find_badchars.py -b "\\x00\\xff" -i windbg_output.txt -t windbg
+
+# Read from file in GDB format
+python3 tools/exploit/find_badchars.py -b "\\x00\\x0a\\x0d" -i gdb_output.txt -t gdb
+
+# List supported formats
+python3 tools/exploit/find_badchars.py --list-formats
+```
+
 ## Translated Files
 
 ### 1. lib/rex/proto/smb/utils.rb → lib/rex/proto/smb/utils.py
