@@ -1,0 +1,14 @@
+# Binary Analysis Dependencies
+
+# Core dependency for Radare2 integration
+r2pipe>=1.6.0
+
+# Optional: LLDB Python bindings (usually system-provided)
+# lldb-python
+
+# For mutation fuzzing algorithms
+# No additional dependencies needed - uses stdlib
+
+# Development/testing
+pytest>=7.0.0
+pytest-cov>=3.0.0
