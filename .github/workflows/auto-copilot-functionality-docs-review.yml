@@ -176,14 +176,22 @@ jobs:
               ! -path "*/dist/*" \
               ! -name "__init__.py" \
               -type f | while read -r file; do
-              # Count functions and classes
+              # Count functions and classes with proper error handling
               func_count=$(grep -c "^def " "$file" 2>/dev/null || echo 0)
               class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
               docstring_count=$(grep -c '"""' "$file" 2>/dev/null || echo 0)
               
-              total=$((func_count + class_count))
-              if [ $total -gt 0 ] && [ $docstring_count -eq 0 ]; then
-                echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
+              # Sanitize variables to ensure they contain only integers
+              func_count=$(echo "$func_count" | tr -d '\n\r' | grep -E '^[0-9]+$' || echo 0)
+              class_count=$(echo "$class_count" | tr -d '\n\r' | grep -E '^[0-9]+$' || echo 0)
+              docstring_count=$(echo "$docstring_count" | tr -d '\n\r' | grep -E '^[0-9]+$' || echo 0)
+              
+              # Ensure variables are valid integers before arithmetic
+              if [ "$func_count" -eq "$func_count" ] 2>/dev/null && [ "$class_count" -eq "$class_count" ] 2>/dev/null; then
+                total=$((func_count + class_count))
+                if [ $total -gt 0 ] && [ "$docstring_count" -eq "$docstring_count" ] 2>/dev/null && [ $docstring_count -eq 0 ]; then
+                  echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
+                fi
               fi
             done
           fi
@@ -197,14 +205,22 @@ jobs:
               ! -path "*/dist/*" \
               ! -path "*/build/*" \
               -type f | while read -r file; do
-              # Count functions and classes
+              # Count functions and classes with proper error handling
               func_count=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null || echo 0)
               class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
               jsdoc_count=$(grep -c '/\*\*' "$file" 2>/dev/null || echo 0)
               
-              total=$((func_count + class_count))
-              if [ $total -gt 5 ] && [ $jsdoc_count -eq 0 ]; then
-                echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
+              # Sanitize variables to ensure they contain only integers
+              func_count=$(echo "$func_count" | tr -d '\n\r' | grep -E '^[0-9]+$' || echo 0)
+              class_count=$(echo "$class_count" | tr -d '\n\r' | grep -E '^[0-9]+$' || echo 0)
+              jsdoc_count=$(echo "$jsdoc_count" | tr -d '\n\r' | grep -E '^[0-9]+$' || echo 0)
+              
+              # Ensure variables are valid integers before arithmetic
+              if [ "$func_count" -eq "$func_count" ] 2>/dev/null && [ "$class_count" -eq "$class_count" ] 2>/dev/null; then
+                total=$((func_count + class_count))
+                if [ $total -gt 5 ] && [ "$jsdoc_count" -eq "$jsdoc_count" ] 2>/dev/null && [ $jsdoc_count -eq 0 ]; then
+                  echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
+                fi
               fi
             done
           fi
