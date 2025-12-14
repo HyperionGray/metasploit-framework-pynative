@@ -11,6 +11,12 @@
 
 class MetasploitModule < Msf::Auxiliary
   include Exploit::Remote::TcpServer
+  include Msf::Module::Deprecated
+
+  deprecated(
+    Date.new(2026, 12, 31),
+    'This is a simple FTP client fuzzer without coverage guidance. Use AFL++ with FTP protocol support or boofuzz instead.'
+  )
 
   def initialize
     super(
