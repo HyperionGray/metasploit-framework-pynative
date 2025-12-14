@@ -72,5 +72,5 @@ But no pf task definition files.
 ---
 
 **Audited by**: GitHub Copilot  
-**Audit Date**: December 14, 2025  
+**Audit Date**: 2025-12-14  
 **Audit Result**: No pf files found - No issues to resolve
