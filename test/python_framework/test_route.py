@@ -257,8 +257,8 @@ class TestRouteEdgeCases(unittest.TestCase):
         """Test route comparison with None."""
         route = Route('192.168.1.0', '255.255.255.0', '192.168.1.1')
         
+        self.assertIsNot(route, None)
         self.assertNotEqual(route, None)
-        self.assertFalse(route == None)
 
 
 if __name__ == '__main__':

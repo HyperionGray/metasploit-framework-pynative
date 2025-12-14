@@ -231,5 +231,22 @@ class Route:
 
 # For backward compatibility with Ruby naming convention
 class NetworkRoute(Route):
-    """Alias for Route class for backward compatibility."""
+    """
+    Alias for Route class for backward compatibility.
+    
+    This class is provided as a compatibility alias for code that may use
+    the more explicit 'NetworkRoute' naming convention. It is functionally
+    identical to the Route class.
+    
+    Usage:
+        Both Route and NetworkRoute can be used interchangeably:
+        
+        >>> route1 = Route('192.168.1.0', '255.255.255.0', '192.168.1.1')
+        >>> route2 = NetworkRoute('192.168.1.0', '255.255.255.0', '192.168.1.1')
+        >>> route1 == route2
+        True
+    
+    Note:
+        For new code, prefer using Route directly as it is more concise.
+    """
     pass

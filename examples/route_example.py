@@ -10,7 +10,13 @@ both IPv4 and IPv6 addresses.
 """
 
 import sys
-sys.path.insert(0, '/home/runner/work/metasploit-framework-pynative/metasploit-framework-pynative')
+import os
+
+# Add parent directory to path for imports
+# Adjust this path based on where you run the script from
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(script_dir)
+sys.path.insert(0, parent_dir)
 
 from python_framework.net.route import Route
 
