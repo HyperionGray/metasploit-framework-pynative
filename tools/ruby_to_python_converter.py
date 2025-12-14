@@ -55,9 +55,9 @@ class RubyToPythonConverter:
         (r'\bunless\b', 'if not'),
         (r'\belsif\b', 'elif'),
         
-        # String methods
-        (r'\.length', '.len()'),
-        (r'\.size', '.len()'),
+        # String methods (Note: Manual conversion needed for len())
+        # (r'\.length', 'len()'),  # Needs context: obj.length -> len(obj)
+        # (r'\.size', 'len()'),    # Needs context: obj.size -> len(obj)
         (r'\.empty\?', ' == \'\''),
         
         # Print statements
@@ -225,7 +225,9 @@ class RubyToPythonConverter:
             lines.append(f"    'date': '{self.metadata['disclosure_date']}',")
         
         if self.metadata.get('license'):
-            license_val = self.metadata['license'].replace('MSF_LICENSE', "'MSF_LICENSE'")
+            license_val = self.metadata['license']
+            if not license_val.startswith("'") and not license_val.startswith('"'):
+                license_val = f"'{license_val}'"
             lines.append(f"    'license': {license_val},")
         
         if self.metadata.get('references'):

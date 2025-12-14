@@ -295,10 +295,12 @@ class LegacyModuleMigrator:
             for module in legacy_modules:
                 src = f"$MODULES_DIR/{module.relative_path}"
                 dst = f"$LEGACY_DIR/{module.relative_path}"
-                dst_dir = os.path.dirname(dst)
+                # Get directory from relative path, not the shell variable version
+                dst_dir = os.path.dirname(module.relative_path)
+                dst_dir_full = f"$LEGACY_DIR/{dst_dir}" if dst_dir else "$LEGACY_DIR"
                 
                 f.write(f"# {module.name or module.relative_path}\n")
-                f.write(f"mkdir -p {dst_dir}\n")
+                f.write(f"mkdir -p {dst_dir_full}\n")
                 f.write(f"mv {src} {dst}\n\n")
             
             f.write('echo "Migration complete!"\n')

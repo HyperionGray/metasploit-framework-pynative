@@ -29,7 +29,7 @@ class TCPSocket:
     
     def __init__(self, rhost: str, rport: int, lhost: str = '0.0.0.0',
                  lport: int = 0, ssl: bool = False, timeout: int = 30,
-                 context: Optional['SSLContext'] = None):
+                 context: Optional[ssl.SSLContext] = None):
         """
         Initialize TCP socket.
         
@@ -119,7 +119,8 @@ class TCPSocket:
             if isinstance(data, str):
                 data = data.encode()
             
-            sent = self.sock.sendall(data)
+            # sendall() returns None on success
+            self.sock.sendall(data)
             logging.debug(f"Sent {len(data)} bytes")
             return len(data)
             
