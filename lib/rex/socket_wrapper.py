@@ -79,11 +79,15 @@ class TCPSocket:
             # Wrap with SSL if requested
             if self.ssl:
                 if self.context is None:
+                    # Note: ssl.create_default_context() may initially allow TLS 1.0/1.1
+                    # We explicitly set minimum_version to TLSv1_2 below for security
                     self.context = ssl.create_default_context()
                     self.context.check_hostname = False
                     self.context.verify_mode = ssl.CERT_NONE
                 
-                # Enforce minimum TLS 1.2 for security (even if context was provided)
+                # Security: Enforce minimum TLS 1.2 for all connections
+                # This prevents use of insecure TLS 1.0 and TLS 1.1 protocols
+                # Applied to both default and user-provided SSL contexts
                 self.context.minimum_version = ssl.TLSVersion.TLSv1_2
                 
                 self.sock = self.context.wrap_socket(
