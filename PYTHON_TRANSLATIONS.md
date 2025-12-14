@@ -584,7 +584,7 @@ python3 tools/modules/module_disclodate.py -n -f Exploit
 
 **Usage:**
 ```python
-from lib.rex.text import Text
+from rex.text import Text
 
 # Create a 100-byte pattern
 pattern = Text.pattern_create(100)
