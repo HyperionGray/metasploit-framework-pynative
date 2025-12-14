@@ -213,18 +213,30 @@ class SliverIntegration(BaseIntegration):
             output: Output file path
         """
         try:
-            cmd = [
-                'sliver-client',
-                '-c', 'generate'
-            ]
+            # Validate inputs
+            valid_os = ['windows', 'linux', 'macos']
+            valid_arch = ['amd64', '386', 'arm', 'arm64']
+            valid_format = ['exe', 'shared', 'shellcode', 'service']
             
-            # Build generate command
-            generate_cmd = f"--os {os} --arch {arch} --format {format}"
+            if os not in valid_os:
+                return {'success': False, 'error': f'Invalid OS. Must be one of: {valid_os}'}
+            if arch not in valid_arch:
+                return {'success': False, 'error': f'Invalid arch. Must be one of: {valid_arch}'}
+            if format not in valid_format:
+                return {'success': False, 'error': f'Invalid format. Must be one of: {valid_format}'}
+            
+            # Build command as list for safety
+            cmd = ['sliver-client', '-c']
+            
+            # Build generate command parts as list
+            generate_parts = ['generate', '--os', str(os), '--arch', str(arch), '--format', str(format)]
             
             if mtls_host:
-                generate_cmd += f" --mtls {mtls_host}:{mtls_port}"
+                mtls_port = int(mtls_port)
+                generate_parts.extend(['--mtls', f'{mtls_host}:{mtls_port}'])
             elif http_host:
-                generate_cmd += f" --http {http_host}:{http_port}"
+                http_port = int(http_port)
+                generate_parts.extend(['--http', f'{http_host}:{http_port}'])
             else:
                 return {
                     'success': False,
@@ -232,7 +244,13 @@ class SliverIntegration(BaseIntegration):
                 }
             
             if output:
-                generate_cmd += f" --save {output}"
+                # Validate output path doesn't contain shell metacharacters
+                import os.path
+                output = os.path.abspath(str(output))
+                generate_parts.extend(['--save', output])
+            
+            # Join for sliver-client -c command format
+            generate_cmd = ' '.join(generate_parts)
             
             logging.info(f"Generating Sliver implant: {generate_cmd}")
             
@@ -240,7 +258,8 @@ class SliverIntegration(BaseIntegration):
                 cmd + [generate_cmd],
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
+                shell=False
             )
             
             if result.returncode == 0:

@@ -502,15 +502,38 @@ havoc.execute('start_client')
 
 ### Legal and Ethical Considerations
 
-⚠️ **WARNING**: These tools are for authorized security testing only.
+⚠️ **CRITICAL WARNING**: These tools are for authorized security testing ONLY.
 
-- ✅ **DO**: Obtain written authorization before use
-- ✅ **DO**: Define clear scope and rules of engagement
-- ✅ **DO**: Document all activities
-- ✅ **DO**: Clean up after testing
-- ❌ **DON'T**: Use on systems without permission
-- ❌ **DON'T**: Exceed authorized scope
-- ❌ **DON'T**: Retain access beyond engagement period
+**Legal Requirements:**
+- ✅ **REQUIRED**: Obtain WRITTEN authorization before ANY use
+- ✅ **REQUIRED**: Have signed contract with clear scope definition
+- ✅ **REQUIRED**: Define explicit rules of engagement
+- ✅ **REQUIRED**: Document ALL activities with timestamps
+- ✅ **REQUIRED**: Have incident response plan
+- ✅ **REQUIRED**: Clean up ALL artifacts after testing
+- ✅ **REQUIRED**: Retain authorization documentation for audit
+
+**Prohibited Actions:**
+- ❌ **ILLEGAL**: Use on systems without explicit written permission
+- ❌ **ILLEGAL**: Exceed authorized scope or timeline
+- ❌ **ILLEGAL**: Retain access beyond engagement period
+- ❌ **ILLEGAL**: Access data not covered by authorization
+- ❌ **ILLEGAL**: Fail to disclose findings to client
+- ❌ **ILLEGAL**: Use tools for personal gain or malicious purposes
+
+**Note:** Unauthorized use of these tools may violate:
+- Computer Fraud and Abuse Act (CFAA) - US
+- Computer Misuse Act - UK
+- Similar laws in other jurisdictions
+- Potential criminal charges and civil liability
+
+**ONLY use these tools:**
+1. With explicit written authorization
+2. Within defined scope and timeframe
+3. For legitimate security testing purposes
+4. In compliance with all applicable laws
+
+**If you don't have proper authorization, DO NOT proceed.**
 
 ---
 

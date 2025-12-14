@@ -20,11 +20,18 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 dependencies_missing = False
+missing_imports = []
 try:
     from metasploit import module
-    from lib.msf.core.integrations.pwncat import PwncatIntegration
-except ImportError:
+except ImportError as e:
     dependencies_missing = True
+    missing_imports.append(f'metasploit module: {e}')
+
+try:
+    from lib.msf.core.integrations.pwncat import PwncatIntegration
+except ImportError as e:
+    dependencies_missing = True
+    missing_imports.append(f'pwncat integration: {e}')
 
 
 metadata = {
@@ -111,7 +118,9 @@ def run(args):
     module.LogHandler.setup(msg_prefix='[pwncat] ')
     
     if dependencies_missing:
-        logging.error('Module dependencies missing')
+        logging.error('Module dependencies missing:')
+        for missing in missing_imports:
+            logging.error(f'  - {missing}')
         return
     
     lhost = args.get('lhost', '0.0.0.0')

@@ -270,6 +270,7 @@ class HavocIntegration(BaseIntegration):
         """Create a default Havoc teamserver profile."""
         import tempfile
         
+        # Create temp file with secure permissions (0o600)
         fd, profile_path = tempfile.mkstemp(suffix='.yaml', prefix='havoc_profile_')
         
         # Basic Havoc profile
@@ -291,6 +292,9 @@ Listeners:
     HostBind: "0.0.0.0"
     HostRotation: "round-robin"
 """
+        
+        # Set secure permissions before writing
+        os.chmod(profile_path, 0o600)
         
         with os.fdopen(fd, 'w') as f:
             f.write(profile_content)

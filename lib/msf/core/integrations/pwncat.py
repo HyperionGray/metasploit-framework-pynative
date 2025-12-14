@@ -153,27 +153,36 @@ class PwncatIntegration(BaseIntegration):
             protocol: linux, windows, or any
         """
         try:
+            # Validate inputs
+            port = int(port)
+            if port < 1 or port > 65535:
+                return {'success': False, 'error': 'Invalid port number'}
+            
+            if protocol not in ['linux', 'windows', 'any']:
+                return {'success': False, 'error': 'Invalid protocol'}
+            
             cmd = [
                 'pwncat-cs',
                 '--listen',
-                '--host', host,
+                '--host', str(host),
                 '--port', str(port),
-                '--platform', protocol
+                '--platform', str(protocol)
             ]
             
             if self.config_file:
-                cmd.extend(['--config', self.config_file])
+                cmd.extend(['--config', str(self.config_file)])
             
             logging.info(f"Starting pwncat listener on {host}:{port}")
             logging.info(f"Command: {' '.join(cmd)}")
             
-            # Start in a pseudo-terminal for interactive use
+            # Start with shell=False for security
             self.process = subprocess.Popen(
                 cmd,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                shell=False
             )
             
             # Give it a moment to start
@@ -209,16 +218,24 @@ class PwncatIntegration(BaseIntegration):
             protocol: linux, windows, or any
         """
         try:
+            # Validate inputs
+            port = int(port)
+            if port < 1 or port > 65535:
+                return {'success': False, 'error': 'Invalid port number'}
+            
+            if protocol not in ['linux', 'windows', 'any']:
+                return {'success': False, 'error': 'Invalid protocol'}
+            
             cmd = [
                 'pwncat-cs',
                 '--connect',
-                host,
+                str(host),
                 str(port),
-                '--platform', protocol
+                '--platform', str(protocol)
             ]
             
             if self.config_file:
-                cmd.extend(['--config', self.config_file])
+                cmd.extend(['--config', str(self.config_file)])
             
             logging.info(f"Connecting to {host}:{port}")
             
@@ -227,7 +244,8 @@ class PwncatIntegration(BaseIntegration):
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                shell=False
             )
             
             time.sleep(2)
