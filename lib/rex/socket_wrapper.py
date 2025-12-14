@@ -82,8 +82,9 @@ class TCPSocket:
                     self.context = ssl.create_default_context()
                     self.context.check_hostname = False
                     self.context.verify_mode = ssl.CERT_NONE
-                    # Enforce minimum TLS 1.2 for security
-                    self.context.minimum_version = ssl.TLSVersion.TLSv1_2
+                
+                # Enforce minimum TLS 1.2 for security (even if context was provided)
+                self.context.minimum_version = ssl.TLSVersion.TLSv1_2
                 
                 self.sock = self.context.wrap_socket(
                     self.sock,
