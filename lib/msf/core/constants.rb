@@ -19,6 +19,7 @@ MODULE_AUX     = 'auxiliary'
 MODULE_PAYLOAD = 'payload'
 MODULE_POST    = 'post'
 MODULE_EVASION = 'evasion'
+MODULE_MALWARE = 'malware'
 MODULE_TYPES   =
   [
     MODULE_ENCODER,
@@ -27,7 +28,8 @@ MODULE_TYPES   =
     MODULE_NOP,
     MODULE_POST,
     MODULE_AUX,
-    MODULE_EVASION
+    MODULE_EVASION,
+    MODULE_MALWARE
   ]
 
 #
