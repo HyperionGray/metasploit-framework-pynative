@@ -27,6 +27,37 @@ For questions and suggestions, you can:
 
 **Note:** Some community members may still use IRC channels and the metasploit-hackers mailing list, though the primary support channels are now GitHub Discussions and Slack.
 
+## Python-Native Framework (Round 4)
+
+This fork is actively converting Metasploit Framework to Python, creating a fully Python-native penetration testing platform:
+
+- **Post-2020 Modules**: Being converted to Python (`modules/`)
+- **Pre-2020 Modules**: Maintained in Ruby for compatibility (`modules_legacy/`)
+- **Python Framework**: Native HTTP clients, socket wrappers, and module interfaces
+- **Conversion Tools**: Automated Ruby-to-Python conversion assistance
+
+See [PYTHON_CONVERSION_STRATEGY.md](PYTHON_CONVERSION_STRATEGY.md) for the complete conversion plan and progress.
+
+Quick start with Python modules:
+```bash
+# View conversion strategy and progress
+cat PYTHON_CONVERSION_STRATEGY.md
+
+# Run Python module example
+python3 modules/exploits/multi/http/generic_rce_example_2024.py
+
+# Analyze modules for legacy migration
+python3 tools/legacy_module_migrator.py -s
+
+# Convert a Ruby module to Python template
+python3 tools/ruby_to_python_converter.py modules/exploits/path/to/module.rb
+```
+
+See also:
+- [PYTHON_TRANSLATIONS.md](PYTHON_TRANSLATIONS.md) - List of 48+ converted modules
+- [PYTHON_QUICKSTART.md](PYTHON_QUICKSTART.md) - Python module quick start guide
+- [modules_legacy/README.md](modules_legacy/README.md) - Legacy module documentation
+
 ## Binary Analysis with Radare2
 
 This fork includes advanced binary analysis capabilities with Radare2 integration:
