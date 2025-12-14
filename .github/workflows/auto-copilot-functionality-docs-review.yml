@@ -176,14 +176,25 @@ jobs:
               ! -path "*/dist/*" \
               ! -name "__init__.py" \
               -type f | while read -r file; do
-              # Count functions and classes
-              func_count=$(grep -c "^def " "$file" 2>/dev/null || echo 0)
-              class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
-              docstring_count=$(grep -c '"""' "$file" 2>/dev/null || echo 0)
+              # Count functions and classes with input validation
+              func_count_raw=$(grep -c "^def " "$file" 2>/dev/null || echo 0)
+              class_count_raw=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
+              docstring_count_raw=$(grep -c '"""' "$file" 2>/dev/null || echo 0)
               
-              total=$((func_count + class_count))
-              if [ $total -gt 0 ] && [ $docstring_count -eq 0 ]; then
-                echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
+              # Validate and sanitize counts (ensure they are single integers)
+              func_count=$(echo "$func_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
+              class_count=$(echo "$class_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
+              docstring_count=$(echo "$docstring_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
+              
+              # Ensure we have valid numbers before arithmetic
+              if [[ "$func_count" =~ ^[0-9]+$ ]] && [[ "$class_count" =~ ^[0-9]+$ ]] && [[ "$docstring_count" =~ ^[0-9]+$ ]]; then
+                total=$((func_count + class_count))
+                if [ $total -gt 0 ] && [ $docstring_count -eq 0 ]; then
+                  echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
+                fi
+              else
+                # Log problematic files for debugging
+                echo "⚠️ $file: Unable to analyze (parsing error)" >> /tmp/doc-analysis.md
               fi
             done
           fi
@@ -197,14 +208,25 @@ jobs:
               ! -path "*/dist/*" \
               ! -path "*/build/*" \
               -type f | while read -r file; do
-              # Count functions and classes
-              func_count=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null || echo 0)
-              class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
-              jsdoc_count=$(grep -c '/\*\*' "$file" 2>/dev/null || echo 0)
+              # Count functions and classes with input validation
+              func_count_raw=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null || echo 0)
+              class_count_raw=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
+              jsdoc_count_raw=$(grep -c '/\*\*' "$file" 2>/dev/null || echo 0)
               
-              total=$((func_count + class_count))
-              if [ $total -gt 5 ] && [ $jsdoc_count -eq 0 ]; then
-                echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
+              # Validate and sanitize counts (ensure they are single integers)
+              func_count=$(echo "$func_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
+              class_count=$(echo "$class_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
+              jsdoc_count=$(echo "$jsdoc_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
+              
+              # Ensure we have valid numbers before arithmetic
+              if [[ "$func_count" =~ ^[0-9]+$ ]] && [[ "$class_count" =~ ^[0-9]+$ ]] && [[ "$jsdoc_count" =~ ^[0-9]+$ ]]; then
+                total=$((func_count + class_count))
+                if [ $total -gt 5 ] && [ $jsdoc_count -eq 0 ]; then
+                  echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
+                fi
+              else
+                # Log problematic files for debugging
+                echo "⚠️ $file: Unable to analyze (parsing error)" >> /tmp/doc-analysis.md
               fi
             done
           fi
