@@ -27,6 +27,26 @@ For questions and suggestions, you can:
 
 **Note:** Some community members may still use IRC channels and the metasploit-hackers mailing list, though the primary support channels are now GitHub Discussions and Slack.
 
+## Binary Analysis with Radare2
+
+This fork includes advanced binary analysis capabilities with Radare2 integration:
+
+- **GDB-like Commands**: Intuitive interface to Radare2 using familiar GDB syntax
+- **LLDB Integration**: Dynamic debugging support for runtime analysis
+- **Binary Instrumentation**: AFL-style coverage tracking and code path analysis  
+- **In-Memory Fuzzing**: High-speed fuzzing with stack manipulation
+
+See [RADARE2_QUICKSTART.md](RADARE2_QUICKSTART.md) for installation and usage guide.
+
+Quick start:
+```bash
+# Install dependencies
+pip3 install r2pipe
+
+# Launch interactive debugger
+python3 tools/binary_analysis/r2gdb.py /path/to/binary
+```
+
 ## Installing Metasploit
 
 ### Recommended Installation
