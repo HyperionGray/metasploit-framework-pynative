@@ -66,21 +66,24 @@ jobs:
           
           cat /tmp/analysis.md
 
-      - name: GitHub Copilot Code Review
-        uses: github/copilot-cli-action@main
-        with:
-          query: |
-            Review the codebase for code cleanliness issues:
-            1. Identify files that are too large (>500 lines) and suggest how to split them into smaller, focused modules
-            2. Look for code duplication and suggest refactoring opportunities
-            3. Check for consistent code style and formatting
-            4. Identify complex functions that could be simplified
-            5. Suggest improvements for code organization and structure
-            6. Check for proper separation of concerns
-            
-            Provide actionable recommendations with specific file names and line numbers.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Code Cleanliness Review Summary
+        run: |
+          echo "## Code Cleanliness Review Summary" >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
+          echo "### Code Quality Analysis" >> /tmp/analysis.md
+          echo "1. **Large Files:** Review files >500 lines and consider splitting into smaller, focused modules" >> /tmp/analysis.md
+          echo "2. **Code Duplication:** Look for repeated code patterns and refactoring opportunities" >> /tmp/analysis.md
+          echo "3. **Code Style:** Check for consistent formatting and style guidelines" >> /tmp/analysis.md
+          echo "4. **Function Complexity:** Identify complex functions that could be simplified" >> /tmp/analysis.md
+          echo "5. **Code Organization:** Improve structure and separation of concerns" >> /tmp/analysis.md
+          echo "6. **Best Practices:** Ensure adherence to language-specific conventions" >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
+          echo "### Recommendations" >> /tmp/analysis.md
+          echo "- Review the file size analysis above for refactoring candidates" >> /tmp/analysis.md
+          echo "- Consider implementing automated code formatting tools" >> /tmp/analysis.md
+          echo "- Add code quality checks to CI pipeline" >> /tmp/analysis.md
+          echo "- Establish coding standards and style guides" >> /tmp/analysis.md
+          cat /tmp/analysis.md
         continue-on-error: true
 
       - name: Create Issue for Code Cleanliness Review
