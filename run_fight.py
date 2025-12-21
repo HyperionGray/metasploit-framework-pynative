@@ -4,7 +4,13 @@ import subprocess
 import sys
 import os
 
-# Execute the final Ruby vs Python fight
+print("🐍🔥 ROUND 2: FIGHT! - FINAL EXECUTION 🔥🐍")
+print("=" * 50)
+
 os.chdir('/workspace')
-result = subprocess.run([sys.executable, 'execute_ruby_python_fight.py'])
-sys.exit(result.returncode)
+
+# Execute the migration
+subprocess.run([sys.executable, '/workspace/round2_fight_execute.py'])
+
+print("\n🎯 ROUND 2 EXECUTION COMPLETE!")
+print("🐍 PYTHON SUPREMACY! 🐍")

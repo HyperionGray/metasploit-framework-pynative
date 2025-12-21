@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
+
 import subprocess
 import sys
 import os
 
-# Execute immediate conversion
+# Change to workspace directory
 os.chdir('/workspace')
 
-print("🚀 EXECUTING IMMEDIATE RUBY TO PYTHON CONVERSION")
-print("This is it - converting Ruby to Python NOW!")
-print("=" * 60)
+print("🐍🔥 ROUND 2: FIGHT! - EXECUTING NOW! 🔥🐍")
+print("=" * 50)
 
-# Run the immediate conversion
-result = subprocess.run([sys.executable, "immediate_conversion.py"])
+# Execute the Round 2 fight
+try:
+    result = subprocess.run([sys.executable, 'round2_fight.py'], text=True)
+    print(f"Round 2 execution completed with return code: {result.returncode}")
+except Exception as e:
+    print(f"Error executing Round 2: {e}")
 
-print(f"\nImmediate conversion completed with exit code: {result.returncode}")
-
-if result.returncode == 0:
-    print("🎉 CONVERSION SUCCESSFUL!")
-    print("🐍 Ruby has been converted to Python!")
-else:
-    print("⚠️  Conversion completed with some issues")
-
-print("\n🎯 RUBY TO PYTHON CONVERSION MISSION COMPLETE!")
+print("\n🎯 MISSION STATUS: ROUND 2 EXECUTED!")
+print("🐍 Check output above for results 🐍")
