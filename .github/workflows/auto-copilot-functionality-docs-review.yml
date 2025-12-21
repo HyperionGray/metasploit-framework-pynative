@@ -129,10 +129,10 @@ jobs:
           echo "### README.md Quality Check:" >> /tmp/doc-analysis.md
           
           if [ -f "README.md" ]; then
-            word_count=$(wc -w < README.md)
+            word_count=$(wc -w < README.md | tr -d ' \t\n\r')
             echo "- Word count: $word_count" >> /tmp/doc-analysis.md
             
-            if [ $word_count -lt 50 ]; then
+            if [ "$word_count" -lt 50 ] 2>/dev/null; then
               echo "⚠️ README.md is very short (< 50 words)" >> /tmp/doc-analysis.md
             else
               echo "✅ README.md has adequate content" >> /tmp/doc-analysis.md
@@ -177,12 +177,17 @@ jobs:
               ! -name "__init__.py" \
               -type f | while read -r file; do
               # Count functions and classes
-              func_count=$(grep -c "^def " "$file" 2>/dev/null || echo 0)
-              class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
-              docstring_count=$(grep -c '"""' "$file" 2>/dev/null || echo 0)
+              func_count=$(grep -c "^def " "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
+              class_count=$(grep -c "^class " "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
+              docstring_count=$(grep -c '"""' "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
+              
+              # Ensure variables are numeric
+              func_count=${func_count:-0}
+              class_count=${class_count:-0}
+              docstring_count=${docstring_count:-0}
               
               total=$((func_count + class_count))
-              if [ $total -gt 0 ] && [ $docstring_count -eq 0 ]; then
+              if [ "$total" -gt 0 ] && [ "$docstring_count" -eq 0 ] 2>/dev/null; then
                 echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
               fi
             done
@@ -198,12 +203,17 @@ jobs:
               ! -path "*/build/*" \
               -type f | while read -r file; do
               # Count functions and classes
-              func_count=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null || echo 0)
-              class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
-              jsdoc_count=$(grep -c '/\*\*' "$file" 2>/dev/null || echo 0)
+              func_count=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
+              class_count=$(grep -c "^class " "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
+              jsdoc_count=$(grep -c '/\*\*' "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
+              
+              # Ensure variables are numeric
+              func_count=${func_count:-0}
+              class_count=${class_count:-0}
+              jsdoc_count=${jsdoc_count:-0}
               
               total=$((func_count + class_count))
-              if [ $total -gt 5 ] && [ $jsdoc_count -eq 0 ]; then
+              if [ "$total" -gt 5 ] && [ "$jsdoc_count" -eq 0 ] 2>/dev/null; then
                 echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
               fi
             done
