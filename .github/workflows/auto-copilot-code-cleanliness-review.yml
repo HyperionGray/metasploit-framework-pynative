@@ -66,21 +66,59 @@ jobs:
           
           cat /tmp/analysis.md
 
-      - name: GitHub Copilot Code Review
-        uses: github/copilot-cli-action@main
-        with:
-          query: |
-            Review the codebase for code cleanliness issues:
-            1. Identify files that are too large (>500 lines) and suggest how to split them into smaller, focused modules
-            2. Look for code duplication and suggest refactoring opportunities
-            3. Check for consistent code style and formatting
-            4. Identify complex functions that could be simplified
-            5. Suggest improvements for code organization and structure
-            6. Check for proper separation of concerns
-            
-            Provide actionable recommendations with specific file names and line numbers.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Code Cleanliness Analysis
+        run: |
+          echo "" >> /tmp/analysis.md
+          echo "## Code Cleanliness Analysis" >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
+          
+          # Check for large files that might need splitting
+          echo "### Large Files Analysis:" >> /tmp/analysis.md
+          find . -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.go" -o -name "*.java" -o -name "*.rb" | \
+          while read -r file; do
+            if [ -f "$file" ]; then
+              lines=$(wc -l < "$file" 2>/dev/null || echo 0)
+              if [ "$lines" -gt 500 ]; then
+                echo "⚠️ Large file: $file ($lines lines) - consider splitting" >> /tmp/analysis.md
+              fi
+            fi
+          done
+          
+          # Check for potential code duplication patterns
+          echo "" >> /tmp/analysis.md
+          echo "### Code Duplication Check:" >> /tmp/analysis.md
+          
+          # Look for repeated function names (simple heuristic)
+          duplicate_functions=$(find . -name "*.py" -exec grep -h "^def " {} \; | sort | uniq -d | wc -l)
+          if [ "$duplicate_functions" -gt 0 ]; then
+            echo "⚠️ Found $duplicate_functions potentially duplicate function names" >> /tmp/analysis.md
+          else
+            echo "✅ No obvious duplicate function names detected" >> /tmp/analysis.md
+          fi
+          
+          # Check for consistent code style
+          echo "" >> /tmp/analysis.md
+          echo "### Code Style Consistency:" >> /tmp/analysis.md
+          
+          # Check for mixed indentation (tabs vs spaces)
+          mixed_indent_files=0
+          find . -name "*.py" | while read -r file; do
+            if [ -f "$file" ]; then
+              if grep -q $'\t' "$file" && grep -q "^    " "$file"; then
+                mixed_indent_files=$((mixed_indent_files + 1))
+                echo "⚠️ Mixed indentation detected in: $file" >> /tmp/analysis.md
+              fi
+            fi
+          done
+          
+          # Check for complex functions (simple heuristic - functions with many lines)
+          echo "" >> /tmp/analysis.md
+          echo "### Function Complexity:" >> /tmp/analysis.md
+          
+          complex_functions=0
+          find . -name "*.py" -exec awk '/^def / {start=NR; name=$0} /^def / && NR>start+50 {print FILENAME":"start":"name" (>50 lines)"; complex++} END {if(complex>0) print "Found " complex " complex functions"}' {} \; >> /tmp/analysis.md 2>/dev/null || echo "✅ No obviously complex functions detected" >> /tmp/analysis.md
+          
+          cat /tmp/analysis.md
         continue-on-error: true
 
       - name: Create Issue for Code Cleanliness Review

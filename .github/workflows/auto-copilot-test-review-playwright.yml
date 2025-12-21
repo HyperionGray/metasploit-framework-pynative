@@ -160,23 +160,76 @@ jobs:
           
           cat /tmp/test-analysis.md
 
-      - name: GitHub Copilot Test Review
-        uses: github/copilot-cli-action@main
-        with:
-          query: |
-            Review the test suite for this repository:
-            1. Verify all web-based functionality has Playwright tests (both headed and headless)
-            2. Identify missing test coverage for critical functionality
-            3. Check test quality and maintainability
-            4. Suggest improvements for test organization
-            5. Verify tests follow best practices (isolation, clarity, proper assertions)
-            6. Check for flaky tests or tests with timing issues
-            7. Ensure tests are running in CI/CD pipeline
-            
-            For any web tests not using Playwright, recommend migration.
-            Provide specific, actionable recommendations with file names.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test Suite Review Analysis
+        run: |
+          echo "" >> /tmp/test-analysis.md
+          echo "## Test Suite Review Analysis" >> /tmp/test-analysis.md
+          echo "" >> /tmp/test-analysis.md
+          
+          # Check for Playwright tests
+          echo "### Playwright Test Coverage:" >> /tmp/test-analysis.md
+          playwright_tests=$(find . -name "*.spec.js" -o -name "*.spec.ts" -o -name "*playwright*" -o -name "*e2e*" | wc -l)
+          if [ "$playwright_tests" -gt 0 ]; then
+            echo "✅ Found $playwright_tests Playwright/E2E test files" >> /tmp/test-analysis.md
+          else
+            echo "⚠️ No Playwright or E2E test files detected" >> /tmp/test-analysis.md
+          fi
+          
+          # Check for web-based functionality that might need testing
+          echo "" >> /tmp/test-analysis.md
+          echo "### Web Functionality Analysis:" >> /tmp/test-analysis.md
+          
+          web_files=$(find . -name "*.html" -o -name "*.js" -o -name "*.ts" | grep -v node_modules | grep -v test | wc -l)
+          if [ "$web_files" -gt 0 ]; then
+            echo "📊 Found $web_files web-related files that may need testing" >> /tmp/test-analysis.md
+          else
+            echo "ℹ️ No obvious web files detected" >> /tmp/test-analysis.md
+          fi
+          
+          # Check for test organization
+          echo "" >> /tmp/test-analysis.md
+          echo "### Test Organization:" >> /tmp/test-analysis.md
+          
+          # Check for test directories
+          test_dirs=0
+          for dir in test tests spec __tests__ e2e; do
+            if [ -d "$dir" ]; then
+              test_dirs=$((test_dirs + 1))
+              echo "✅ Found test directory: $dir" >> /tmp/test-analysis.md
+            fi
+          done
+          
+          if [ "$test_dirs" -eq 0 ]; then
+            echo "⚠️ No dedicated test directories found" >> /tmp/test-analysis.md
+          fi
+          
+          # Check for test configuration files
+          echo "" >> /tmp/test-analysis.md
+          echo "### Test Configuration:" >> /tmp/test-analysis.md
+          
+          test_configs=0
+          for config in playwright.config.js playwright.config.ts jest.config.js jest.config.ts vitest.config.js vitest.config.ts; do
+            if [ -f "$config" ]; then
+              test_configs=$((test_configs + 1))
+              echo "✅ Found test configuration: $config" >> /tmp/test-analysis.md
+            fi
+          done
+          
+          if [ "$test_configs" -eq 0 ]; then
+            echo "⚠️ No test configuration files found" >> /tmp/test-analysis.md
+          fi
+          
+          # Check for CI integration
+          echo "" >> /tmp/test-analysis.md
+          echo "### CI Integration:" >> /tmp/test-analysis.md
+          
+          if find .github/workflows -name "*.yml" -exec grep -l "test\|playwright\|jest\|vitest" {} \; | grep -q .; then
+            echo "✅ Tests appear to be integrated in CI workflows" >> /tmp/test-analysis.md
+          else
+            echo "⚠️ No obvious test integration in CI workflows" >> /tmp/test-analysis.md
+          fi
+          
+          cat /tmp/test-analysis.md
         continue-on-error: true
 
       - name: Create or Update Test Review Issue

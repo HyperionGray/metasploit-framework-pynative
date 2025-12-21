@@ -32,17 +32,93 @@ jobs:
           pytest tests/ || exit 1
         continue-on-error: true
 
-      - name: Copilot PR Agent Review
-        uses: github/copilot-agent/pr@main
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: PR Review Analysis v2
+        run: |
+          echo "Performing enhanced PR review analysis..."
+          
+          # Enhanced PR analysis
+          echo "## Enhanced PR Review Analysis" > /tmp/pr-review-v2.md
+          echo "" >> /tmp/pr-review-v2.md
+          
+          # Check commit quality
+          echo "### Commit Analysis:" >> /tmp/pr-review-v2.md
+          commit_count=$(git rev-list --count HEAD~1..HEAD)
+          if [ "$commit_count" -gt 5 ]; then
+            echo "⚠️ PR has $commit_count commits - consider squashing" >> /tmp/pr-review-v2.md
+          else
+            echo "✅ PR has reasonable number of commits ($commit_count)" >> /tmp/pr-review-v2.md
+          fi
+          
+          # Check for breaking changes
+          echo "" >> /tmp/pr-review-v2.md
+          echo "### Breaking Changes Analysis:" >> /tmp/pr-review-v2.md
+          if git diff --name-only HEAD~1 | grep -q "requirements\|package\.json\|Gemfile"; then
+            echo "⚠️ Dependency files changed - potential breaking changes" >> /tmp/pr-review-v2.md
+          fi
+          
+          # Check for security concerns
+          echo "" >> /tmp/pr-review-v2.md
+          echo "### Security Analysis:" >> /tmp/pr-review-v2.md
+          if git diff HEAD~1 | grep -i "password\|secret\|key\|token"; then
+            echo "⚠️ Potential security-sensitive changes detected" >> /tmp/pr-review-v2.md
+          else
+            echo "✅ No obvious security concerns detected" >> /tmp/pr-review-v2.md
+          fi
+          
+          cat /tmp/pr-review-v2.md
         continue-on-error: true
 
-      - name: Copilot Auto-fix Failing Playwright Tests
-        uses: github/copilot-agent/fix@main
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          max_attempts: 3
+      - name: Enhanced Auto-fix for Playwright Tests
+        run: |
+          echo "Enhanced auto-fix for failing Playwright tests..."
+          
+          # More sophisticated test fixing approach
+          if ! pytest tests/ --tb=no -q; then
+            echo "Tests failing, running enhanced diagnostic and fix sequence..."
+            
+            # Diagnostic phase
+            echo "🔍 Running diagnostics..."
+            
+            # Check Python environment
+            python --version
+            pip list | grep playwright || echo "Playwright not found in pip list"
+            
+            # Check for common issues
+            echo "Checking for common Playwright issues..."
+            
+            # Fix 1: Clean reinstall
+            echo "Fix 1: Clean Playwright reinstall..."
+            pip uninstall -y playwright
+            pip install playwright
+            python -m playwright install
+            
+            # Test after fix 1
+            if pytest tests/ --tb=no -q; then
+              echo "✅ Fixed by clean reinstall"
+              exit 0
+            fi
+            
+            # Fix 2: Browser-specific fixes
+            echo "Fix 2: Browser-specific troubleshooting..."
+            python -m playwright install chromium
+            python -m playwright install firefox
+            
+            # Test after fix 2
+            if pytest tests/ --tb=no -q; then
+              echo "✅ Fixed by browser reinstall"
+              exit 0
+            fi
+            
+            # Fix 3: Test environment fixes
+            echo "Fix 3: Environment and configuration fixes..."
+            export PLAYWRIGHT_BROWSERS_PATH=/tmp/playwright-browsers
+            python -m playwright install
+            
+            # Final test attempt
+            pytest tests/ --tb=short || echo "❌ Tests still failing after all enhanced fixes"
+          else
+            echo "✅ Tests passing - no fixes needed"
+          fi
         continue-on-error: true
 
       - name: Create Pull Request for Automated Fixes

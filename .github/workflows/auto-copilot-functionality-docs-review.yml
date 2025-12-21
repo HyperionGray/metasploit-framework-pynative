@@ -221,23 +221,45 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      - name: GitHub Copilot Documentation Review
-        uses: github/copilot-cli-actions@v1
-        with:
-          query: |
-            Review the documentation for this repository:
-            1. Check README.md completeness and quality
-            2. Verify all features and functionality are documented
-            3. Check for installation and usage instructions
-            4. Identify missing or outdated documentation
-            5. Suggest improvements for clarity and completeness
-            6. Verify code comments and inline documentation
-            7. Check for API documentation if applicable
-            8. Ensure contributing guidelines are present
-            
-            Provide specific recommendations with file names and sections.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Additional Documentation Analysis
+        run: |
+          echo "## Additional Documentation Analysis" >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
+          echo "### Code Documentation Review:" >> /tmp/doc-analysis.md
+          
+          # Check for API documentation
+          if find . -name "*.md" -exec grep -l -i "api\|endpoint\|method" {} \; | grep -q .; then
+            echo "✅ API documentation found" >> /tmp/doc-analysis.md
+          else
+            echo "⚠️ No API documentation detected" >> /tmp/doc-analysis.md
+          fi
+          
+          # Check for examples directory
+          if [ -d "examples" ] || [ -d "example" ] || find . -name "*example*" -type d | grep -q .; then
+            echo "✅ Examples directory found" >> /tmp/doc-analysis.md
+          else
+            echo "⚠️ No examples directory found" >> /tmp/doc-analysis.md
+          fi
+          
+          # Check for inline code comments
+          total_code_files=0
+          commented_files=0
+          
+          for ext in py js ts go java rb; do
+            while IFS= read -r -d '' file; do
+              total_code_files=$((total_code_files + 1))
+              if grep -q "#\|//\|/\*" "$file" 2>/dev/null; then
+                commented_files=$((commented_files + 1))
+              fi
+            done < <(find . -name "*.$ext" ! -path "*/node_modules/*" ! -path "*/.venv/*" ! -path "*/vendor/*" -print0 2>/dev/null)
+          done
+          
+          if [ "$total_code_files" -gt 0 ]; then
+            comment_percentage=$((commented_files * 100 / total_code_files))
+            echo "📊 Code files with comments: $commented_files/$total_code_files ($comment_percentage%)" >> /tmp/doc-analysis.md
+          fi
+          
+          cat /tmp/doc-analysis.md
         continue-on-error: true
 
       - name: Create Documentation Review Report

@@ -27,22 +27,72 @@ jobs:
         run: |
           python -m playwright install
 
-      - name: Copilot Generate Playwright Scripts
-        uses: github/copilot-agent/playwright-generate@main # Example, customize for Python; or use Chat to generate script
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: "Generate Playwright test scripts covering every user action on this web app."
-        continue-on-error: true # If your agent doesn't support, replace with python script generation using Copilot Chat
+      - name: Generate Playwright Test Scripts
+        run: |
+          echo "Generating basic Playwright test structure..."
+          
+          # Create tests directory if it doesn't exist
+          mkdir -p tests/playwright
+          
+          # Generate a basic Playwright test template
+          cat > tests/playwright/basic_test.py << 'EOF'
+          import pytest
+          from playwright.sync_api import Page, expect
+          
+          def test_homepage_loads(page: Page):
+              """Test that the homepage loads successfully"""
+              # This is a template - customize for your application
+              page.goto("http://localhost:3000")  # Adjust URL as needed
+              expect(page).to_have_title(qr=".*")  # Basic title check
+          
+          def test_navigation_elements(page: Page):
+              """Test that basic navigation elements are present"""
+              page.goto("http://localhost:3000")  # Adjust URL as needed
+              # Add specific navigation tests here
+              pass
+          
+          # Add more test functions as needed for your application
+          EOF
+          
+          echo "✅ Basic Playwright test template created at tests/playwright/basic_test.py"
+          echo "📝 Please customize the tests for your specific application"
+        continue-on-error: true
 
       - name: Run Playwright Tests
         run: |
           pytest tests/ # Or the path to your Playwright scripts
 
-      - name: If Tests Fail, Copilot Attempts Fix & Repeats
-        uses: github/copilot-agent/playwright-fix-and-loop@main # Example, requires agent loop feature
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          max_attempts: 5
+      - name: Test Failure Analysis and Retry
+        run: |
+          echo "Analyzing test failures and attempting fixes..."
+          
+          # Check if tests failed in previous step
+          if [ $? -ne 0 ]; then
+            echo "⚠️ Tests failed, analyzing common issues..."
+            
+            # Check for common Playwright issues
+            echo "Checking for common Playwright issues:"
+            
+            # Check if browsers are installed
+            if ! python -c "from playwright.sync_api import sync_playwright; print('Playwright installed')" 2>/dev/null; then
+              echo "❌ Playwright not properly installed"
+              echo "Attempting to reinstall Playwright..."
+              pip install playwright
+              python -m playwright install
+            fi
+            
+            # Check for port conflicts
+            echo "Checking for port availability..."
+            if netstat -tuln | grep -q ":3000 "; then
+              echo "⚠️ Port 3000 is in use, tests may need different port"
+            fi
+            
+            # Retry tests with more verbose output
+            echo "Retrying tests with verbose output..."
+            pytest tests/ -v --tb=short || echo "Tests still failing after retry"
+          else
+            echo "✅ Tests passed successfully"
+          fi
         continue-on-error: true
 
       - name: Create PR with passing tests or attempted fixes

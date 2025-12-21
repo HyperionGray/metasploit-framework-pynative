@@ -57,59 +57,118 @@ jobs:
           cat /tmp/gpt5-analysis.md
         continue-on-error: true
 
-      - name: GPT-5 Advanced Code Analysis
-        uses: github/copilot-cli-actions@v1
-        with:
-          model: gpt-5
-          query: |
-            Perform a comprehensive code analysis of this repository using GPT-5's advanced capabilities:
-            
-            1. **Code Quality & Architecture**
-               - Analyze overall code structure and organization
-               - Identify architectural patterns and anti-patterns
-               - Suggest improvements for maintainability and scalability
-            
-            2. **Security Analysis**
-               - Detect potential security vulnerabilities
-               - Identify unsafe coding patterns
-               - Recommend security best practices
-            
-            3. **Performance Optimization**
-               - Identify performance bottlenecks
-               - Suggest optimization opportunities
-               - Recommend efficient algorithms and data structures
-            
-            4. **Best Practices**
-               - Verify adherence to language-specific best practices
-               - Check for proper error handling
-               - Ensure code follows SOLID principles
-            
-            5. **Documentation & Maintainability**
-               - Assess code documentation quality
-               - Identify areas needing better comments
-               - Suggest improvements for code readability
-            
-            Provide specific, actionable recommendations with file names and line numbers where applicable.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Advanced Code Analysis
+        run: |
+          echo "## Advanced Code Analysis" >> /tmp/gpt5-analysis.md
+          echo "" >> /tmp/gpt5-analysis.md
+          
+          # Code Quality Analysis
+          echo "### Code Quality & Architecture:" >> /tmp/gpt5-analysis.md
+          
+          # Check for common code quality indicators
+          if find . -name "*.py" -exec grep -l "TODO\|FIXME\|XXX\|HACK" {} \; | grep -q .; then
+            todo_count=$(find . -name "*.py" -exec grep -c "TODO\|FIXME\|XXX\|HACK" {} \; | awk '{sum+=$1} END {print sum}')
+            echo "⚠️ Found $todo_count TODO/FIXME comments requiring attention" >> /tmp/gpt5-analysis.md
+          else
+            echo "✅ No outstanding TODO/FIXME comments found" >> /tmp/gpt5-analysis.md
+          fi
+          
+          # Check for error handling patterns
+          error_handling_files=0
+          total_py_files=0
+          while IFS= read -r -d '' file; do
+            total_py_files=$((total_py_files + 1))
+            if grep -q "try:\|except\|raise\|finally:" "$file" 2>/dev/null; then
+              error_handling_files=$((error_handling_files + 1))
+            fi
+          done < <(find . -name "*.py" ! -path "*/.venv/*" ! -path "*/node_modules/*" -print0 2>/dev/null)
+          
+          if [ "$total_py_files" -gt 0 ]; then
+            error_percentage=$((error_handling_files * 100 / total_py_files))
+            echo "📊 Python files with error handling: $error_handling_files/$total_py_files ($error_percentage%)" >> /tmp/gpt5-analysis.md
+          fi
+          
+          # Security Analysis
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "### Security Analysis:" >> /tmp/gpt5-analysis.md
+          
+          # Check for potential security issues
+          security_patterns="eval\|exec\|shell=True\|subprocess\.call\|os\.system"
+          if find . -name "*.py" -exec grep -l "$security_patterns" {} \; | grep -q .; then
+            security_files=$(find . -name "*.py" -exec grep -l "$security_patterns" {} \; | wc -l)
+            echo "⚠️ Found $security_files files with potentially unsafe patterns" >> /tmp/gpt5-analysis.md
+          else
+            echo "✅ No obvious security anti-patterns detected" >> /tmp/gpt5-analysis.md
+          fi
+          
+          # Performance Analysis
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "### Performance Considerations:" >> /tmp/gpt5-analysis.md
+          
+          # Check for common performance issues
+          if find . -name "*.py" -exec grep -l "for.*in.*range(len(" {} \; | grep -q .; then
+            echo "⚠️ Found potential inefficient loop patterns" >> /tmp/gpt5-analysis.md
+          else
+            echo "✅ No obvious inefficient loop patterns detected" >> /tmp/gpt5-analysis.md
+          fi
+          
+          cat /tmp/gpt5-analysis.md
         continue-on-error: true
 
-      - name: GPT-5 Test Coverage Analysis
-        uses: github/copilot-cli-actions@v1
-        with:
-          model: gpt-5
-          query: |
-            Analyze the test coverage and testing strategy:
-            
-            1. Identify files that lack adequate test coverage
-            2. Suggest missing test cases for critical functionality
-            3. Recommend improvements to existing tests
-            4. Identify edge cases that should be tested
-            5. Suggest integration and end-to-end test scenarios
-            
-            Focus on critical paths and business logic.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test Coverage Analysis
+        run: |
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "### Test Coverage Analysis:" >> /tmp/gpt5-analysis.md
+          
+          # Check for test directories and files
+          test_dirs=0
+          test_files=0
+          
+          # Common test directory patterns
+          for dir in test tests spec __tests__ test_* *_test; do
+            if [ -d "$dir" ]; then
+              test_dirs=$((test_dirs + 1))
+              echo "✅ Found test directory: $dir" >> /tmp/gpt5-analysis.md
+            fi
+          done
+          
+          # Count test files
+          test_files=$(find . \( -name "*test*.py" -o -name "*_test.py" -o -name "test_*.py" -o -name "*spec*.py" \) ! -path "*/.venv/*" ! -path "*/node_modules/*" | wc -l)
+          
+          if [ "$test_files" -gt 0 ]; then
+            echo "📊 Found $test_files test files" >> /tmp/gpt5-analysis.md
+          else
+            echo "⚠️ No test files detected" >> /tmp/gpt5-analysis.md
+          fi
+          
+          # Check for testing frameworks
+          if find . -name "*.py" -exec grep -l "import pytest\|from pytest\|import unittest\|from unittest" {} \; | grep -q .; then
+            echo "✅ Testing framework imports detected" >> /tmp/gpt5-analysis.md
+          else
+            echo "⚠️ No common testing framework imports found" >> /tmp/gpt5-analysis.md
+          fi
+          
+          # Check for test configuration files
+          test_configs=0
+          for config in pytest.ini tox.ini setup.cfg pyproject.toml .coveragerc; do
+            if [ -f "$config" ]; then
+              test_configs=$((test_configs + 1))
+              echo "✅ Found test configuration: $config" >> /tmp/gpt5-analysis.md
+            fi
+          done
+          
+          if [ "$test_configs" -eq 0 ]; then
+            echo "⚠️ No test configuration files found" >> /tmp/gpt5-analysis.md
+          fi
+          
+          # Analyze test-to-code ratio
+          total_py_files=$(find . -name "*.py" ! -path "*/.venv/*" ! -path "*/node_modules/*" ! -name "*test*" ! -name "*spec*" | wc -l)
+          if [ "$total_py_files" -gt 0 ] && [ "$test_files" -gt 0 ]; then
+            test_ratio=$((test_files * 100 / total_py_files))
+            echo "📊 Test-to-code ratio: $test_files tests for $total_py_files code files ($test_ratio%)" >> /tmp/gpt5-analysis.md
+          fi
+          
+          cat /tmp/gpt5-analysis.md
         continue-on-error: true
 
       - name: Create GPT-5 Analysis Report
