@@ -1,31 +1,30 @@
-# Legacy Ruby Codebase
+# Legacy Ruby Code Archive
 
-This directory contains the original Ruby codebase from the Metasploit Framework that was created or last significantly modified before 2021.
-
-## Structure
-
-The directory structure mirrors the original Metasploit Framework layout:
-
-- `modules/` - Legacy exploit, auxiliary, post, and other modules
-- `lib/` - Legacy framework core libraries
-- `tools/` - Legacy development and analysis tools
-- `scripts/` - Legacy operational scripts
-- `external/` - Legacy external source code
+This directory contains legacy Ruby code that has been moved here as part of the Ruby to Python migration initiative.
 
 ## Purpose
 
-This legacy codebase is preserved for:
-- Historical reference
-- Compatibility during transition period
-- Research and analysis of older exploits
-- Maintaining support for legacy systems
+All Ruby files from the active codebase have been moved here to preserve the legacy code while transitioning to a Python-first approach.
+
+## Directory Structure
+
+- `modules/`    - Legacy Ruby modules (exploits, auxiliary, etc.)
+- `lib/`        - Legacy Ruby framework libraries  
+- `tools/`      - Legacy Ruby development tools
+- `scripts/`    - Legacy Ruby operational scripts
+- `plugins/`    - Legacy Ruby plugins
+- `external/`   - Legacy external Ruby dependencies
 
 ## Migration Status
 
-All post-2020 content has been migrated to Python in the main framework directories.
-The current framework is Python-native for all new development.
+✅ **Ruby Elimination Complete**  
+🐍 **Python is now the primary language**  
+📦 **Legacy Ruby code preserved here**
 
-## Usage
+This preserves the historical Ruby codebase while allowing the project to move forward with Python as the primary language.
 
-Legacy modules can still be referenced but are not actively maintained.
-For new development, use the Python framework in the main directories.
+---
+
+**Migration Date**: $(date)  
+**Status**: Ruby eliminated from active codebase  
+**Python Framework**: Available in `/python_framework/`
