@@ -63,6 +63,32 @@ To get started with Metasploit:
 2. **Explore Resources:** 
    - Visit the [Using Metasploit](https://docs.metasploit.com/docs/using-metasploit/getting-started/index.html) section of the documentation.
 
+## PF Framework Integration
+
+This fork embraces modern exploitation tools and techniques. Write exploits as Python tasks with full access to:
+
+- **Pwntools**: Industry-standard exploitation library
+- **Radare2**: Advanced binary analysis and reversing
+- **GDB/GEF/pwndbg**: Interactive debugging with automation
+- **AFL++/libFuzzer**: Coverage-guided fuzzing with sanitizers
+- **Ghidra**: NSA's reverse engineering platform
+
+**Quick Start:**
+```bash
+# See example PF task
+python3 examples/pf_task_example.py --help
+
+# Set target via environment variables (simpler than MSF's 'set' commands)
+export TARGET_HOST=192.168.1.100
+export TARGET_PORT=9999
+python3 examples/pf_task_example.py --mode exploit
+```
+
+**Documentation:**
+- [PF Integration Guide](documentation/PF_INTEGRATION_GUIDE.md) - Write exploits as PF tasks
+- [Exploit Writing Guide](documentation/EXPLOIT_WRITING_GUIDE.md) - Comprehensive exploitation tutorial
+- [Module Categorization](documentation/MODULE_CATEGORIZATION.md) - Understanding legacy vs. active modules
+
 ## Contributing
 
 To contribute to Metasploit:

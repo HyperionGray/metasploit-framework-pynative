@@ -10,6 +10,12 @@ class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Tcp
   include Msf::Auxiliary::Fuzzer
   include Msf::Auxiliary::Scanner
+  include Msf::Module::Deprecated
+
+  deprecated(
+    Date.new(2026, 12, 31),
+    'This is a simple DNS protocol fuzzer without coverage guidance. Use AFL++ with DNS protocol support or specialized DNS fuzzers instead.'
+  )
 
   def initialize
     super(

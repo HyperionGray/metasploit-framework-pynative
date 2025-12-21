@@ -1,154 +1,117 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+##
+# This module requires Metasploit: https://metasploit.com/download
+# Current source: https://github.com/rapid7/metasploit-framework
+##
+
 """
-Rex Text utilities
+Rex::Text equivalent in Python
+Provides text manipulation utilities for Metasploit
 """
 
-import random
-import string
-import hashlib
+import struct
+import base64
 
 
 class Text:
-    """Text manipulation and generation utilities"""
-    
+    """Text manipulation utilities"""
+
     @staticmethod
-    def rand_text_alpha(min_len: int = 8, max_len: int = None) -> str:
+    def pattern_create(length, sets=None):
         """
-        Generate random alphabetic text
+        Create a cyclic pattern of a given length
         
         Args:
-            min_len: Minimum length or exact length if max_len is None
-            max_len: Maximum length (optional)
-            
+            length: Length of pattern to create
+            sets: Custom pattern character sets (list of strings)
+                  Default is ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz', '0123456789']
+        
         Returns:
-            Random alphabetic string
+            String containing the cyclic pattern
         """
-        if max_len is None:
-            length = min_len
+        if sets is None:
+            sets = [
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                'abcdefghijklmnopqrstuvwxyz',
+                '0123456789'
+            ]
+        
+        pattern = ''
+        while len(pattern) < length:
+            for char1 in sets[0]:
+                for char2 in sets[1] if len(sets) > 1 else sets[0]:
+                    for char3 in sets[2] if len(sets) > 2 else (sets[1] if len(sets) > 1 else sets[0]):
+                        pattern += char1 + char2 + char3
+                        if len(pattern) >= length:
+                            return pattern[:length]
+        
+        return pattern[:length]
+
+    @staticmethod
+    def pattern_offset(pattern, query, start_offset=0):
+        """
+        Find the offset of a substring or integer in a pattern
+        
+        Args:
+            pattern: The pattern to search in
+            query: String or integer to find
+            start_offset: Starting offset for the search
+        
+        Returns:
+            Integer offset if found, None otherwise
+        """
+        if isinstance(query, int):
+            # Convert integer to little-endian 4-byte string
+            try:
+                query_str = struct.pack('<I', query).decode('latin-1')
+            except (struct.error, OverflowError):
+                return None
         else:
-            length = random.randint(min_len, max_len)
-        return ''.join(random.choice(string.ascii_letters) for _ in range(length))
+            query_str = query
         
+        try:
+            offset = pattern.index(query_str, start_offset)
+            return offset
+        except ValueError:
+            return None
+
     @staticmethod
-    def rand_text_alphanumeric(min_len: int = 8, max_len: int = None) -> str:
+    def decode_base64(data):
         """
-        Generate random alphanumeric text
+        Decode base64 data
         
         Args:
-            min_len: Minimum length or exact length if max_len is None
-            max_len: Maximum length (optional)
-            
-        Returns:
-            Random alphanumeric string
-        """
-        if max_len is None:
-            length = min_len
-        else:
-            length = random.randint(min_len, max_len)
-        return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(length))
+            data: Base64 encoded string
         
-    @staticmethod
-    def rand_text_numeric(min_len: int = 8, max_len: int = None) -> str:
-        """
-        Generate random numeric text
-        
-        Args:
-            min_len: Minimum length or exact length if max_len is None
-            max_len: Maximum length (optional)
-            
-        Returns:
-            Random numeric string
-        """
-        if max_len is None:
-            length = min_len
-        else:
-            length = random.randint(min_len, max_len)
-        return ''.join(random.choice(string.digits) for _ in range(length))
-        
-    @staticmethod
-    def rand_text_hex(min_len: int = 8, max_len: int = None) -> str:
-        """
-        Generate random hexadecimal text
-        
-        Args:
-            min_len: Minimum length or exact length if max_len is None
-            max_len: Maximum length (optional)
-            
-        Returns:
-            Random hex string
-        """
-        if max_len is None:
-            length = min_len
-        else:
-            length = random.randint(min_len, max_len)
-        return ''.join(random.choice(string.hexdigits.lower()) for _ in range(length))
-        
-    @staticmethod
-    def md5(data: bytes) -> str:
-        """
-        Calculate MD5 hash
-        
-        Args:
-            data: Data to hash
-            
-        Returns:
-            Hex digest string
-        """
-        return hashlib.md5(data).hexdigest()
-        
-    @staticmethod
-    def encode_base64(data: bytes) -> str:
-        """
-        Base64 encode data
-        
-        Args:
-            data: Data to encode
-            
-        Returns:
-            Base64 encoded string
-        """
-        import base64
-        return base64.b64encode(data).decode('ascii')
-        
-    @staticmethod
-    def decode_base64(data: str) -> bytes:
-        """
-        Base64 decode data
-        
-        Args:
-            data: Base64 string to decode
-            
         Returns:
             Decoded bytes
         """
-        import base64
         return base64.b64decode(data)
-        
+
     @staticmethod
-    def uri_encode(data: str) -> str:
+    def to_ascii(data):
         """
-        URL encode string
+        Convert data to ASCII string
         
         Args:
-            data: String to encode
-            
-        Returns:
-            URL encoded string
-        """
-        from urllib.parse import quote
-        return quote(data)
+            data: Bytes or string to convert
         
-    @staticmethod
-    def uri_decode(data: str) -> str:
-        """
-        URL decode string
-        
-        Args:
-            data: String to decode
-            
         Returns:
-            URL decoded string
+            ASCII string
         """
-        from urllib.parse import unquote
-        return unquote(data)
+        if isinstance(data, bytes):
+            # Remove null bytes and decode
+            return data.rstrip(b'\x00').decode('ascii', errors='ignore')
+        return str(data)
+
+
+if __name__ == '__main__':
+    # Simple test
+    pattern = Text.pattern_create(100)
+    print(f"Pattern (100 chars): {pattern}")
+    
+    # Test finding offset
+    offset = Text.pattern_offset(pattern, "Aa3A")
+    print(f"Offset of 'Aa3A': {offset}")

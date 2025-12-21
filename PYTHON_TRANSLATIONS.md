@@ -573,87 +573,114 @@ python3 tools/modules/module_disclodate.py -s -d 2020-01-01 -D 2023-12-31
 python3 tools/modules/module_disclodate.py -n -f Exploit
 ```
 
-## Round 2 Python Conversions - Post-2020 Exploits
-
-### Framework Infrastructure (New in Round 2)
-
-#### lib/msf/core/module.py → Base Module Class
-**Purpose:** Base class for all Metasploit modules
+### 49. lib/rex/text.rb → lib/rex/text.py
+**Purpose:** Text manipulation utilities for Metasploit
 
 **Key Features:**
-- Module ranking constants (ManualRanking, ExcellentRanking, etc.)
-- Architecture constants (ARCH_X86, ARCH_X64, ARCH_CMD, etc.)
-- Platform constants (PLATFORM_WINDOWS, PLATFORM_LINUX, etc.)
-- Reliability, Stability, and SideEffects constants
-- Common methods: print_status, print_good, print_error, fail_with
-- Datastore and options management
-
-#### lib/msf/core/exploit.py → Exploit Base Class
-**Purpose:** Base class for all exploit modules
-
-**Key Features:**
-- CheckCode class for vulnerability verification (Unknown, Safe, Detected, Appears, Vulnerable, Unsupported)
-- Failure reasons constants
-- Exploit execution framework
-- Remote exploit mixins (HttpClient, HttpServer, JndiInjection, Tcp, Smb, Ftp, Ssh)
-- AutoCheck and Retry mixins
-
-#### lib/msf/core/auxiliary.py → Auxiliary Base Class
-**Purpose:** Base class for auxiliary modules (scanners, fuzzers, etc.)
-
-#### lib/msf/core/post.py → Post Module Base Class
-**Purpose:** Base class for post-exploitation modules with File operations mixin
-
-#### lib/msf/core/options.py → Module Options
-**Purpose:** Option types for module configuration
-
-**Key Features:**
-- OptString, OptInt, OptPort, OptBool, OptAddress, OptPath, OptEnum
-- Validation methods for each option type
-
-#### lib/msf/core/exploit/file_dropper.py → File Dropper Mixin
-**Purpose:** Track and cleanup files dropped on target systems
-
-#### lib/rex/text.py → Text Utilities
-**Purpose:** Text manipulation and generation utilities
-
-**Key Features:**
-- rand_text_alpha, rand_text_alphanumeric, rand_text_numeric, rand_text_hex
-- md5, encode_base64, decode_base64
-- uri_encode, uri_decode
-
-### Exploit Modules (Round 2 Conversions)
-
-### 49. modules/exploits/multi/http/cve_2023_38836_boidcms.rb → modules/exploits/multi/http/cve_2023_38836_boidcms.py
-**Purpose:** BoidCMS Command Injection (CVE-2023-38836)
-
-**Key Features:**
-- Exploits improper sanitization in BoidCMS version 2.0.0 and below
-- Authenticated PHP file upload disguised as GIF
-- Webshell deployment and command execution
-- File cleanup after exploitation
+- `pattern_create()` - Create cyclic patterns for exploit development
+- `pattern_offset()` - Find offset of substring/integer in pattern
+- `decode_base64()` - Base64 decoding
+- `to_ascii()` - Convert bytes to ASCII string
 
 **Usage:**
 ```python
-# Module is designed to run through Metasploit Framework
-# Set RHOST, CMS_USERNAME, CMS_PASSWORD, and execute
+from rex.text import Text
+
+# Create a 100-byte pattern
+pattern = Text.pattern_create(100)
+
+# Find offset of a specific value
+offset = Text.pattern_offset(pattern, "Aa3A")
+print(f"Offset: {offset}")
 ```
 
-### 50. modules/exploits/multi/http/langflow_unauth_rce_cve_2025_3248.rb → modules/exploits/multi/http/langflow_unauth_rce_cve_2025_3248.py
-**Purpose:** Langflow AI RCE (CVE-2025-3248)
+### 50. tools/exploit/pattern_create.rb → tools/exploit/pattern_create.py
+**Purpose:** Create cyclic patterns for buffer overflow exploitation
 
 **Key Features:**
-- Unauthenticated code injection in Langflow < 1.3.0
-- Exploits /api/v1/validate/code endpoint
-- Python code execution via @exec decorator
-- Version detection and auto_login check
+- Generate patterns of specified length
+- Support for custom character sets
+- Used to identify buffer overflow offsets
 
 **Usage:**
-```python
-# Module is designed to run through Metasploit Framework
-# Works against Langflow versions prior to 1.3.0
-# No authentication required if auto_login is enabled
+```bash
+python3 tools/exploit/pattern_create.py -l 200
+python3 tools/exploit/pattern_create.py -l 50 -s ABC,def,123
 ```
+
+### 51. tools/exploit/pattern_offset.rb → tools/exploit/pattern_offset.py
+**Purpose:** Find offset of a pattern value
+
+**Key Features:**
+- Locate exact matches in patterns
+- Support for hex values and 4-byte strings
+- Find approximate matches with byte adjustments
+- Essential for exploit development
+
+**Usage:**
+```bash
+python3 tools/exploit/pattern_offset.py -q Aa3A
+python3 tools/exploit/pattern_offset.py -q 41304141 -l 8192
+python3 tools/exploit/pattern_offset.py -q AAAA -s ABC,def,123
+```
+
+### 52. tools/password/cpassword_decrypt.rb → tools/password/cpassword_decrypt.py
+**Purpose:** Decrypt Group Policy Preferences (GPP) cpassword strings
+
+**Key Features:**
+- Decrypt cpassword values using Microsoft's public AES key
+- Useful for extracting passwords from groups.xml and scheduledtasks.xml
+- Handles UTF-16LE encoding and PKCS7 padding
+
+**Usage:**
+```bash
+python3 tools/password/cpassword_decrypt.py AzVJmXh/J9KrU5n0czX1uBPLSUjzFE8j7dOltPD8tLk
+# Output: [+] The decrypted AES password is: testpassword
+```
+
+**Dependencies:**
+- pycryptodome (install with: `pip install pycryptodome`)
+
+### 53. scripts/meterpreter/hashdump.rb → scripts/meterpreter/hashdump.py
+**Purpose:** Dump Windows password hashes via Meterpreter
+
+**Key Features:**
+- Extract SAM database password hashes
+- Boot key and hboot key calculation
+- Password hint extraction
+- Framework placeholder for meterpreter integration
+
+**Usage:**
+```bash
+# Within Meterpreter session:
+python3 scripts/meterpreter/hashdump.py
+python3 scripts/meterpreter/hashdump.py -p 445
+
+# Note: Standalone mode shows usage information
+```
+
+**Note:** This is a reference implementation. Actual hash dumping requires a live Meterpreter session.
+
+### 54. scripts/meterpreter/scraper.rb → scripts/meterpreter/scraper.py
+**Purpose:** Comprehensive system information gathering
+
+**Key Features:**
+- Network configuration and routing
+- System information (OS, computer name)
+- User and group enumeration
+- Share and service enumeration
+- Password hash dumping
+- Registry hive export (HKLM, HKCU, HKCC, HKCR, HKU)
+
+**Usage:**
+```bash
+# Within Meterpreter session:
+python3 scripts/meterpreter/scraper.py
+
+# Output stored in: logs/scripts/scraper/<host>_<timestamp>
+```
+
+**Note:** This is a reference implementation. Actual scraping requires a live Meterpreter session.
 
 ## Common Patterns
 

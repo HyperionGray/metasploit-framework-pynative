@@ -1,11 +1,14 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Metasploit Framework - Core module classes
+Metasploit Framework Core Classes
+
+This package contains the core framework classes including exploit base classes,
+module management, and framework integration.
 """
 
-from .exploit import Exploit, CheckCode
-from .auxiliary import Auxiliary
-from .module import Module
+from . import exploit
+from . import auxiliary
+from . import module
+from . import constants
 
-__all__ = ['Exploit', 'Auxiliary', 'Module', 'CheckCode']
+__all__ = ['exploit', 'auxiliary', 'module', 'constants']

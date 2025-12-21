@@ -13,6 +13,12 @@ class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Smtp
   include Msf::Auxiliary::Fuzzer
   include Msf::Auxiliary::Scanner
+  include Msf::Module::Deprecated
+
+  deprecated(
+    Date.new(2026, 12, 31),
+    'This is a simple SMTP command fuzzer without coverage guidance. Use AFL++ with SMTP protocol support or boofuzz instead.'
+  )
 
   def initialize
     super(

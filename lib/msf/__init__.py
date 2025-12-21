@@ -1,9 +1,12 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Metasploit Framework - Python Implementation
-Core MSF module namespace
+Metasploit Framework Core (MSF) Python Package
+
+This package contains the core framework classes and utilities for
+Python-based Metasploit modules.
 """
 
-__version__ = '6.4.0-dev'
-__all__ = ['core', 'base', 'util']
+from . import core
+from . import util
+
+__all__ = ['core', 'util']

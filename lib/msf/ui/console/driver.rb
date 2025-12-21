@@ -477,6 +477,7 @@ class Driver < Msf::Ui::Driver
       pchar = framework.datastore['PromptChar'] || DefaultPromptChar
       p = framework.datastore['Prompt'] || DefaultPrompt
       p = "#{p} #{active_module.type}(%bld%red#{active_module.promptname}%clr)" if active_module
+      p = "(%bld%grn#{active_session.type}:#{active_session.sid}%clr) #{p}" if active_session
       super(p, pchar)
     else
       # Don't squash calls from within lib/rex/ui/text/shell.rb
@@ -521,6 +522,23 @@ protected
   # executable.  This is only allowed if command passthru has been permitted
   #
   def unknown_command(method, line)
+    # If we have an active session with console support, route commands to it
+    if active_session && active_session.respond_to?(:console) && active_session.console
+      begin
+        active_session.console.run_single(line)
+        return :handled
+      rescue Interrupt
+        # User interrupted, allow it to propagate
+        raise
+      rescue Rex::TimeoutError => e
+        print_error("Session command timeout: #{e.message}")
+        elog("Session command timeout", e)
+      rescue StandardError => e
+        print_error("Error running command in session: #{e.message}")
+        elog("Session command error", e)
+      end
+    end
+
     if File.basename(method) == 'msfconsole'
       print_error('msfconsole cannot be run inside msfconsole')
       return
