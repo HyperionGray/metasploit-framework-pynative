@@ -153,31 +153,14 @@ jobs:
           echo "" >> /tmp/doc-analysis.md
           echo "### Additional Documentation:" >> /tmp/doc-analysis.md
           
-          # Find markdown files (limit to first 20 to avoid excessive output)
-          md_files=$(find . -name "*.md" \
+          # Find all markdown files
+          find . -name "*.md" \
             ! -path "*/node_modules/*" \
             ! -path "*/.venv/*" \
             ! -path "*/vendor/*" \
-            -type f | head -20)
-          
-          if [ -n "$md_files" ]; then
-            echo "$md_files" | while read -r file; do
-              echo "- $file" >> /tmp/doc-analysis.md
-            done
-            
-            # Count total markdown files
-            total_md=$(find . -name "*.md" \
-              ! -path "*/node_modules/*" \
-              ! -path "*/.venv/*" \
-              ! -path "*/vendor/*" \
-              -type f | wc -l)
-            
-            if [ "$total_md" -gt 20 ]; then
-              echo "- ... and $((total_md - 20)) more markdown files" >> /tmp/doc-analysis.md
-            fi
-          else
-            echo "No additional markdown files found" >> /tmp/doc-analysis.md
-          fi
+            -type f | while read -r file; do
+            echo "- $file" >> /tmp/doc-analysis.md
+          done || echo "No additional markdown files found" >> /tmp/doc-analysis.md
           
           echo "" >> /tmp/doc-analysis.md
           echo "### Code with Missing Documentation:" >> /tmp/doc-analysis.md
@@ -193,25 +176,14 @@ jobs:
               ! -path "*/dist/*" \
               ! -name "__init__.py" \
               -type f | while read -r file; do
-              # Count functions and classes with input validation
-              func_count_raw=$(grep -c "^def " "$file" 2>/dev/null || echo 0)
-              class_count_raw=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
-              docstring_count_raw=$(grep -c '"""' "$file" 2>/dev/null || echo 0)
+              # Count functions and classes
+              func_count=$(grep -c "^def " "$file" 2>/dev/null || echo 0)
+              class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
+              docstring_count=$(grep -c '"""' "$file" 2>/dev/null || echo 0)
               
-              # Validate and sanitize counts (ensure they are single integers)
-              func_count=$(echo "$func_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
-              class_count=$(echo "$class_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
-              docstring_count=$(echo "$docstring_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
-              
-              # Ensure we have valid numbers before arithmetic
-              if [[ "$func_count" =~ ^[0-9]+$ ]] && [[ "$class_count" =~ ^[0-9]+$ ]] && [[ "$docstring_count" =~ ^[0-9]+$ ]]; then
-                total=$((func_count + class_count))
-                if [ $total -gt 0 ] && [ $docstring_count -eq 0 ]; then
-                  echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
-                fi
-              else
-                # Log problematic files for debugging
-                echo "⚠️ $file: Unable to analyze (parsing error)" >> /tmp/doc-analysis.md
+              total=$((func_count + class_count))
+              if [ $total -gt 0 ] && [ $docstring_count -eq 0 ]; then
+                echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
               fi
             done
           fi
@@ -225,33 +197,38 @@ jobs:
               ! -path "*/dist/*" \
               ! -path "*/build/*" \
               -type f | while read -r file; do
-              # Count functions and classes with input validation
-              func_count_raw=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null || echo 0)
-              class_count_raw=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
-              jsdoc_count_raw=$(grep -c '/\*\*' "$file" 2>/dev/null || echo 0)
+              # Count functions and classes
+              func_count=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null || echo 0)
+              class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
+              jsdoc_count=$(grep -c '/\*\*' "$file" 2>/dev/null || echo 0)
               
-              # Validate and sanitize counts (ensure they are single integers)
-              func_count=$(echo "$func_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
-              class_count=$(echo "$class_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
-              jsdoc_count=$(echo "$jsdoc_count_raw" | head -n1 | grep -E '^[0-9]+$' || echo 0)
-              
-              # Ensure we have valid numbers before arithmetic
-              if [[ "$func_count" =~ ^[0-9]+$ ]] && [[ "$class_count" =~ ^[0-9]+$ ]] && [[ "$jsdoc_count" =~ ^[0-9]+$ ]]; then
-                total=$((func_count + class_count))
-                if [ $total -gt 5 ] && [ $jsdoc_count -eq 0 ]; then
-                  echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
-                fi
-              else
-                # Log problematic files for debugging
-                echo "⚠️ $file: Unable to analyze (parsing error)" >> /tmp/doc-analysis.md
+              total=$((func_count + class_count))
+              if [ $total -gt 5 ] && [ $jsdoc_count -eq 0 ]; then
+                echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
               fi
             done
           fi
           
           cat /tmp/doc-analysis.md
 
-      # Note: GitHub Copilot CLI action integration removed due to action availability
-      # The comprehensive documentation analysis above provides similar functionality
+      - name: GitHub Copilot Documentation Review
+        uses: github/copilot-cli-actions@v1
+        with:
+          query: |
+            Review the documentation for this repository:
+            1. Check README.md completeness and quality
+            2. Verify all features and functionality are documented
+            3. Check for installation and usage instructions
+            4. Identify missing or outdated documentation
+            5. Suggest improvements for clarity and completeness
+            6. Verify code comments and inline documentation
+            7. Check for API documentation if applicable
+            8. Ensure contributing guidelines are present
+            
+            Provide specific recommendations with file names and sections.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
       - name: Create Documentation Review Report
         uses: actions/github-script@main
@@ -259,7 +236,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            let analysis = fs.readFileSync('/tmp/doc-analysis.md', 'utf8');
+            const analysis = fs.readFileSync('/tmp/doc-analysis.md', 'utf8');
             
             const date = new Date().toISOString().split('T')[0];
             const title = `Code Functionality & Documentation Review - ${date}`;
@@ -267,12 +244,6 @@ jobs:
             const buildStatus = process.env.BUILD_STATUS || 'unknown';
             const buildEmoji = buildStatus === 'success' ? '✅' : 
                               buildStatus === 'failed' ? '❌' : '⚠️';
-            
-            // Truncate analysis if it's too long to prevent GitHub API errors
-            const maxAnalysisLength = 40000; // Leave room for the rest of the content
-            if (analysis.length > maxAnalysisLength) {
-              analysis = analysis.substring(0, maxAnalysisLength) + '\n\n... (output truncated due to length)';
-            }
             
             const body = `# Code Functionality and Documentation Review
             
@@ -313,14 +284,6 @@ jobs:
             *This issue was automatically generated by the Functionality & Documentation Review workflow.*
             `;
             
-            // Final check to ensure body is within GitHub's limits
-            const maxBodyLength = 65000; // Slightly under the 65536 limit for safety
-            let finalBody = body;
-            if (body.length > maxBodyLength) {
-              const truncateAt = maxBodyLength - 200; // Leave room for truncation message
-              finalBody = body.substring(0, truncateAt) + '\n\n... (content truncated to fit GitHub limits)';
-            }
-            
             // Check for existing issues
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -338,55 +301,20 @@ jobs:
             
             if (recentIssue) {
               console.log(`Recent issue found: #${recentIssue.number}, updating`);
-              
-              // Truncate comment if needed
-              let commentBody = `## Updated Analysis (${date})\n\nBuild Status: ${buildEmoji} ${buildStatus}\n\n${analysis}`;
-              if (commentBody.length > maxBodyLength) {
-                const truncateAt = maxBodyLength - 200;
-                commentBody = commentBody.substring(0, truncateAt) + '\n\n... (content truncated to fit GitHub limits)';
-              }
-              
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: recentIssue.number,
-                body: commentBody
+                body: `## Updated Analysis (${date})\n\nBuild Status: ${buildEmoji} ${buildStatus}\n\n${analysis}`
               });
             } else {
-              try {
-                await github.rest.issues.create({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  title: title,
-                  body: finalBody,
-                  labels: ['documentation', 'functionality', 'automated', 'needs-review']
-                });
-              } catch (error) {
-                console.error('Failed to create issue:', error.message);
-                // Create a minimal issue if the full one fails
-                const minimalBody = `# Code Functionality and Documentation Review
-                
-                ## Build Status: ${buildEmoji} ${buildStatus}
-                
-                Documentation analysis completed but output was too large for GitHub issue.
-                Please check the workflow logs for detailed analysis.
-                
-                ## Action Items
-                - [ ] Review workflow logs for detailed documentation analysis
-                - [ ] Address any build issues if status is failed
-                - [ ] Improve documentation coverage
-                
-                ---
-                *This is a minimal issue due to content size limitations.*`;
-                
-                await github.rest.issues.create({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  title: title,
-                  body: minimalBody,
-                  labels: ['documentation', 'functionality', 'automated', 'needs-review']
-                });
-              }
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['documentation', 'functionality', 'automated', 'needs-review']
+              });
             }
         env:
           BUILD_STATUS: ${{ steps.build.outputs.BUILD_STATUS }}
