@@ -221,21 +221,24 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      - name: GitHub Copilot Documentation Review
+      # GitHub Copilot Documentation Review - Temporarily Disabled
+      # The github/copilot-cli-actions action is not available
+      # This step was intended to provide AI-powered documentation review
+      # TODO: Replace with alternative documentation analysis when available
+      - name: Documentation Review Summary
         run: |
-          echo "## GitHub Copilot Documentation Review" >> /tmp/doc-analysis.md
-          echo "" >> /tmp/doc-analysis.md
-          echo "Note: GitHub Copilot documentation review functionality is not yet available." >> /tmp/doc-analysis.md
-          echo "This step is a placeholder for future Copilot integration." >> /tmp/doc-analysis.md
-          echo "" >> /tmp/doc-analysis.md
-          echo "Planned documentation review areas:" >> /tmp/doc-analysis.md
-          echo "- README.md completeness and quality" >> /tmp/doc-analysis.md
-          echo "- Feature and functionality documentation" >> /tmp/doc-analysis.md
-          echo "- Installation and usage instructions" >> /tmp/doc-analysis.md
-          echo "- Missing or outdated documentation identification" >> /tmp/doc-analysis.md
-          echo "- Code comments and inline documentation" >> /tmp/doc-analysis.md
-          echo "- API documentation verification" >> /tmp/doc-analysis.md
-          echo "- Contributing guidelines presence" >> /tmp/doc-analysis.md
+          echo "## AI-Powered Documentation Review"
+          echo "This step would have provided GitHub Copilot-powered documentation analysis."
+          echo "The following areas would have been reviewed:"
+          echo "1. README.md completeness and quality"
+          echo "2. Feature and functionality documentation"
+          echo "3. Installation and usage instructions"
+          echo "4. Missing or outdated documentation identification"
+          echo "5. Code comments and inline documentation"
+          echo "6. API documentation coverage"
+          echo "7. Contributing guidelines presence"
+          echo ""
+          echo "Manual review is recommended for these areas until AI-powered analysis is available."
         continue-on-error: true
 
       - name: Create Documentation Review Report

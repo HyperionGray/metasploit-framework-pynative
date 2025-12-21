@@ -5,22 +5,23 @@
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-#
-# Ruby wrapper for the Python md5_lookup.py tool
-# This maintains backward compatibility while delegating to the Python implementation
-#
+msfbase = __FILE__
+while File.symlink?(msfbase)
+  msfbase = File.expand_path(File.readlink(msfbase), File.dirname(msfbase))
+end
+
+$:.unshift(File.expand_path(File.join(File.dirname(msfbase), '..', '..', 'lib')))
 
 require 'msfenv'
 require 'rex'
-require 'json'
 require 'optparse'
-require 'tempfile'
+require 'json'
 
 module Md5LookupUtility
 
   class Disclaimer
     def initialize
-      @config_path = File.join(Msf::Config.config_directory, 'md5_lookup.ini')
+      @config_path = File.join(Msf::Config.config_directory, 'md5lookup.ini')
     end
 
     def ack
@@ -42,7 +43,8 @@ module Md5LookupUtility
     private
 
     def has_waiver?
-      load_setting('waiver') == true
+      setting = load_setting('waiver')
+      setting == true || setting == 'true'
     end
 
     def save_setting(name, value)
@@ -59,158 +61,10 @@ module Md5LookupUtility
     end
   end
 
-  class Md5Lookup
-    include Rex::Proto::Http::Client
+  class Md5Lookup < Rex::Proto::Http::Client
 
-    def initialize
-      @python_script = File.join(File.dirname(__FILE__), 'md5_lookup.py')
-    end
-
-    def lookup(hash, database)
-      # Try HTTP client approach first (for testing and compatibility)
-      begin
-        opts = {
-          'uri' => '/api/api.cracker.php',
-          'method' => 'GET',
-          'vars_get' => {
-            'database' => database,
-            'hash' => hash
-          }
-        }
-        
-        response = send_request_cgi(opts)
-        result = get_json_result(response)
-        return result unless result.empty?
-      rescue => e
-        # If HTTP client fails, fall back to Python implementation
-      end
-      
-      # Fallback to Python implementation
-      lookup_via_python(hash, database)
-    end
-
-    private
-
-    def lookup_via_python(hash, database)
-      # Create temporary files for input and output
-      input_file = Tempfile.new('md5_input')
-      output_file = Tempfile.new('md5_output')
-      
-      begin
-        # Write hash to input file
-        input_file.write(hash)
-        input_file.close
-
-        # Call Python script
-        cmd = "python3 #{@python_script} -i #{input_file.path} -d #{database} -o #{output_file.path} --assume-yes"
-        system(cmd)
-
-        # Read result from output file
-        if File.exist?(output_file.path) && File.size(output_file.path) > 0
-          result = File.read(output_file.path).strip
-          if result.include?('=')
-            return result.split('=', 2)[1].strip
-          end
-        end
-        
-        return ''
-      ensure
-        input_file.unlink if input_file
-        output_file.unlink if output_file
-      end
-    end
-
-    def get_json_result(response)
-      return '' if response.body.nil? || response.body.empty?
-      
-      begin
-        data = JSON.parse(response.body)
-        if data['status']
-          return data['result'] || ''
-        end
-      rescue JSON::ParserError
-        # Invalid JSON, return empty
-      end
-      
-      ''
-    end
-  end
-
-  class Driver
-    def initialize
-      @options = {}
-      @output_handle = nil
-    end
-
-    def run
-      @options = OptsConsole.parse(ARGV)
-      
-      # Check disclaimer
-      disclaimer = Disclaimer.new
-      unless disclaimer.send(:has_waiver?)
-        return unless disclaimer.ack
-      end
-
-      # Open output file
-      if @options[:outfile]
-        @output_handle = File.new(@options[:outfile], 'wb')
-      end
-
-      # Process hashes
-      get_hash_results(@options[:input], @options[:databases]) do |result|
-        puts "Found: #{result[:hash]} = #{result[:cracked_hash]} (from #{result[:credit]})"
-        save_result(result) if @output_handle
-      end
-
-      @output_handle.close if @output_handle
-    end
-
-    private
-
-    def save_result(result)
-      @output_handle.write("#{result[:hash]} = #{result[:cracked_hash]}\n")
-    end
-
-    def get_hash_results(input_file, databases)
-      search_engine = Md5Lookup.new
-      
-      extract_hashes(input_file) do |hash|
-        databases.each do |db|
-          cracked = search_engine.lookup(hash, db)
-          if !cracked.empty?
-            yield({
-              :hash => hash,
-              :cracked_hash => cracked,
-              :credit => db
-            })
-            break
-          end
-        end
-      end
-    end
-
-    def extract_hashes(input_file)
-      File.open(input_file, 'rb') do |f|
-        f.each_line do |line|
-          hash = line.strip
-          if is_md5_format?(hash)
-            yield hash
-          end
-        end
-      end
-    end
-
-    def is_md5_format?(str)
-      return false if str.nil? || str.empty?
-      str.length == 32 && str.match(/^[a-fA-F0-9]+$/)
-    end
-  end
-
-  class OptsConsole
     DATABASES = {
-      'all' => ['authsecu', 'i337.net', 'md5.my-addr.com', 'md5.net', 'md5crack', 
-                'md5cracker.org', 'md5decryption.com', 'md5online.net', 'md5pass', 
-                'netmd5crack', 'tmto'],
+      'all' => nil,
       'authsecu' => 'authsecu',
       'i337' => 'i337.net',
       'md5_my_addr' => 'md5.my-addr.com',
@@ -224,6 +78,131 @@ module Md5LookupUtility
       'tmto' => 'tmto'
     }
 
+    LOOKUP_ENDPOINTS = [
+      'https://md5cracker.org/api/api.cracker.php',
+      'http://md5cracker.org/api/api.cracker.php'
+    ]
+
+    def initialize
+      super()
+    end
+
+    def lookup(hash_value, database)
+      LOOKUP_ENDPOINTS.each do |endpoint|
+        uri = URI.parse(endpoint)
+        
+        opts = {
+          'method' => 'GET',
+          'uri' => "#{uri.path}?database=#{database}&hash=#{hash_value}",
+          'rhost' => uri.host,
+          'rport' => uri.port || (uri.scheme == 'https' ? 443 : 80),
+          'ssl' => uri.scheme == 'https'
+        }
+
+        begin
+          res = send_request_cgi(opts)
+          next unless res && res.code == 200
+          
+          result = get_json_result(res)
+          return result if result && !result.empty?
+        rescue => e
+          # Continue to next endpoint on error
+          next
+        end
+      end
+      
+      ''
+    end
+
+    private
+
+    def get_json_result(response)
+      return '' if response.body.nil? || response.body.empty?
+      
+      begin
+        data = JSON.parse(response.body)
+        if data['status'] == true || data['status'] == 'true'
+          return data['result'] || ''
+        end
+      rescue JSON::ParserError
+        # Invalid JSON, return empty
+      end
+      
+      ''
+    end
+  end
+
+  class Driver
+    def initialize
+      @options = OptsConsole.parse(ARGV)
+      @output_handle = nil
+    end
+
+    def run
+      disclaimer = Disclaimer.new
+      unless disclaimer.send(:has_waiver?)
+        return unless disclaimer.ack
+      end
+
+      @output_handle = File.new(@options[:outfile], 'wb') if @options[:outfile]
+
+      get_hash_results(@options[:input], @options[:databases]) do |result|
+        print_result(result)
+        save_result(result) if @output_handle
+      end
+
+      @output_handle.close if @output_handle
+    end
+
+    private
+
+    def print_result(result)
+      puts "Found: #{result[:hash]} = #{result[:cracked_hash]} (from #{result[:credit]})"
+    end
+
+    def save_result(result)
+      @output_handle.write("#{result[:hash]} = #{result[:cracked_hash]}\n")
+    end
+
+    def get_hash_results(input_file, databases)
+      search_engine = Md5Lookup.new
+      
+      extract_hashes(input_file) do |hash|
+        databases.each do |db|
+          cracked = search_engine.lookup(hash, db)
+          if cracked && !cracked.empty?
+            result = {
+              hash: hash,
+              cracked_hash: cracked,
+              credit: db
+            }
+            yield result
+            break
+          end
+        end
+      end
+    end
+
+    def extract_hashes(input_file)
+      File.open(input_file, 'rb') do |f|
+        f.each_line do |line|
+          hash = line.strip
+          next if hash.empty?
+          
+          if is_md5_format?(hash)
+            yield hash
+          end
+        end
+      end
+    end
+
+    def is_md5_format?(value)
+      return false if value.nil? || value.empty?
+      value.length == 32 && value.match?(/\A[a-fA-F0-9]+\z/)
+    end
+  end
+
+  class OptsConsole
     def self.parse(argv)
       options = {}
       
@@ -231,11 +210,12 @@ module Md5LookupUtility
         opts.banner = "Usage: #{$0} [options]"
         
         opts.on('-i', '--input FILE', 'Input file containing MD5 hashes') do |file|
-          raise OptionParser::MissingArgument, 'Input file does not exist' unless File.exist?(file)
+          raise OptionParser::MissingArgument, 'Input file is required' unless file
+          raise OptionParser::InvalidArgument, 'Input file does not exist' unless File.exist?(file)
           options[:input] = file
         end
         
-        opts.on('-d', '--databases DATABASES', 'Comma-separated database list') do |dbs|
+        opts.on('-d', '--databases DATABASES', 'Comma-separated database names') do |dbs|
           options[:databases] = extract_db_names(dbs)
         end
         
@@ -251,55 +231,45 @@ module Md5LookupUtility
       
       parser.parse!(argv)
       
-      # Validate required options
       raise OptionParser::MissingArgument, 'Input file is required' unless options[:input]
-      
-      # Set defaults
-      options[:databases] ||= DATABASES['all']
-      options[:outfile] ||= 'md5_results.txt'
+      options[:databases] ||= get_database_names
       
       options
     end
 
     def self.extract_db_names(db_list)
-      return DATABASES['all'] if db_list == 'all'
+      return get_database_names if db_list.downcase.include?('all')
       
-      names = []
-      db_list.split(',').each do |db|
-        db = db.strip
-        if DATABASES.key?(db) && db != 'all'
-          if DATABASES[db].is_a?(Array)
-            names.concat(DATABASES[db])
-          else
-            names << DATABASES[db]
-          end
+      names = db_list.split(',').map(&:strip)
+      valid_names = []
+      
+      names.each do |name|
+        symbol = name.downcase
+        if Md5Lookup::DATABASES.key?(symbol) && Md5Lookup::DATABASES[symbol]
+          valid_names << Md5Lookup::DATABASES[symbol]
         end
       end
       
-      names.empty? ? DATABASES['all'] : names
+      valid_names.empty? ? get_database_names : valid_names
     end
 
     def self.get_database_symbols
-      DATABASES.keys.reject { |k| k == 'all' }
+      Md5Lookup::DATABASES.keys.reject { |k| Md5Lookup::DATABASES[k].nil? }
     end
 
     def self.get_database_names
-      symbols = get_database_symbols
-      names = []
-      symbols.each do |symbol|
-        if DATABASES[symbol].is_a?(Array)
-          names.concat(DATABASES[symbol])
-        else
-          names << DATABASES[symbol]
-        end
-      end
-      names
+      Md5Lookup::DATABASES.values.compact
     end
   end
 end
 
-# If this script is run directly, execute the driver
+# If this file is executed directly, run the driver
 if __FILE__ == $0
-  driver = Md5LookupUtility::Driver.new
-  driver.run
+  begin
+    driver = Md5LookupUtility::Driver.new
+    driver.run
+  rescue => e
+    $stderr.puts "Error: #{e.message}"
+    exit 1
+  end
 end
