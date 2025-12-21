@@ -58,58 +58,33 @@ jobs:
         continue-on-error: true
 
       - name: GPT-5 Advanced Code Analysis
-        uses: github/copilot-cli-actions@v1
-        with:
-          model: gpt-5
-          query: |
-            Perform a comprehensive code analysis of this repository using GPT-5's advanced capabilities:
-            
-            1. **Code Quality & Architecture**
-               - Analyze overall code structure and organization
-               - Identify architectural patterns and anti-patterns
-               - Suggest improvements for maintainability and scalability
-            
-            2. **Security Analysis**
-               - Detect potential security vulnerabilities
-               - Identify unsafe coding patterns
-               - Recommend security best practices
-            
-            3. **Performance Optimization**
-               - Identify performance bottlenecks
-               - Suggest optimization opportunities
-               - Recommend efficient algorithms and data structures
-            
-            4. **Best Practices**
-               - Verify adherence to language-specific best practices
-               - Check for proper error handling
-               - Ensure code follows SOLID principles
-            
-            5. **Documentation & Maintainability**
-               - Assess code documentation quality
-               - Identify areas needing better comments
-               - Suggest improvements for code readability
-            
-            Provide specific, actionable recommendations with file names and line numbers where applicable.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## GPT-5 Advanced Code Analysis" >> /tmp/gpt5-analysis.md
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "Note: GPT-5 analysis functionality is not yet available." >> /tmp/gpt5-analysis.md
+          echo "This step is a placeholder for future GPT-5 integration." >> /tmp/gpt5-analysis.md
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "Planned analysis areas:" >> /tmp/gpt5-analysis.md
+          echo "- Code Quality & Architecture" >> /tmp/gpt5-analysis.md
+          echo "- Security Analysis" >> /tmp/gpt5-analysis.md
+          echo "- Performance Optimization" >> /tmp/gpt5-analysis.md
+          echo "- Best Practices" >> /tmp/gpt5-analysis.md
+          echo "- Documentation & Maintainability" >> /tmp/gpt5-analysis.md
         continue-on-error: true
 
       - name: GPT-5 Test Coverage Analysis
-        uses: github/copilot-cli-actions@v1
-        with:
-          model: gpt-5
-          query: |
-            Analyze the test coverage and testing strategy:
-            
-            1. Identify files that lack adequate test coverage
-            2. Suggest missing test cases for critical functionality
-            3. Recommend improvements to existing tests
-            4. Identify edge cases that should be tested
-            5. Suggest integration and end-to-end test scenarios
-            
-            Focus on critical paths and business logic.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## GPT-5 Test Coverage Analysis" >> /tmp/gpt5-analysis.md
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "Note: GPT-5 test coverage analysis functionality is not yet available." >> /tmp/gpt5-analysis.md
+          echo "This step is a placeholder for future GPT-5 integration." >> /tmp/gpt5-analysis.md
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "Planned test analysis areas:" >> /tmp/gpt5-analysis.md
+          echo "- Test coverage gap identification" >> /tmp/gpt5-analysis.md
+          echo "- Missing test case suggestions" >> /tmp/gpt5-analysis.md
+          echo "- Test improvement recommendations" >> /tmp/gpt5-analysis.md
+          echo "- Edge case identification" >> /tmp/gpt5-analysis.md
+          echo "- Integration test scenarios" >> /tmp/gpt5-analysis.md
         continue-on-error: true
 
       - name: Create GPT-5 Analysis Report
