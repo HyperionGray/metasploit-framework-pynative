@@ -1,0 +1,11 @@
+# Reverse engineering helpers (pf)
+
+task inspect-binary
+  describe Quick binary triage (file, checksec, strings, symbols)
+  shell python3 tools/re/inspect_binary.py ${binary} ${strings:+--strings ${strings}} ${symbols:+--symbols ${symbols}}
+end
+
+task re-help
+  describe Show reverse engineering tasks
+  shell echo "Tasks: inspect-binary"
+end
