@@ -38,7 +38,22 @@ This fork is actively converting Metasploit Framework to Python, creating a full
 
 See [PYTHON_CONVERSION_STRATEGY.md](PYTHON_CONVERSION_STRATEGY.md) for the complete conversion plan and progress.
 
-Quick start with Python modules:
+### Ruby to Python Converter
+
+**Yes, the converter works!** 🎉 Use `tools/ruby_to_python_converter.py` to convert Ruby modules to Python:
+
+```bash
+# Convert a Ruby module to Python template
+python3 tools/ruby_to_python_converter.py modules/exploits/path/to/module.rb
+
+# View detailed converter documentation
+cat CONVERTER_GUIDE.md
+```
+
+The converter extracts metadata, translates common patterns, and generates a Python template with TODOs for manual completion. See [CONVERTER_GUIDE.md](CONVERTER_GUIDE.md) for detailed usage, examples, and explanation of all the scripts in the repo.
+
+### Quick Start with Python Modules
+
 ```bash
 # View conversion strategy and progress
 cat PYTHON_CONVERSION_STRATEGY.md
@@ -49,11 +64,12 @@ python3 modules/exploits/multi/http/generic_rce_example_2024.py
 # Analyze modules for legacy migration
 python3 tools/legacy_module_migrator.py -s
 
-# Convert a Ruby module to Python template
+# Convert a Ruby module to Python (official tool)
 python3 tools/ruby_to_python_converter.py modules/exploits/path/to/module.rb
 ```
 
 See also:
+- [CONVERTER_GUIDE.md](CONVERTER_GUIDE.md) - **Ruby to Python converter guide (START HERE!)**
 - [PYTHON_TRANSLATIONS.md](PYTHON_TRANSLATIONS.md) - List of 48+ converted modules
 - [PYTHON_QUICKSTART.md](PYTHON_QUICKSTART.md) - Python module quick start guide
 - [modules_legacy/README.md](modules_legacy/README.md) - Legacy module documentation
