@@ -57,59 +57,75 @@ jobs:
           cat /tmp/gpt5-analysis.md
         continue-on-error: true
 
-      - name: GPT-5 Advanced Code Analysis
-        uses: github/copilot-cli-actions@v1
-        with:
-          model: gpt-5
-          query: |
-            Perform a comprehensive code analysis of this repository using GPT-5's advanced capabilities:
-            
-            1. **Code Quality & Architecture**
-               - Analyze overall code structure and organization
-               - Identify architectural patterns and anti-patterns
-               - Suggest improvements for maintainability and scalability
-            
-            2. **Security Analysis**
-               - Detect potential security vulnerabilities
-               - Identify unsafe coding patterns
-               - Recommend security best practices
-            
-            3. **Performance Optimization**
-               - Identify performance bottlenecks
-               - Suggest optimization opportunities
-               - Recommend efficient algorithms and data structures
-            
-            4. **Best Practices**
-               - Verify adherence to language-specific best practices
-               - Check for proper error handling
-               - Ensure code follows SOLID principles
-            
-            5. **Documentation & Maintainability**
-               - Assess code documentation quality
-               - Identify areas needing better comments
-               - Suggest improvements for code readability
-            
-            Provide specific, actionable recommendations with file names and line numbers where applicable.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GPT-5 Advanced Code Analysis - Temporarily Disabled
+      # The github/copilot-cli-actions action is not available
+      # This step was intended to provide AI-powered code analysis using GPT-5
+      # TODO: Replace with alternative static analysis tools when available
+      - name: Code Analysis Summary
+        run: |
+          echo "## AI-Powered Code Analysis (GPT-5)"
+          echo "This step would have provided comprehensive code analysis using GPT-5's advanced capabilities:"
+          echo ""
+          echo "### Intended Analysis Areas:"
+          echo "1. **Code Quality & Architecture**"
+          echo "   - Overall code structure and organization analysis"
+          echo "   - Architectural patterns and anti-patterns identification"
+          echo "   - Maintainability and scalability improvements"
+          echo ""
+          echo "2. **Security Analysis**"
+          echo "   - Potential security vulnerability detection"
+          echo "   - Unsafe coding pattern identification"
+          echo "   - Security best practices recommendations"
+          echo ""
+          echo "3. **Performance Optimization**"
+          echo "   - Performance bottleneck identification"
+          echo "   - Optimization opportunity suggestions"
+          echo "   - Efficient algorithms and data structures recommendations"
+          echo ""
+          echo "4. **Best Practices**"
+          echo "   - Language-specific best practices verification"
+          echo "   - Error handling checks"
+          echo "   - SOLID principles compliance"
+          echo ""
+          echo "5. **Documentation & Maintainability**"
+          echo "   - Code documentation quality assessment"
+          echo "   - Areas needing better comments identification"
+          echo "   - Code readability improvements"
+          echo ""
+          echo "Manual code review or alternative static analysis tools are recommended until AI-powered analysis is available."
         continue-on-error: true
 
-      - name: GPT-5 Test Coverage Analysis
-        uses: github/copilot-cli-actions@v1
-        with:
-          model: gpt-5
-          query: |
-            Analyze the test coverage and testing strategy:
-            
-            1. Identify files that lack adequate test coverage
-            2. Suggest missing test cases for critical functionality
-            3. Recommend improvements to existing tests
-            4. Identify edge cases that should be tested
-            5. Suggest integration and end-to-end test scenarios
-            
-            Focus on critical paths and business logic.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GPT-5 Test Coverage Analysis - Temporarily Disabled
+      # The github/copilot-cli-actions action is not available
+      # This step was intended to provide AI-powered test coverage analysis
+      # TODO: Replace with alternative test analysis tools when available
+      - name: Test Coverage Analysis Summary
+        run: |
+          echo "## AI-Powered Test Coverage Analysis (GPT-5)"
+          echo "This step would have provided comprehensive test coverage and testing strategy analysis:"
+          echo ""
+          echo "### Intended Analysis Areas:"
+          echo "1. **Test Coverage Assessment**"
+          echo "   - Files lacking adequate test coverage identification"
+          echo "   - Critical functionality coverage gaps"
+          echo "   - Test quality and effectiveness evaluation"
+          echo ""
+          echo "2. **Missing Test Cases**"
+          echo "   - Critical functionality test case suggestions"
+          echo "   - Edge case identification and testing recommendations"
+          echo "   - Business logic validation test suggestions"
+          echo ""
+          echo "3. **Test Strategy Improvements**"
+          echo "   - Existing test enhancement recommendations"
+          echo "   - Integration test scenario suggestions"
+          echo "   - End-to-end test case recommendations"
+          echo ""
+          echo "4. **Testing Best Practices**"
+          echo "   - Test structure and organization improvements"
+          echo "   - Test maintainability enhancements"
+          echo "   - Testing framework optimization suggestions"
+          echo ""
+          echo "Manual test review or alternative test analysis tools (like coverage.py, jest --coverage, etc.) are recommended until AI-powered analysis is available."
         continue-on-error: true
 
       - name: Create GPT-5 Analysis Report

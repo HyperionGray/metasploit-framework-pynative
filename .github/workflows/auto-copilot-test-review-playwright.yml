@@ -160,23 +160,43 @@ jobs:
           
           cat /tmp/test-analysis.md
 
-      - name: GitHub Copilot Test Review
-        uses: github/copilot-cli-action@main
-        with:
-          query: |
-            Review the test suite for this repository:
-            1. Verify all web-based functionality has Playwright tests (both headed and headless)
-            2. Identify missing test coverage for critical functionality
-            3. Check test quality and maintainability
-            4. Suggest improvements for test organization
-            5. Verify tests follow best practices (isolation, clarity, proper assertions)
-            6. Check for flaky tests or tests with timing issues
-            7. Ensure tests are running in CI/CD pipeline
-            
-            For any web tests not using Playwright, recommend migration.
-            Provide specific, actionable recommendations with file names.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GitHub Copilot Test Review - Temporarily Disabled
+      # The github/copilot-cli-action action is not available
+      # This step was intended to provide AI-powered test suite review
+      # TODO: Replace with alternative test analysis tools when available
+      - name: Test Suite Review Summary
+        run: |
+          echo "## AI-Powered Test Suite Review"
+          echo "This step would have provided GitHub Copilot-powered test suite analysis."
+          echo ""
+          echo "### Intended Review Areas:"
+          echo "1. **Playwright Test Coverage**"
+          echo "   - Web-based functionality test verification (headed and headless)"
+          echo "   - Missing test coverage identification"
+          echo "   - Critical functionality test gaps"
+          echo ""
+          echo "2. **Test Quality Assessment**"
+          echo "   - Test maintainability evaluation"
+          echo "   - Test organization improvements"
+          echo "   - Best practices compliance verification"
+          echo ""
+          echo "3. **Test Best Practices**"
+          echo "   - Test isolation verification"
+          echo "   - Test clarity and readability"
+          echo "   - Proper assertion usage"
+          echo "   - Flaky test identification"
+          echo ""
+          echo "4. **CI/CD Integration**"
+          echo "   - Pipeline test execution verification"
+          echo "   - Test timing and performance issues"
+          echo "   - Test environment consistency"
+          echo ""
+          echo "5. **Migration Recommendations**"
+          echo "   - Non-Playwright web test identification"
+          echo "   - Migration path suggestions"
+          echo "   - Test framework optimization"
+          echo ""
+          echo "Manual test review or alternative test analysis tools (like pytest --cov, jest --coverage, test reporters, etc.) are recommended until AI-powered analysis is available."
         continue-on-error: true
 
       - name: Create or Update Test Review Issue

@@ -221,23 +221,24 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      - name: GitHub Copilot Documentation Review
-        uses: github/copilot-cli-actions@v1
-        with:
-          query: |
-            Review the documentation for this repository:
-            1. Check README.md completeness and quality
-            2. Verify all features and functionality are documented
-            3. Check for installation and usage instructions
-            4. Identify missing or outdated documentation
-            5. Suggest improvements for clarity and completeness
-            6. Verify code comments and inline documentation
-            7. Check for API documentation if applicable
-            8. Ensure contributing guidelines are present
-            
-            Provide specific recommendations with file names and sections.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GitHub Copilot Documentation Review - Temporarily Disabled
+      # The github/copilot-cli-actions action is not available
+      # This step was intended to provide AI-powered documentation review
+      # TODO: Replace with alternative documentation analysis when available
+      - name: Documentation Review Summary
+        run: |
+          echo "## AI-Powered Documentation Review"
+          echo "This step would have provided GitHub Copilot-powered documentation analysis."
+          echo "The following areas would have been reviewed:"
+          echo "1. README.md completeness and quality"
+          echo "2. Feature and functionality documentation"
+          echo "3. Installation and usage instructions"
+          echo "4. Missing or outdated documentation identification"
+          echo "5. Code comments and inline documentation"
+          echo "6. API documentation coverage"
+          echo "7. Contributing guidelines presence"
+          echo ""
+          echo "Manual review is recommended for these areas until AI-powered analysis is available."
         continue-on-error: true
 
       - name: Create Documentation Review Report

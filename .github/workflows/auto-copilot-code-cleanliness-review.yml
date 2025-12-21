@@ -66,21 +66,42 @@ jobs:
           
           cat /tmp/analysis.md
 
-      - name: GitHub Copilot Code Review
-        uses: github/copilot-cli-action@main
-        with:
-          query: |
-            Review the codebase for code cleanliness issues:
-            1. Identify files that are too large (>500 lines) and suggest how to split them into smaller, focused modules
-            2. Look for code duplication and suggest refactoring opportunities
-            3. Check for consistent code style and formatting
-            4. Identify complex functions that could be simplified
-            5. Suggest improvements for code organization and structure
-            6. Check for proper separation of concerns
-            
-            Provide actionable recommendations with specific file names and line numbers.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GitHub Copilot Code Review - Temporarily Disabled
+      # The github/copilot-cli-action action is not available
+      # This step was intended to provide AI-powered code cleanliness review
+      # TODO: Replace with alternative static analysis tools when available
+      - name: Code Cleanliness Review Summary
+        run: |
+          echo "## AI-Powered Code Cleanliness Review"
+          echo "This step would have provided GitHub Copilot-powered code cleanliness analysis."
+          echo ""
+          echo "### Intended Review Areas:"
+          echo "1. **Large File Analysis**"
+          echo "   - Files over 500 lines identification"
+          echo "   - Module splitting suggestions"
+          echo "   - Code organization improvements"
+          echo ""
+          echo "2. **Code Duplication Detection**"
+          echo "   - Duplicate code identification"
+          echo "   - Refactoring opportunities"
+          echo "   - DRY principle compliance"
+          echo ""
+          echo "3. **Code Style and Formatting**"
+          echo "   - Consistent style verification"
+          echo "   - Formatting improvements"
+          echo "   - Style guide compliance"
+          echo ""
+          echo "4. **Function Complexity Analysis**"
+          echo "   - Complex function identification"
+          echo "   - Simplification suggestions"
+          echo "   - Cyclomatic complexity reduction"
+          echo ""
+          echo "5. **Code Organization**"
+          echo "   - Structure improvements"
+          echo "   - Separation of concerns verification"
+          echo "   - Architecture recommendations"
+          echo ""
+          echo "Manual code review or alternative static analysis tools (like pylint, eslint, sonarqube, etc.) are recommended until AI-powered analysis is available."
         continue-on-error: true
 
       - name: Create Issue for Code Cleanliness Review
