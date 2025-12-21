@@ -1,34 +1,43 @@
 #!/usr/bin/env ruby
 
-# Quick test to see if the md5_lookup.rb file loads correctly
+# Simple test to check if md5_lookup.rb can be loaded
+
 begin
-  # Add the workspace lib directory to load path
-  $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
+  # Set up the path like the test does
+  msfbase = File.expand_path(File.dirname(__FILE__))
+  
+  # Mock the Metasploit::Framework.root method
+  module Metasploit
+    module Framework
+      def self.root
+        Pathname.new(msfbase)
+      end
+    end
+  end
+  
+  require 'pathname'
   
   # Try to load the file
-  load File.join(File.dirname(__FILE__), 'tools/password/md5_lookup.rb')
+  load_path = Metasploit::Framework.root.join('tools/password/md5_lookup.rb').to_path
+  puts "Attempting to load: #{load_path}"
   
-  puts "✓ File loaded successfully"
-  
-  # Test basic class instantiation
-  disclaimer = Md5LookupUtility::Disclaimer.new
-  puts "✓ Disclaimer class instantiated"
-  
-  lookup = Md5LookupUtility::Md5Lookup.new
-  puts "✓ Md5Lookup class instantiated"
-  
-  # Test with empty argv for Driver
-  driver = Md5LookupUtility::Driver.new([])
-  puts "✓ Driver class instantiated with empty argv"
-  
-  puts "✓ OptsConsole class available" if defined?(Md5LookupUtility::OptsConsole)
-  
-  # Test OptsConsole with empty argv
-  options = Md5LookupUtility::OptsConsole.parse([])
-  puts "✓ OptsConsole.parse works with empty argv"
-  puts "  Options: #{options}"
+  if File.exist?(load_path)
+    puts "File exists, attempting to load..."
+    load load_path
+    puts "Successfully loaded md5_lookup.rb"
+    
+    # Test if the classes are defined
+    puts "Md5LookupUtility defined: #{defined?(Md5LookupUtility)}"
+    puts "Md5LookupUtility::Disclaimer defined: #{defined?(Md5LookupUtility::Disclaimer)}"
+    puts "Md5LookupUtility::Md5Lookup defined: #{defined?(Md5LookupUtility::Md5Lookup)}"
+    puts "Md5LookupUtility::Driver defined: #{defined?(Md5LookupUtility::Driver)}"
+    puts "Md5LookupUtility::OptsConsole defined: #{defined?(Md5LookupUtility::OptsConsole)}"
+    
+  else
+    puts "File does not exist at: #{load_path}"
+  end
   
 rescue => e
-  puts "✗ Error: #{e.message}"
-  puts e.backtrace.first(5)
+  puts "Error loading file: #{e.class}: #{e.message}"
+  puts e.backtrace.join("\n")
 end
