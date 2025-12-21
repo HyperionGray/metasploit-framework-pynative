@@ -222,22 +222,22 @@ jobs:
           cat /tmp/doc-analysis.md
 
       - name: GitHub Copilot Documentation Review
-        uses: github/copilot-cli-actions@v1
-        with:
-          query: |
-            Review the documentation for this repository:
-            1. Check README.md completeness and quality
-            2. Verify all features and functionality are documented
-            3. Check for installation and usage instructions
-            4. Identify missing or outdated documentation
-            5. Suggest improvements for clarity and completeness
-            6. Verify code comments and inline documentation
-            7. Check for API documentation if applicable
-            8. Ensure contributing guidelines are present
-            
-            Provide specific recommendations with file names and sections.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## GitHub Copilot Documentation Review" >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
+          echo "Note: GitHub Copilot documentation review functionality is not currently available." >> /tmp/doc-analysis.md
+          echo "The github/copilot-cli-actions action does not exist." >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
+          echo "### Planned Documentation Review Areas:" >> /tmp/doc-analysis.md
+          echo "- Check README.md completeness and quality" >> /tmp/doc-analysis.md
+          echo "- Verify all features and functionality are documented" >> /tmp/doc-analysis.md
+          echo "- Check for installation and usage instructions" >> /tmp/doc-analysis.md
+          echo "- Identify missing or outdated documentation" >> /tmp/doc-analysis.md
+          echo "- Suggest improvements for clarity and completeness" >> /tmp/doc-analysis.md
+          echo "- Verify code comments and inline documentation" >> /tmp/doc-analysis.md
+          echo "- Check for API documentation if applicable" >> /tmp/doc-analysis.md
+          echo "- Ensure contributing guidelines are present" >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
         continue-on-error: true
 
       - name: Create Documentation Review Report

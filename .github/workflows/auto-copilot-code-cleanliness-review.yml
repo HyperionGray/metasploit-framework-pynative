@@ -67,20 +67,20 @@ jobs:
           cat /tmp/analysis.md
 
       - name: GitHub Copilot Code Review
-        uses: github/copilot-cli-action@main
-        with:
-          query: |
-            Review the codebase for code cleanliness issues:
-            1. Identify files that are too large (>500 lines) and suggest how to split them into smaller, focused modules
-            2. Look for code duplication and suggest refactoring opportunities
-            3. Check for consistent code style and formatting
-            4. Identify complex functions that could be simplified
-            5. Suggest improvements for code organization and structure
-            6. Check for proper separation of concerns
-            
-            Provide actionable recommendations with specific file names and line numbers.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## GitHub Copilot Code Review" >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
+          echo "Note: GitHub Copilot code review functionality is not currently available." >> /tmp/analysis.md
+          echo "The github/copilot-cli-action action does not exist." >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
+          echo "### Planned Code Review Areas:" >> /tmp/analysis.md
+          echo "- Identify files that are too large (>500 lines)" >> /tmp/analysis.md
+          echo "- Look for code duplication and suggest refactoring opportunities" >> /tmp/analysis.md
+          echo "- Check for consistent code style and formatting" >> /tmp/analysis.md
+          echo "- Identify complex functions that could be simplified" >> /tmp/analysis.md
+          echo "- Suggest improvements for code organization and structure" >> /tmp/analysis.md
+          echo "- Check for proper separation of concerns" >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
         continue-on-error: true
 
       - name: Create Issue for Code Cleanliness Review

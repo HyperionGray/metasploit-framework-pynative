@@ -28,21 +28,19 @@ jobs:
           python -m playwright install
 
       - name: Copilot Generate Playwright Scripts
-        uses: github/copilot-agent/playwright-generate@main # Example, customize for Python; or use Chat to generate script
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: "Generate Playwright test scripts covering every user action on this web app."
-        continue-on-error: true # If your agent doesn't support, replace with python script generation using Copilot Chat
+        run: |
+          echo "Note: Copilot Playwright script generation functionality is not currently available."
+          echo "The github/copilot-agent/playwright-generate action does not exist."
+        continue-on-error: true
 
       - name: Run Playwright Tests
         run: |
           pytest tests/ # Or the path to your Playwright scripts
 
       - name: If Tests Fail, Copilot Attempts Fix & Repeats
-        uses: github/copilot-agent/playwright-fix-and-loop@main # Example, requires agent loop feature
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          max_attempts: 5
+        run: |
+          echo "Note: Copilot auto-fix and loop functionality is not currently available."
+          echo "The github/copilot-agent/playwright-fix-and-loop action does not exist."
         continue-on-error: true
 
       - name: Create PR with passing tests or attempted fixes

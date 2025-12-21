@@ -161,22 +161,21 @@ jobs:
           cat /tmp/test-analysis.md
 
       - name: GitHub Copilot Test Review
-        uses: github/copilot-cli-action@main
-        with:
-          query: |
-            Review the test suite for this repository:
-            1. Verify all web-based functionality has Playwright tests (both headed and headless)
-            2. Identify missing test coverage for critical functionality
-            3. Check test quality and maintainability
-            4. Suggest improvements for test organization
-            5. Verify tests follow best practices (isolation, clarity, proper assertions)
-            6. Check for flaky tests or tests with timing issues
-            7. Ensure tests are running in CI/CD pipeline
-            
-            For any web tests not using Playwright, recommend migration.
-            Provide specific, actionable recommendations with file names.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## GitHub Copilot Test Review" >> /tmp/test-analysis.md
+          echo "" >> /tmp/test-analysis.md
+          echo "Note: GitHub Copilot test review functionality is not currently available." >> /tmp/test-analysis.md
+          echo "The github/copilot-cli-action action does not exist." >> /tmp/test-analysis.md
+          echo "" >> /tmp/test-analysis.md
+          echo "### Planned Test Review Areas:" >> /tmp/test-analysis.md
+          echo "- Verify all web-based functionality has Playwright tests" >> /tmp/test-analysis.md
+          echo "- Identify missing test coverage for critical functionality" >> /tmp/test-analysis.md
+          echo "- Check test quality and maintainability" >> /tmp/test-analysis.md
+          echo "- Suggest improvements for test organization" >> /tmp/test-analysis.md
+          echo "- Verify tests follow best practices" >> /tmp/test-analysis.md
+          echo "- Check for flaky tests or tests with timing issues" >> /tmp/test-analysis.md
+          echo "- Ensure tests are running in CI/CD pipeline" >> /tmp/test-analysis.md
+          echo "" >> /tmp/test-analysis.md
         continue-on-error: true
 
       - name: Create or Update Test Review Issue
