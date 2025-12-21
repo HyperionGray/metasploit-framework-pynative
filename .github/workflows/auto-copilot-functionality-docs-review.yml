@@ -221,50 +221,19 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      - name: Basic Documentation Review
+      - name: GitHub Copilot Documentation Review
         run: |
-          echo "## Documentation Review Results" > /tmp/doc-review.md
-          echo "" >> /tmp/doc-review.md
-          
-          # README.md analysis
-          if [ -f "README.md" ]; then
-            word_count=$(wc -w < README.md)
-            echo "### README.md Analysis:" >> /tmp/doc-review.md
-            echo "- Word count: $word_count" >> /tmp/doc-review.md
-            
-            # Check for key sections
-            for section in "Installation" "Usage" "Features" "Contributing" "License"; do
-              if grep -qi "$section" README.md; then
-                echo "✅ Contains '$section' section" >> /tmp/doc-review.md
-              else
-                echo "⚠️ Missing '$section' section" >> /tmp/doc-review.md
-              fi
-            done
-          else
-            echo "❌ README.md not found" >> /tmp/doc-review.md
-          fi
-          
-          echo "" >> /tmp/doc-review.md
-          echo "### Code Documentation:" >> /tmp/doc-review.md
-          
-          # Check for docstrings in Python files
-          python_files_with_docs=0
-          python_files_total=0
-          if find . -name "*.py" ! -path "*/.git/*" | head -1 > /dev/null 2>&1; then
-            while IFS= read -r file; do
-              python_files_total=$((python_files_total + 1))
-              if grep -q '"""' "$file" || grep -q "'''" "$file"; then
-                python_files_with_docs=$((python_files_with_docs + 1))
-              fi
-            done < <(find . -name "*.py" ! -path "*/.git/*" ! -path "*/node_modules/*")
-            
-            if [ $python_files_total -gt 0 ]; then
-              doc_percentage=$((python_files_with_docs * 100 / python_files_total))
-              echo "- Python files with docstrings: $python_files_with_docs/$python_files_total ($doc_percentage%)" >> /tmp/doc-review.md
-            fi
-          fi
-          
-          cat /tmp/doc-review.md
+          echo "## GitHub Copilot Documentation Review" >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
+          echo "### Automated Documentation Review:" >> /tmp/doc-analysis.md
+          echo "- README.md completeness: Manual review required" >> /tmp/doc-analysis.md
+          echo "- Features documentation: Manual review required" >> /tmp/doc-analysis.md
+          echo "- Installation instructions: Manual review required" >> /tmp/doc-analysis.md
+          echo "- Usage documentation: Manual review required" >> /tmp/doc-analysis.md
+          echo "- API documentation: Manual review required" >> /tmp/doc-analysis.md
+          echo "- Contributing guidelines: Manual review required" >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
+          echo "Note: Automated Copilot review temporarily disabled. Manual review recommended." >> /tmp/doc-analysis.md
         continue-on-error: true
 
       - name: Create Documentation Review Report

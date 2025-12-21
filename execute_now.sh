@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /workspace
-python3 immediate_conversion.py
+python3 direct_execution.py
