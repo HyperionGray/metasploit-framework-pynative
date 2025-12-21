@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
 import subprocess
 import sys
+import os
 
-result = subprocess.run([sys.executable, '/workspace/final_ruby_killer.py'], 
-                       capture_output=True, text=True)
-print(result.stdout)
-if result.stderr:
-    print("STDERR:", result.stderr)
-print("Return code:", result.returncode)
+os.chdir('/workspace')
+
+print("🚀 IMMEDIATE EXECUTION: ROUNDS 3 & 4")
+print("=" * 50)
+
+result = subprocess.run([sys.executable, 'immediate_execution.py'])
+print(f"\nExecution completed with return code: {result.returncode}")
