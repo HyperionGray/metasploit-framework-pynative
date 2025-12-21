@@ -1,88 +1,34 @@
 #!/usr/bin/env python3
-"""
-FINAL RUBY ELIMINATION SCRIPT
-Ruby v Python: Round 7: FIGHT!
 
-This script executes the final conversion of Metasploit Framework
-from Ruby to Python, fulfilling the dying wish of an old man.
-"""
-
-import subprocess
-import sys
 import os
+import sys
 from pathlib import Path
 
 def main():
-    print("🥊" * 20)
-    print("RUBY v PYTHON: ROUND 7: FIGHT!")
-    print("🥊" * 20)
-    print()
-    print("The dying wish of an old man...")
-    print("Metasploit is to be a republic again.")
-    print("And it will be written in Python.")
-    print()
-    print("Executing final conversion...")
-    print()
+    print("🥊 RUBY v PYTHON: ROUND 1: FIGHT! 🥊")
+    print("=" * 60)
+    print("Alright gang only 7.1k ruby files to go!! let's rock this potato!!!!!")
+    print("Remember only stuff after 2020:")
+    print("- Is it ruby? Make it python.")
+    print("only rule. GO.")
+    print("=" * 60)
     
-    # Change to workspace directory
-    os.chdir('/workspace')
+    # Setup
+    workspace = Path("/workspace")
+    os.chdir(workspace)
+    sys.path.insert(0, str(workspace))
     
-    # Execute the batch conversion
+    # Import and execute
     try:
-        print("🔥 EXECUTING BATCH CONVERSION 🔥")
-        result = subprocess.run([
-            'python3', 'batch_ruby_to_python_converter.py'
-        ], capture_output=True, text=True)
+        from batch_ruby_to_python_converter import BatchRubyToPythonConverter
         
-        print("CONVERSION OUTPUT:")
-        print(result.stdout)
+        converter = BatchRubyToPythonConverter(workspace_dir=str(workspace), dry_run=False)
+        converter.run_batch_conversion()
         
-        if result.stderr:
-            print("CONVERSION ERRORS:")
-            print(result.stderr)
-        
-        print()
-        print("🎯 CHECKING RESULTS...")
-        
-        # Count Ruby files
-        ruby_result = subprocess.run([
-            'find', '.', '-name', '*.rb', '-type', 'f'
-        ], capture_output=True, text=True)
-        
-        ruby_files = ruby_result.stdout.strip().split('\n') if ruby_result.stdout.strip() else []
-        ruby_count = len([f for f in ruby_files if f])
-        
-        # Count Python files  
-        python_result = subprocess.run([
-            'find', '.', '-name', '*.py', '-type', 'f'
-        ], capture_output=True, text=True)
-        
-        python_files = python_result.stdout.strip().split('\n') if python_result.stdout.strip() else []
-        python_count = len([f for f in python_files if f])
-        
-        print(f"📊 FINAL STATISTICS:")
-        print(f"   Ruby files remaining: {ruby_count}")
-        print(f"   Python files total: {python_count}")
-        print()
-        
-        if python_count > ruby_count:
-            print("🎉 VICTORY! 🎉")
-            print("Python has conquered Ruby!")
-            print("The republic has been restored!")
-            print("🐍 PYTHON SUPREMACY ACHIEVED! 🐍")
-        else:
-            print("⚔️  The battle continues...")
-            print("More conversion needed...")
-        
-        print()
-        print("The old man's dying wish:")
-        print("'Metasploit is to be a republic again.'")
-        print("'And it will be written in Python.'")
-        print()
-        print("✅ MISSION ACCOMPLISHED ✅")
+        print("\n🎉 PYTHON WINS ROUND 1! 🐍")
         
     except Exception as e:
-        print(f"❌ Conversion failed: {e}")
+        print(f"❌ Error: {e}")
         return 1
     
     return 0
