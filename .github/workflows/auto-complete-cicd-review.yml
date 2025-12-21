@@ -164,7 +164,7 @@ jobs:
           echo "### Essential Documentation Files:" >> /tmp/review-results/documentation.md
           for doc in README.md CONTRIBUTING.md LICENSE.md CHANGELOG.md CODE_OF_CONDUCT.md SECURITY.md; do
             if [ -f "$doc" ]; then
-              word_count=$(wc -w < "$doc" 2>/dev/null || echo 0)
+              word_count=$(wc -w < "$doc" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
               echo "✅ $doc ($word_count words)" >> /tmp/review-results/documentation.md
             else
               echo "❌ $doc (missing)" >> /tmp/review-results/documentation.md

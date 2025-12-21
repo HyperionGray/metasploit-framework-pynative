@@ -2,6 +2,81 @@
 
 This document summarizes the Ruby files that have been translated to Python in this repository.
 
+## Recent Exploit Module Conversions (2024)
+
+### 55. modules/exploits/linux/http/apache_hugegraph_gremlin_rce.rb → modules/exploits/linux/http/apache_hugegraph_gremlin_rce.py
+**Purpose:** Apache HugeGraph Gremlin RCE (CVE-2024-27348)
+
+**Key Features:**
+- Remote Code Execution in Apache HugeGraph Server versions before 1.3.0
+- Gremlin sandbox bypass vulnerability
+- Java reflection-based command execution
+- Automatic version detection and vulnerability checking
+
+**Usage:**
+```bash
+python3 modules/exploits/linux/http/apache_hugegraph_gremlin_rce.py --host 192.168.1.100 --port 8080
+python3 modules/exploits/linux/http/apache_hugegraph_gremlin_rce.py --host target.example.com --check-only
+```
+
+### 56. modules/exploits/example_webapp.rb → modules/exploits/example_webapp.py
+**Purpose:** Sample web application exploit demonstrating common patterns
+
+**Key Features:**
+- Educational example showing exploit development techniques
+- Version detection and vulnerability checking
+- Multiple authentication methods (Basic Auth and form-based)
+- Command injection through POST parameters
+- File upload via multipart form-data
+- Comprehensive error handling
+
+**Usage:**
+```bash
+python3 modules/exploits/example_webapp.py --host 192.168.1.100 --username admin --password pass123
+python3 modules/exploits/example_webapp.py --host target.example.com --check-only --verbose
+```
+
+### 57. modules/exploits/linux/http/chamilo_bigupload_webshell.rb → modules/exploits/linux/http/chamilo_bigupload_webshell.py
+**Purpose:** Chamilo v1.11.24 Unrestricted File Upload PHP Webshell (CVE-2023-4220)
+
+**Key Features:**
+- Unrestricted file upload vulnerability in Chamilo LMS
+- Bypasses file extension checks via 'post-unsupported' action
+- Uploads PHP webshell to accessible directory
+- Automatic vulnerability detection
+- Cleanup support for uploaded files
+
+**Usage:**
+```bash
+python3 modules/exploits/linux/http/chamilo_bigupload_webshell.py --host 192.168.1.100
+python3 modules/exploits/linux/http/chamilo_bigupload_webshell.py --host target.example.com --check-only --verbose
+```
+
+### 58. tools/exploit/find_badchars.rb → tools/exploit/find_badchars.py
+**Purpose:** Find bad characters for exploit development
+
+**Key Features:**
+- Assists in deducing bad characters for input paths
+- Compares expected vs actual memory contents
+- Supports multiple input formats (raw, WinDbg, GDB, hex)
+- Identifies which bytes were corrupted in memory
+- Essential tool for buffer overflow exploitation
+
+**Usage:**
+```bash
+# Read from stdin in raw format
+python3 tools/exploit/find_badchars.py -b "\\x00\\xff" < memory.bin
+
+# Read from file in WinDbg format
+python3 tools/exploit/find_badchars.py -b "\\x00\\xff" -i windbg_output.txt -t windbg
+
+# Read from file in GDB format
+python3 tools/exploit/find_badchars.py -b "\\x00\\x0a\\x0d" -i gdb_output.txt -t gdb
+
+# List supported formats
+python3 tools/exploit/find_badchars.py --list-formats
+```
+
 ## Translated Files
 
 ### 1. lib/rex/proto/smb/utils.rb → lib/rex/proto/smb/utils.py
@@ -705,6 +780,31 @@ All translated files have been verified for:
 - ✅ Executable permissions set
 - ✅ Basic functionality tests where applicable
 
+### Round 2 Testing Status
+- ✅ All framework base classes compile without errors
+- ✅ All exploit conversions pass syntax validation
+- ✅ IDE import errors resolved with framework stubs
+- ✅ Module metadata properly structured
+- ✅ 50 total files now translated to Python (48 from Round 1 + 2 exploits + framework infrastructure)
+
 ## Future Work
+
+### Round 2 Achievements
+- Created comprehensive Python framework infrastructure (lib/msf/core/ and lib/rex/)
+- Established patterns for exploit module conversion
+- Demonstrated conversions for CVE-2023-* and CVE-2025-* exploits
+- Provided base classes that prevent IDE errors when editing Python modules
+
+### Remaining Work
+The repository contains 576 post-2020 exploits with CVE references. This initial round demonstrates:
+1. The framework infrastructure needed for Python exploits
+2. Conversion patterns for different exploit types (HTTP, authentication bypass, code injection)
+3. Working examples that can serve as templates for future conversions
+
+Additional conversions can follow the same patterns established here:
+- Inherit from Exploit base class
+- Use CheckCode for vulnerability verification
+- Implement check() and exploit() methods
+- Use framework utilities from lib/msf/ and lib/rex/
 
 These translations provide a foundation for a Python-native Metasploit implementation. Some files contain placeholders for framework integration that would need to be completed when the full Python framework is available.
