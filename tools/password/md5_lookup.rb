@@ -61,8 +61,7 @@ module Md5LookupUtility
     end
   end
 
-  class Md5Lookup
-    include Rex::Proto::Http::Client
+  class Md5Lookup < Rex::Proto::Http::Client
 
     DATABASES = {
       'all' => nil,
@@ -85,7 +84,7 @@ module Md5LookupUtility
     ]
 
     def initialize
-      super
+      super()
     end
 
     def lookup(hash_value, database)
