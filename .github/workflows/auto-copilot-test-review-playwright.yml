@@ -160,43 +160,22 @@ jobs:
           
           cat /tmp/test-analysis.md
 
-      # GitHub Copilot Test Review - Temporarily Disabled
-      # The github/copilot-cli-action action is not available
-      # This step was intended to provide AI-powered test suite review
-      # TODO: Replace with alternative test analysis tools when available
-      - name: Test Suite Review Summary
+      - name: GitHub Copilot Test Review
         run: |
-          echo "## AI-Powered Test Suite Review"
-          echo "This step would have provided GitHub Copilot-powered test suite analysis."
-          echo ""
-          echo "### Intended Review Areas:"
-          echo "1. **Playwright Test Coverage**"
-          echo "   - Web-based functionality test verification (headed and headless)"
-          echo "   - Missing test coverage identification"
-          echo "   - Critical functionality test gaps"
-          echo ""
-          echo "2. **Test Quality Assessment**"
-          echo "   - Test maintainability evaluation"
-          echo "   - Test organization improvements"
-          echo "   - Best practices compliance verification"
-          echo ""
-          echo "3. **Test Best Practices**"
-          echo "   - Test isolation verification"
-          echo "   - Test clarity and readability"
-          echo "   - Proper assertion usage"
-          echo "   - Flaky test identification"
-          echo ""
-          echo "4. **CI/CD Integration**"
-          echo "   - Pipeline test execution verification"
-          echo "   - Test timing and performance issues"
-          echo "   - Test environment consistency"
-          echo ""
-          echo "5. **Migration Recommendations**"
-          echo "   - Non-Playwright web test identification"
-          echo "   - Migration path suggestions"
-          echo "   - Test framework optimization"
-          echo ""
-          echo "Manual test review or alternative test analysis tools (like pytest --cov, jest --coverage, test reporters, etc.) are recommended until AI-powered analysis is available."
+          echo "## GitHub Copilot Test Review" >> /tmp/test-analysis.md
+          echo "" >> /tmp/test-analysis.md
+          echo "Note: GitHub Copilot test review functionality is not currently available." >> /tmp/test-analysis.md
+          echo "The github/copilot-cli-action action does not exist." >> /tmp/test-analysis.md
+          echo "" >> /tmp/test-analysis.md
+          echo "### Planned Test Review Areas:" >> /tmp/test-analysis.md
+          echo "- Verify all web-based functionality has Playwright tests" >> /tmp/test-analysis.md
+          echo "- Identify missing test coverage for critical functionality" >> /tmp/test-analysis.md
+          echo "- Check test quality and maintainability" >> /tmp/test-analysis.md
+          echo "- Suggest improvements for test organization" >> /tmp/test-analysis.md
+          echo "- Verify tests follow best practices" >> /tmp/test-analysis.md
+          echo "- Check for flaky tests or tests with timing issues" >> /tmp/test-analysis.md
+          echo "- Ensure tests are running in CI/CD pipeline" >> /tmp/test-analysis.md
+          echo "" >> /tmp/test-analysis.md
         continue-on-error: true
 
       - name: Create or Update Test Review Issue

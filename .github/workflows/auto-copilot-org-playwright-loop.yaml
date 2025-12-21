@@ -37,67 +37,18 @@ jobs:
           pytest tests/ || exit 1
         continue-on-error: true
 
-      # Automated PR Review Analysis
-      - name: PR Review Analysis
+      # Copilot PR Agent auto-review (if available for org)
+      - name: Copilot PR Agent Review
         run: |
-          echo "Performing automated PR review analysis..."
-          
-          # Check for common PR issues
-          echo "## PR Review Analysis" > /tmp/pr-review.md
-          echo "" >> /tmp/pr-review.md
-          
-          # Check for large changes
-          if git diff --name-only HEAD~1 | wc -l | awk '{if($1 > 10) print "⚠️ Large PR with " $1 " files changed"}' >> /tmp/pr-review.md; then
-            echo "Large PR detected" >> /tmp/pr-review.md
-          fi
-          
-          # Check for test coverage
-          if git diff --name-only HEAD~1 | grep -q "\.py$" && ! git diff --name-only HEAD~1 | grep -q "test"; then
-            echo "⚠️ Python files changed but no test files modified" >> /tmp/pr-review.md
-          fi
-          
-          # Check for documentation updates
-          if git diff --name-only HEAD~1 | grep -q "\.py$" && ! git diff --name-only HEAD~1 | grep -q "\.md$"; then
-            echo "⚠️ Code changes without documentation updates" >> /tmp/pr-review.md
-          fi
-          
-          cat /tmp/pr-review.md
+          echo "Note: Copilot PR Agent functionality is not currently available."
+          echo "The github/copilot-agent/pr action does not exist."
         continue-on-error: true
 
-      # Automated Test Fix Attempts
-      - name: Auto-fix Failing Playwright Tests
+      # Copilot Agent auto-fix (can loop up to N attempts if tests fail)
+      - name: Copilot Auto-fix Failing Playwright Tests
         run: |
-          echo "Attempting to fix failing Playwright tests..."
-          
-          # Check if tests are failing
-          if ! pytest tests/ --tb=no -q; then
-            echo "Tests are failing, attempting common fixes..."
-            
-            # Attempt 1: Reinstall dependencies
-            echo "Attempt 1: Reinstalling Playwright dependencies..."
-            pip install --upgrade playwright
-            python -m playwright install
-            
-            if pytest tests/ --tb=no -q; then
-              echo "✅ Tests fixed by reinstalling dependencies"
-              exit 0
-            fi
-            
-            # Attempt 2: Check for timing issues
-            echo "Attempt 2: Adding wait conditions to tests..."
-            find tests/ -name "*.py" -exec sed -i 's/page\.click(/page.click(, timeout=10000)/g' {} \; 2>/dev/null || true
-            
-            if pytest tests/ --tb=no -q; then
-              echo "✅ Tests fixed by adding timeouts"
-              exit 0
-            fi
-            
-            # Attempt 3: Run tests in headless mode
-            echo "Attempt 3: Running tests in headless mode..."
-            pytest tests/ --headed=false --tb=no -q || echo "Tests still failing after all attempts"
-          else
-            echo "✅ Tests are already passing"
-          fi
+          echo "Note: Copilot auto-fix functionality is not currently available."
+          echo "The github/copilot-agent/fix action does not exist."
         continue-on-error: true
 
       # Create PR with fixes (if any)

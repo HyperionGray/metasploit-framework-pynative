@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 
-# Execute the conversion directly
+# Execute the conversion immediately
+import subprocess
 import sys
 import os
-sys.path.insert(0, '/workspace')
 
-# Change to workspace
 os.chdir('/workspace')
+print("Executing Ruby to Python conversion...")
 
-# Import and run the conversion
-from direct_ruby_conversion import convert_ruby_files
+# Run the converter
+result = subprocess.run([sys.executable, '/workspace/convert_now.py'])
+print(f"Conversion completed with exit code: {result.returncode}")
 
-if __name__ == '__main__':
-    convert_ruby_files()
+if result.returncode == 0:
+    print("🎉 PYTHON WINS! The republic is restored! 🐍")
+else:
+    print("⚔️ Battle continues...")

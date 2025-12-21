@@ -66,42 +66,21 @@ jobs:
           
           cat /tmp/analysis.md
 
-      # GitHub Copilot Code Review - Temporarily Disabled
-      # The github/copilot-cli-action action is not available
-      # This step was intended to provide AI-powered code cleanliness review
-      # TODO: Replace with alternative static analysis tools when available
-      - name: Code Cleanliness Review Summary
+      - name: GitHub Copilot Code Review
         run: |
-          echo "## AI-Powered Code Cleanliness Review"
-          echo "This step would have provided GitHub Copilot-powered code cleanliness analysis."
-          echo ""
-          echo "### Intended Review Areas:"
-          echo "1. **Large File Analysis**"
-          echo "   - Files over 500 lines identification"
-          echo "   - Module splitting suggestions"
-          echo "   - Code organization improvements"
-          echo ""
-          echo "2. **Code Duplication Detection**"
-          echo "   - Duplicate code identification"
-          echo "   - Refactoring opportunities"
-          echo "   - DRY principle compliance"
-          echo ""
-          echo "3. **Code Style and Formatting**"
-          echo "   - Consistent style verification"
-          echo "   - Formatting improvements"
-          echo "   - Style guide compliance"
-          echo ""
-          echo "4. **Function Complexity Analysis**"
-          echo "   - Complex function identification"
-          echo "   - Simplification suggestions"
-          echo "   - Cyclomatic complexity reduction"
-          echo ""
-          echo "5. **Code Organization**"
-          echo "   - Structure improvements"
-          echo "   - Separation of concerns verification"
-          echo "   - Architecture recommendations"
-          echo ""
-          echo "Manual code review or alternative static analysis tools (like pylint, eslint, sonarqube, etc.) are recommended until AI-powered analysis is available."
+          echo "## GitHub Copilot Code Review" >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
+          echo "Note: GitHub Copilot code review functionality is not currently available." >> /tmp/analysis.md
+          echo "The github/copilot-cli-action action does not exist." >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
+          echo "### Planned Code Review Areas:" >> /tmp/analysis.md
+          echo "- Identify files that are too large (>500 lines)" >> /tmp/analysis.md
+          echo "- Look for code duplication and suggest refactoring opportunities" >> /tmp/analysis.md
+          echo "- Check for consistent code style and formatting" >> /tmp/analysis.md
+          echo "- Identify complex functions that could be simplified" >> /tmp/analysis.md
+          echo "- Suggest improvements for code organization and structure" >> /tmp/analysis.md
+          echo "- Check for proper separation of concerns" >> /tmp/analysis.md
+          echo "" >> /tmp/analysis.md
         continue-on-error: true
 
       - name: Create Issue for Code Cleanliness Review

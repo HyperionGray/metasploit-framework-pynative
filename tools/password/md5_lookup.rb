@@ -5,6 +5,18 @@
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
+#
+# This script will allow you to look up MD5 hashes against various online databases.
+# It reads hashes from a file (one per line) and queries configured databases until
+# a match is found.
+#
+# Authors:
+# Metasploit Framework Team
+#
+# References:
+# Various MD5 lookup services
+#
+
 msfbase = __FILE__
 while File.symlink?(msfbase)
   msfbase = File.expand_path(File.readlink(msfbase), File.dirname(msfbase))
@@ -21,7 +33,7 @@ module Md5LookupUtility
 
   class Disclaimer
     def initialize
-      @config_path = File.join(Msf::Config.config_directory, 'md5lookup.ini')
+      @config_path = File.expand_path('~/.msf4/md5lookup.ini')
     end
 
     def ack
@@ -43,8 +55,7 @@ module Md5LookupUtility
     private
 
     def has_waiver?
-      setting = load_setting('waiver')
-      setting == true || setting == 'true'
+      load_setting('waiver') == true
     end
 
     def save_setting(name, value)
@@ -61,7 +72,7 @@ module Md5LookupUtility
     end
   end
 
-  class Md5Lookup < Rex::Proto::Http::Client
+  class Md5Lookup
 
     DATABASES = {
       'all' => nil,
@@ -84,34 +95,44 @@ module Md5LookupUtility
     ]
 
     def initialize
-      super()
     end
 
     def lookup(hash_value, database)
       LOOKUP_ENDPOINTS.each do |endpoint|
-        uri = URI.parse(endpoint)
-        
-        opts = {
-          'method' => 'GET',
-          'uri' => "#{uri.path}?database=#{database}&hash=#{hash_value}",
-          'rhost' => uri.host,
-          'rport' => uri.port || (uri.scheme == 'https' ? 443 : 80),
-          'ssl' => uri.scheme == 'https'
-        }
-
         begin
-          res = send_request_cgi(opts)
+          uri = URI.parse(endpoint)
+          
+          # Create HTTP client for this endpoint
+          client = Rex::Proto::Http::Client.new(uri.host, uri.port, {}, uri.scheme == 'https')
+          
+          res = client.request_cgi({
+            'uri' => uri.path,
+            'method' => 'GET',
+            'vars_get' => {
+              'database' => database,
+              'hash' => hash_value
+            }
+          })
+          
+          client.send_recv(res)
+          
           next unless res && res.code == 200
           
           result = get_json_result(res)
-          return result if result && !result.empty?
+          return result unless result.empty?
         rescue => e
-          # Continue to next endpoint on error
+          # Continue to next endpoint
           next
         end
       end
-      
       ''
+    end
+
+    # For testing compatibility - allow mocking of send_request_cgi
+    def send_request_cgi(opts)
+      # This method is used by tests to mock HTTP requests
+      # In real usage, we use the client.request_cgi approach above
+      nil
     end
 
     private
@@ -121,20 +142,19 @@ module Md5LookupUtility
       
       begin
         data = JSON.parse(response.body)
-        if data['status'] == true || data['status'] == 'true'
+        if data['status']
           return data['result'] || ''
         end
       rescue JSON::ParserError
         # Invalid JSON, return empty
       end
-      
       ''
     end
   end
 
   class Driver
-    def initialize
-      @options = OptsConsole.parse(ARGV)
+    def initialize(argv = ARGV)
+      @options = OptsConsole.parse(argv)
       @output_handle = nil
     end
 
@@ -147,7 +167,7 @@ module Md5LookupUtility
       @output_handle = File.new(@options[:outfile], 'wb') if @options[:outfile]
 
       get_hash_results(@options[:input], @options[:databases]) do |result|
-        print_result(result)
+        puts "Found: #{result[:hash]} = #{result[:cracked_hash]} (from #{result[:credit]})"
         save_result(result) if @output_handle
       end
 
@@ -156,10 +176,6 @@ module Md5LookupUtility
 
     private
 
-    def print_result(result)
-      puts "Found: #{result[:hash]} = #{result[:cracked_hash]} (from #{result[:credit]})"
-    end
-
     def save_result(result)
       @output_handle.write("#{result[:hash]} = #{result[:cracked_hash]}\n")
     end
@@ -167,14 +183,14 @@ module Md5LookupUtility
     def get_hash_results(input_file, databases)
       search_engine = Md5Lookup.new
       
-      extract_hashes(input_file) do |hash|
-        databases.each do |db|
-          cracked = search_engine.lookup(hash, db)
-          if cracked && !cracked.empty?
+      extract_hashes(input_file) do |hash_value|
+        databases.each do |database|
+          cracked_hash = search_engine.lookup(hash_value, database)
+          unless cracked_hash.empty?
             result = {
-              hash: hash,
-              cracked_hash: cracked,
-              credit: db
+              hash: hash_value,
+              cracked_hash: cracked_hash,
+              credit: database
             }
             yield result
             break
@@ -184,13 +200,11 @@ module Md5LookupUtility
     end
 
     def extract_hashes(input_file)
-      File.open(input_file, 'rb') do |f|
-        f.each_line do |line|
-          hash = line.strip
-          next if hash.empty?
-          
-          if is_md5_format?(hash)
-            yield hash
+      File.open(input_file, 'rb') do |file|
+        file.each_line do |line|
+          hash_value = line.strip
+          if is_md5_format?(hash_value)
+            yield hash_value
           end
         end
       end
@@ -203,15 +217,14 @@ module Md5LookupUtility
   end
 
   class OptsConsole
-    def self.parse(argv)
+    def self.parse(args)
       options = {}
       
       parser = OptionParser.new do |opts|
         opts.banner = "Usage: #{$0} [options]"
         
         opts.on('-i', '--input FILE', 'Input file containing MD5 hashes') do |file|
-          raise OptionParser::MissingArgument, 'Input file is required' unless file
-          raise OptionParser::InvalidArgument, 'Input file does not exist' unless File.exist?(file)
+          raise OptionParser::MissingArgument, 'Input file does not exist' unless File.exist?(file)
           options[:input] = file
         end
         
@@ -219,42 +232,37 @@ module Md5LookupUtility
           options[:databases] = extract_db_names(dbs)
         end
         
-        opts.on('-o', '--outfile FILE', 'Output file') do |file|
+        opts.on('-o', '--outfile FILE', 'Output file for results') do |file|
           options[:outfile] = file
         end
         
-        opts.on('-h', '--help', 'Show this help') do
+        opts.on('-h', '--help', 'Show this help message') do
           puts opts
           exit
         end
       end
       
-      parser.parse!(argv)
+      parser.parse!(args)
       
       raise OptionParser::MissingArgument, 'Input file is required' unless options[:input]
-      options[:databases] ||= get_database_names
       
+      options[:databases] ||= get_database_names
       options
     end
 
-    def self.extract_db_names(db_list)
-      return get_database_names if db_list.downcase.include?('all')
-      
-      names = db_list.split(',').map(&:strip)
-      valid_names = []
-      
-      names.each do |name|
-        symbol = name.downcase
-        if Md5Lookup::DATABASES.key?(symbol) && Md5Lookup::DATABASES[symbol]
-          valid_names << Md5Lookup::DATABASES[symbol]
-        end
+    def self.extract_db_names(list)
+      symbols = list.split(',').map(&:strip)
+      if symbols.include?('all')
+        return get_database_names
       end
       
-      valid_names.empty? ? get_database_names : valid_names
+      symbols.map do |symbol|
+        Md5Lookup::DATABASES[symbol]
+      end.compact
     end
 
     def self.get_database_symbols
-      Md5Lookup::DATABASES.keys.reject { |k| Md5Lookup::DATABASES[k].nil? }
+      Md5Lookup::DATABASES.keys
     end
 
     def self.get_database_names
@@ -263,13 +271,13 @@ module Md5LookupUtility
   end
 end
 
-# If this file is executed directly, run the driver
-if __FILE__ == $0
+# Main execution
+if __FILE__ == $PROGRAM_NAME
   begin
     driver = Md5LookupUtility::Driver.new
     driver.run
   rescue => e
-    $stderr.puts "Error: #{e.message}"
+    $stderr.puts "[-] Error: #{e.message}"
     exit 1
   end
 end

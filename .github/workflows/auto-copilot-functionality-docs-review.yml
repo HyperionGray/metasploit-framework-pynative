@@ -221,24 +221,23 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      # GitHub Copilot Documentation Review - Temporarily Disabled
-      # The github/copilot-cli-actions action is not available
-      # This step was intended to provide AI-powered documentation review
-      # TODO: Replace with alternative documentation analysis when available
-      - name: Documentation Review Summary
+      - name: GitHub Copilot Documentation Review
         run: |
-          echo "## AI-Powered Documentation Review"
-          echo "This step would have provided GitHub Copilot-powered documentation analysis."
-          echo "The following areas would have been reviewed:"
-          echo "1. README.md completeness and quality"
-          echo "2. Feature and functionality documentation"
-          echo "3. Installation and usage instructions"
-          echo "4. Missing or outdated documentation identification"
-          echo "5. Code comments and inline documentation"
-          echo "6. API documentation coverage"
-          echo "7. Contributing guidelines presence"
-          echo ""
-          echo "Manual review is recommended for these areas until AI-powered analysis is available."
+          echo "## GitHub Copilot Documentation Review" >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
+          echo "Note: GitHub Copilot documentation review functionality is not currently available." >> /tmp/doc-analysis.md
+          echo "The github/copilot-cli-actions action does not exist." >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
+          echo "### Planned Documentation Review Areas:" >> /tmp/doc-analysis.md
+          echo "- Check README.md completeness and quality" >> /tmp/doc-analysis.md
+          echo "- Verify all features and functionality are documented" >> /tmp/doc-analysis.md
+          echo "- Check for installation and usage instructions" >> /tmp/doc-analysis.md
+          echo "- Identify missing or outdated documentation" >> /tmp/doc-analysis.md
+          echo "- Suggest improvements for clarity and completeness" >> /tmp/doc-analysis.md
+          echo "- Verify code comments and inline documentation" >> /tmp/doc-analysis.md
+          echo "- Check for API documentation if applicable" >> /tmp/doc-analysis.md
+          echo "- Ensure contributing guidelines are present" >> /tmp/doc-analysis.md
+          echo "" >> /tmp/doc-analysis.md
         continue-on-error: true
 
       - name: Create Documentation Review Report
