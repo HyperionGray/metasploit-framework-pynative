@@ -53,6 +53,9 @@ capstone>=4.0.2
 keystone-engine>=0.9.2
 unicorn>=2.0.0
 
+# Modern Shell Handlers and C2
+pwncat-cs>=0.5.0
+
 # Binary Analysis (from existing requirements-binary-analysis.txt)
 r2pipe>=1.6.0
 
