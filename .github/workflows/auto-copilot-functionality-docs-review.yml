@@ -221,23 +221,24 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      - name: GitHub Copilot Documentation Review
-        uses: github/copilot-cli-actions@v1
-        with:
-          query: |
-            Review the documentation for this repository:
-            1. Check README.md completeness and quality
-            2. Verify all features and functionality are documented
-            3. Check for installation and usage instructions
-            4. Identify missing or outdated documentation
-            5. Suggest improvements for clarity and completeness
-            6. Verify code comments and inline documentation
-            7. Check for API documentation if applicable
-            8. Ensure contributing guidelines are present
-            
-            Provide specific recommendations with file names and sections.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: GitHub Copilot Documentation Review (Placeholder)
+        run: |
+          echo "## GitHub Copilot Documentation Review"
+          echo "This step would review the documentation for this repository:"
+          echo ""
+          echo "1. Check README.md completeness and quality"
+          echo "2. Verify all features and functionality are documented"
+          echo "3. Check for installation and usage instructions"
+          echo "4. Identify missing or outdated documentation"
+          echo "5. Suggest improvements for clarity and completeness"
+          echo "6. Verify code comments and inline documentation"
+          echo "7. Check for API documentation if applicable"
+          echo "8. Ensure contributing guidelines are present"
+          echo ""
+          echo "Provide specific recommendations with file names and sections."
+          echo ""
+          echo "Note: This is a placeholder step. The original github/copilot-cli-actions action does not exist."
+          echo "To implement actual documentation review, consider using documentation linters or manual review processes."
         continue-on-error: true
 
       - name: Create Documentation Review Report
