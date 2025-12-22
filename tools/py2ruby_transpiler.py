@@ -636,7 +636,7 @@ class PythonToRubyTranspiler(ast.NodeVisitor):
             return f"{left} ** {right}"
         elif isinstance(node.op, ast.FloorDiv):
             return f"({left} / {right}).floor"
-        elif isinstance(node.op, ast.Mod) and '%' in left:
+        elif isinstance(node.op, ast.Mod) and isinstance(node.left, ast.Constant) and isinstance(node.left.value, str):
             # String formatting
             return f"{left} % {right}"
         
