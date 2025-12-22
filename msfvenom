@@ -8,6 +8,16 @@ class UsageError < MsfVenomError; end
 require 'optparse'
 require 'timeout'
 
+# Show informational message about Python alternatives (unless quiet mode)
+unless ENV['MSF_QUIET'] || ARGV.include?('-q') || ARGV.include?('--quiet') || ARGV.include?('-h') || ARGV.include?('--help')
+  puts "\n" + "="*70
+  puts "  MsfVenom - Payload Generator"
+  puts "="*70
+  puts "  TIP: Python-native payload generation coming soon!"
+  puts "    See transpilers/ for Ruby↔Python conversion tools"
+  puts "="*70 + "\n"
+end
+
 # Silences warnings as they only serve to confuse end users
 if defined?(Warning) && Warning.respond_to?(:[]=)
   Warning[:deprecated] = false
