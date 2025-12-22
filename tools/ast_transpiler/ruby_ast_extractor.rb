@@ -100,6 +100,38 @@ module RubyASTExtractor
             params: process_node(node[2]),
             body: process_node(node[3])
           }
+        when :@ivar
+          {
+            type: 'InstanceVariable',
+            name: node[1],
+            position: {line: node[2][0], column: node[2][1]}
+          }
+        when :@cvar
+          {
+            type: 'ClassVariable',
+            name: node[1],
+            position: {line: node[2][0], column: node[2][1]}
+          }
+        when :@gvar
+          {
+            type: 'GlobalVariable',
+            name: node[1],
+            position: {line: node[2][0], column: node[2][1]}
+          }
+        when :var_field
+          {
+            type: 'VariableField',
+            variable: process_node(node[1])
+          }
+        when :super
+          {
+            type: 'SuperCall',
+            args: process_node(node[1])
+          }
+        when :zsuper
+          {
+            type: 'SuperCallWithoutArgs'
+          }
         when :@ident
           {
             type: 'Identifier',
@@ -246,6 +278,11 @@ module RubyASTExtractor
             type: 'FunctionCall',
             name: process_node(node[1])
           }
+        when :vcall
+          {
+            type: 'VariableCall',
+            name: process_node(node[1])
+          }
         when :command
           {
             type: 'Command',
@@ -301,6 +338,11 @@ module RubyASTExtractor
             condition: process_node(node[1]),
             then_clause: process_node(node[2]),
             else_clause: process_node(node[3])
+          }
+        when :else
+          {
+            type: 'ElseClause',
+            body: process_node(node[1])
           }
         when :unless
           {

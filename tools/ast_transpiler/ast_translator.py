@@ -412,7 +412,19 @@ class RubyASTTranslator:
         body = self._translate_body(then_clause)
         
         else_clause = node.get('else_clause')
-        orelse = self._translate_body(else_clause) if else_clause else []
+        orelse = []
+        if else_clause:
+            if isinstance(else_clause, dict):
+                else_type = else_clause.get('type')
+                if else_type == 'ElseClause':
+                    orelse = self._translate_elseclause(else_clause)
+                elif else_type == 'ElsifClause':
+                    # Handle elsif as nested if
+                    orelse = [self._translate_node(else_clause)]
+                else:
+                    orelse = self._translate_body(else_clause)
+            else:
+                orelse = self._translate_body(else_clause)
         
         return ast.If(test=test, body=body, orelse=orelse)
     
@@ -458,14 +470,259 @@ class RubyASTTranslator:
     
     def _translate_assignment(self, node: Dict) -> ast.Assign:
         """Translate Ruby Assignment to Python Assign"""
-        target = self._translate_node(node.get('target'))
+        target_node = node.get('target')
         value = self._translate_node(node.get('value'))
+        
+        # Handle different target types
+        if isinstance(target_node, dict):
+            target_type = target_node.get('type')
+            
+            if target_type == 'VariableField':
+                # Extract the actual variable
+                var_node = target_node.get('variable', {})
+                target = self._translate_node(var_node)
+            else:
+                target = self._translate_node(target_node)
+        else:
+            target = self._translate_node(target_node)
         
         # Ensure target has Store context
         if isinstance(target, ast.Name):
             target.ctx = ast.Store()
+        elif isinstance(target, ast.Attribute):
+            target.ctx = ast.Store()
+        
+        if target is None:
+            # Fallback to a dummy target
+            target = ast.Name(id='_unknown', ctx=ast.Store())
         
         return ast.Assign(targets=[target], value=value)
+    
+    def _translate_instancevariable(self, node: Dict) -> ast.Attribute:
+        """Translate Ruby instance variable (@name) to Python self.name"""
+        var_name = node.get('name', '@unknown')
+        # Remove the @ prefix
+        if var_name.startswith('@'):
+            var_name = var_name[1:]
+        
+        return ast.Attribute(
+            value=ast.Name(id='self', ctx=ast.Load()),
+            attr=var_name,
+            ctx=ast.Load()
+        )
+    
+    def _translate_classvariable(self, node: Dict) -> ast.Attribute:
+        """Translate Ruby class variable (@@name) to Python cls.name"""
+        var_name = node.get('name', '@@unknown')
+        # Remove the @@ prefix
+        if var_name.startswith('@@'):
+            var_name = var_name[2:]
+        
+        return ast.Attribute(
+            value=ast.Name(id='cls', ctx=ast.Load()),
+            attr=var_name,
+            ctx=ast.Load()
+        )
+    
+    def _translate_globalvariable(self, node: Dict) -> ast.Name:
+        """Translate Ruby global variable ($name) to Python name"""
+        var_name = node.get('name', '$unknown')
+        # Remove the $ prefix and convert to uppercase
+        if var_name.startswith('$'):
+            var_name = var_name[1:].upper()
+        
+        return ast.Name(id=var_name, ctx=ast.Load())
+    
+    def _translate_supercall(self, node: Dict) -> ast.Expr:
+        """Translate Ruby super() to Python super().__init__()"""
+        args_node = node.get('args')
+        args = []
+        
+        if args_node:
+            if isinstance(args_node, dict):
+                args_list = args_node.get('args', []) if args_node.get('type') == 'Arguments' else []
+            elif isinstance(args_node, list):
+                args_list = args_node
+            else:
+                args_list = []
+            
+            for arg in args_list:
+                if arg:
+                    translated_arg = self._translate_node(arg)
+                    if translated_arg:
+                        args.append(translated_arg)
+        
+        # Call super().__init__(args)
+        super_call = ast.Call(
+            func=ast.Name(id='super', ctx=ast.Load()),
+            args=[],
+            keywords=[]
+        )
+        
+        init_call = ast.Call(
+            func=ast.Attribute(
+                value=super_call,
+                attr='__init__',
+                ctx=ast.Load()
+            ),
+            args=args,
+            keywords=[]
+        )
+        
+        return ast.Expr(value=init_call)
+    
+    def _translate_supercallwithoutargs(self, node: Dict) -> ast.Expr:
+        """Translate Ruby super (without parens) to Python super().__init__()"""
+        super_call = ast.Call(
+            func=ast.Name(id='super', ctx=ast.Load()),
+            args=[],
+            keywords=[]
+        )
+        
+        init_call = ast.Call(
+            func=ast.Attribute(
+                value=super_call,
+                attr='__init__',
+                ctx=ast.Load()
+            ),
+            args=[],
+            keywords=[]
+        )
+        
+        return ast.Expr(value=init_call)
+    
+    def _translate_call(self, node: Dict) -> ast.Call:
+        """Translate Ruby method call (receiver.method) to Python Call"""
+        receiver = self._translate_node(node.get('receiver'))
+        method_node = node.get('method', {})
+        
+        if isinstance(method_node, dict):
+            method_name = method_node.get('value', 'unknown')
+        else:
+            method_name = str(method_node)
+        
+        # Handle method names ending with ?
+        if method_name.endswith('?'):
+            method_name = 'is_' + method_name[:-1]
+        
+        return ast.Call(
+            func=ast.Attribute(
+                value=receiver if receiver else ast.Name(id='self', ctx=ast.Load()),
+                attr=method_name,
+                ctx=ast.Load()
+            ),
+            args=[],
+            keywords=[]
+        )
+    
+    def _translate_methodcall(self, node: Dict) -> Union[ast.Expr, ast.Call]:
+        """Translate Ruby MethodCall to Python Call with arguments"""
+        method_node = node.get('method', {})
+        args_node = node.get('args', {})
+        
+        # Get the base call
+        if isinstance(method_node, dict):
+            method_type = method_node.get('type')
+            
+            if method_type == 'Call':
+                # This is a chained method call
+                base_call = self._translate_call(method_node)
+            elif method_type == 'FunctionCall':
+                # This is a function call
+                name_node = method_node.get('name', {})
+                func_name = name_node.get('value', 'unknown') if isinstance(name_node, dict) else str(name_node)
+                
+                # Handle method names ending with ?
+                if func_name.endswith('?'):
+                    func_name = 'is_' + func_name[:-1]
+                
+                base_call = ast.Call(
+                    func=ast.Name(id=func_name, ctx=ast.Load()),
+                    args=[],
+                    keywords=[]
+                )
+            else:
+                # Try to translate as-is
+                translated = self._translate_node(method_node)
+                if isinstance(translated, ast.Call):
+                    base_call = translated
+                else:
+                    base_call = ast.Call(
+                        func=ast.Name(id='unknown', ctx=ast.Load()),
+                        args=[],
+                        keywords=[]
+                    )
+        else:
+            base_call = ast.Call(
+                func=ast.Name(id='unknown', ctx=ast.Load()),
+                args=[],
+                keywords=[]
+            )
+        
+        # Add arguments from args_node
+        if isinstance(args_node, list):
+            for arg in args_node:
+                if arg:
+                    translated_arg = self._translate_node(arg)
+                    if translated_arg:
+                        base_call.args.append(translated_arg)
+        elif args_node and isinstance(args_node, dict):
+            args_type = args_node.get('type')
+            if args_type == 'Arguments':
+                args_list = args_node.get('args', [])
+                if isinstance(args_list, list):
+                    for arg in args_list:
+                        if arg:
+                            translated_arg = self._translate_node(arg)
+                            if translated_arg:
+                                base_call.args.append(translated_arg)
+        
+        # Return just the call if it's used as an expression (not a statement)
+        # The caller will wrap it in Expr if needed
+        return base_call
+    
+    def _translate_arguments(self, node: Dict) -> List[ast.expr]:
+        """Translate Ruby Arguments to list of Python expressions"""
+        args_list = node.get('args', [])
+        result = []
+        
+        if isinstance(args_list, list):
+            for arg in args_list:
+                if arg:
+                    translated = self._translate_node(arg)
+                    if translated:
+                        result.append(translated)
+        
+        # If there's only one argument, return it directly for use in return statements
+        if len(result) == 1:
+            return result[0]
+        
+        # Otherwise return as tuple
+        return ast.Tuple(elts=result, ctx=ast.Load()) if result else None
+    
+    def _translate_elseclause(self, node: Dict) -> List[ast.stmt]:
+        """Translate Ruby ElseClause to Python statements"""
+        body = node.get('body')
+        return self._translate_body(body)
+    
+    def _translate_variablecall(self, node: Dict) -> ast.Call:
+        """Translate Ruby variable call (method call that looks like variable) to Python Call"""
+        name_node = node.get('name', {})
+        if isinstance(name_node, dict):
+            var_name = name_node.get('value', 'unknown')
+        else:
+            var_name = str(name_node)
+        
+        # Handle method names ending with ?
+        if var_name.endswith('?'):
+            var_name = 'is_' + var_name[:-1]
+        
+        # This is actually a method call without arguments
+        return ast.Call(
+            func=ast.Name(id=var_name, ctx=ast.Load()),
+            args=[],
+            keywords=[]
+        )
     
     # Helper methods
     
