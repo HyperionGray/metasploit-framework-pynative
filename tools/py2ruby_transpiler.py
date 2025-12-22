@@ -556,7 +556,11 @@ class PythonToRubyTranspiler(ast.NodeVisitor):
     
     def visit_Call(self, node: ast.Call) -> str:
         """Visit function call."""
-        func = self.visit_expr(node.func)
+        # Heuristic for class instantiation: MyClass() -> MyClass.new()
+        if isinstance(node.func, ast.Name) and node.func.id and node.func.id[0].isupper():
+            func = f"{node.func.id}.new"
+        else:
+            func = self.visit_expr(node.func)
         
         # Handle built-in functions
         if isinstance(node.func, ast.Name):
