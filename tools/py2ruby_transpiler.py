@@ -754,8 +754,8 @@ class PythonToRubyTranspiler(ast.NodeVisitor):
         iter_expr = self.visit_expr(gen.iter)
         
         if gen.ifs:
-            cond = self.visit_expr(gen.ifs[0])
-            return f"{iter_expr}.select {{ |{target}| {cond} }}.map {{ |{target}| [{key}, {value}] }}.to_h"
+            conditions = " && ".join(f"({self.visit_expr(if_cond)})" for if_cond in gen.ifs)
+            return f"{iter_expr}.select {{ |{target}| {conditions} }}.map {{ |{target}| [{key}, {value}] }}.to_h"
         else:
             return f"{iter_expr}.map {{ |{target}| [{key}, {value}] }}.to_h"
     
