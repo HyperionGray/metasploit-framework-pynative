@@ -11,6 +11,16 @@
 # $Revision$
 #
 
+# Show informational message about Python alternatives (unless quiet mode)
+unless ENV['MSF_QUIET'] || ARGV.include?('-q')
+  $stderr.puts "\n" + "="*70
+  $stderr.puts "  Msfd - Metasploit Daemon"
+  $stderr.puts "="*70
+  $stderr.puts "  TIP: For a modern Python-native workflow:"
+  $stderr.puts "    source msfrc    # Virtualenv-like environment"
+  $stderr.puts "="*70 + "\n"
+end
+
 msfbase = __FILE__
 while File.symlink?(msfbase)
   msfbase = File.expand_path(File.readlink(msfbase), File.dirname(msfbase))
