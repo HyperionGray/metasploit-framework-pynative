@@ -75,14 +75,22 @@ class MetasploitConfig:
         
         log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         
+        # Build handlers list - always include StreamHandler
+        handlers = [logging.StreamHandler()]
+        
+        # Try to add FileHandler, fall back gracefully if it fails
+        try:
+            file_handler = logging.FileHandler(self.log_dir / 'metasploit.log')
+            handlers.append(file_handler)
+        except (OSError, PermissionError, IOError) as e:
+            # Print warning but continue with StreamHandler only
+            print(f"Warning: Could not create log file: {e}", file=sys.stderr)
+        
         # Configure root logger
         logging.basicConfig(
             level=log_level,
             format=log_format,
-            handlers=[
-                logging.StreamHandler(),
-                logging.FileHandler(self.log_dir / 'metasploit.log')
-            ]
+            handlers=handlers
         )
         
         self.logger = logging.getLogger('metasploit')
