@@ -129,10 +129,10 @@ jobs:
           echo "### README.md Quality Check:" >> /tmp/doc-analysis.md
           
           if [ -f "README.md" ]; then
-            word_count=$(wc -w < README.md | tr -d ' \t\n\r')
+            word_count=$(wc -w < README.md)
             echo "- Word count: $word_count" >> /tmp/doc-analysis.md
             
-            if [ "$word_count" -lt 50 ] 2>/dev/null; then
+            if [ $word_count -lt 50 ]; then
               echo "⚠️ README.md is very short (< 50 words)" >> /tmp/doc-analysis.md
             else
               echo "✅ README.md has adequate content" >> /tmp/doc-analysis.md
@@ -177,17 +177,12 @@ jobs:
               ! -name "__init__.py" \
               -type f | while read -r file; do
               # Count functions and classes
-              func_count=$(grep -c "^def " "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
-              class_count=$(grep -c "^class " "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
-              docstring_count=$(grep -c '"""' "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
-              
-              # Ensure variables are numeric
-              func_count=${func_count:-0}
-              class_count=${class_count:-0}
-              docstring_count=${docstring_count:-0}
+              func_count=$(grep -c "^def " "$file" 2>/dev/null || echo 0)
+              class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
+              docstring_count=$(grep -c '"""' "$file" 2>/dev/null || echo 0)
               
               total=$((func_count + class_count))
-              if [ "$total" -gt 0 ] && [ "$docstring_count" -eq 0 ] 2>/dev/null; then
+              if [ $total -gt 0 ] && [ $docstring_count -eq 0 ]; then
                 echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
               fi
             done
@@ -203,17 +198,12 @@ jobs:
               ! -path "*/build/*" \
               -type f | while read -r file; do
               # Count functions and classes
-              func_count=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
-              class_count=$(grep -c "^class " "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
-              jsdoc_count=$(grep -c '/\*\*' "$file" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
-              
-              # Ensure variables are numeric
-              func_count=${func_count:-0}
-              class_count=${class_count:-0}
-              jsdoc_count=${jsdoc_count:-0}
+              func_count=$(grep -cE "(^function |^export function |^const .* = .*=>)" "$file" 2>/dev/null || echo 0)
+              class_count=$(grep -c "^class " "$file" 2>/dev/null || echo 0)
+              jsdoc_count=$(grep -c '/\*\*' "$file" 2>/dev/null || echo 0)
               
               total=$((func_count + class_count))
-              if [ "$total" -gt 5 ] && [ "$jsdoc_count" -eq 0 ] 2>/dev/null; then
+              if [ $total -gt 5 ] && [ $jsdoc_count -eq 0 ]; then
                 echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
               fi
             done
@@ -221,21 +211,22 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      # Note: GitHub Copilot CLI action removed due to non-existence
-      # The documentation analysis above provides comprehensive coverage
-      - name: Additional Documentation Checks
-        run: |
-          echo "## Additional Documentation Recommendations" >> /tmp/doc-analysis.md
-          echo "" >> /tmp/doc-analysis.md
-          echo "### Automated Suggestions:" >> /tmp/doc-analysis.md
-          echo "1. **Complete README.md** with all required sections" >> /tmp/doc-analysis.md
-          echo "2. **Add missing documentation files** (CONTRIBUTING.md, CHANGELOG.md, etc.)" >> /tmp/doc-analysis.md
-          echo "3. **Document all public APIs** and exported functions" >> /tmp/doc-analysis.md
-          echo "4. **Add inline code comments** for complex logic" >> /tmp/doc-analysis.md
-          echo "5. **Create usage examples** and tutorials" >> /tmp/doc-analysis.md
-          echo "6. **Update outdated documentation** to match current code" >> /tmp/doc-analysis.md
-          echo "7. **Ensure contributing guidelines are present**" >> /tmp/doc-analysis.md
-          echo "8. **Check for API documentation if applicable**" >> /tmp/doc-analysis.md
+      - name: GitHub Copilot Documentation Review
+        uses: austenstone/copilot-cli-action@v2
+        with:
+          copilot-token: ${{ secrets.COPILOT_TOKEN }}
+          prompt: |
+            Review the documentation for this repository:
+            1. Check README.md completeness and quality
+            2. Verify all features and functionality are documented
+            3. Check for installation and usage instructions
+            4. Identify missing or outdated documentation
+            5. Suggest improvements for clarity and completeness
+            6. Verify code comments and inline documentation
+            7. Check for API documentation if applicable
+            8. Ensure contributing guidelines are present
+            
+            Provide specific recommendations with file names and sections.
         continue-on-error: true
 
       - name: Create Documentation Review Report
@@ -245,7 +236,6 @@ jobs:
           script: |
             const fs = require('fs');
             const analysis = fs.readFileSync('/tmp/doc-analysis.md', 'utf8');
-            const reviewResults = ''; // Removed non-existent file reference
             
             const date = new Date().toISOString().split('T')[0];
             const title = `Code Functionality & Documentation Review - ${date}`;
@@ -259,8 +249,6 @@ jobs:
             ## Build Status: ${buildEmoji} ${buildStatus}
             
             ${analysis}
-            
-            ${reviewResults}
             
             ## Functionality Review
             
