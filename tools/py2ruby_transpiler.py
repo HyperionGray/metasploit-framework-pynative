@@ -764,7 +764,8 @@ class PythonToRubyTranspiler(ast.NodeVisitor):
         parts = []
         for value in node.values:
             if isinstance(value, ast.Constant):
-                parts.append(value.value)
+                escaped_val = value.value.replace('\\', '\\\\').replace('"', '\\"')
+                parts.append(escaped_val)
             elif isinstance(value, ast.FormattedValue):
                 expr = self.visit_expr(value.value)
                 parts.append(f"#{{{expr}}}")
