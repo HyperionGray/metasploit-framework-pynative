@@ -1,4 +1,101 @@
 # Python requirements converted from Gemfile
+# Manual review completed and dependencies mapped
+
+# Development and Testing Tools (Ruby -> Python mappings)
+# simplecov -> coverage
+coverage>=7.0.0
+# redcarpet -> markdown
+markdown>=3.4.0
+# yard -> sphinx
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.2.0
+# pry-byebug -> ipdb
+ipdb>=0.13.0
+# debug -> pdb (built-in, no package needed)
+# octokit -> PyGithub
+PyGithub>=1.58.0
+# memory_profiler -> memory-profiler
+memory-profiler>=0.60.0
+# ruby-prof -> py-spy or cProfile (built-in)
+py-spy>=0.3.14
+# metasploit-aggregator -> custom implementation needed
+# license_finder -> pip-licenses
+pip-licenses>=4.0.0
+# rake -> invoke
+invoke>=2.0.0
+# rspec-rails -> pytest-django
+pytest>=7.0.0
+pytest-django>=4.5.0
+# rspec-rerun -> pytest-rerunfailures
+pytest-rerunfailures>=11.0.0
+# flake8 (fixed version)
+flake8>=6.0.0
+# test-prof -> pytest-benchmark
+pytest-benchmark>=4.0.0
+# factory_bot_rails -> factory-boy
+factory-boy>=3.2.0
+# fivemat -> pytest-sugar
+pytest-sugar>=0.9.0
+# allure-rspec -> allure-pytest
+allure-pytest>=2.12.0
+# timecop -> freezegun
+freezegun>=1.2.0
+
+# Core Framework Dependencies
+# Web framework and HTTP handling
+flask>=2.3.0
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Database and ORM
+sqlalchemy>=2.0.0
+alembic>=1.11.0
+psycopg2-binary>=2.9.0
+
+# Cryptography and Security
+pycryptodome>=3.18.0
+cryptography>=41.0.0
+bcrypt>=4.0.0
+
+# Network and Protocol Libraries
+paramiko>=3.2.0
+scapy>=2.5.0
+impacket>=0.11.0
+pwntools>=4.10.0
+
+# Binary Analysis and Reverse Engineering
+r2pipe>=1.7.0
+capstone>=5.0.0
+keystone-engine>=0.9.2
+unicorn>=2.0.0
+
+# Exploitation and Post-Exploitation
+metasploit-payloads>=2.0.0  # Custom package for payload generation
+msfrpc>=1.0.0  # Custom RPC client
+
+# Data Processing and Parsing
+lxml>=4.9.0
+beautifulsoup4>=4.12.0
+pyyaml>=6.0.0
+jinja2>=3.1.0
+
+# Logging and Monitoring
+colorlog>=6.7.0
+rich>=13.0.0
+
+# Development and Code Quality
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.4.0
+pre-commit>=3.3.0
+
+# Optional Dependencies for Advanced Features
+# Uncomment as needed
+# docker>=6.1.0  # For containerized payloads
+# kubernetes>=27.2.0  # For K8s exploitation
+# boto3>=1.28.0  # For AWS exploitation
+# azure-identity>=1.13.0  # For Azure exploitation
+# google-cloud-core>=2.3.0  # For GCP exploitation
 # Enhanced with comprehensive testing and development dependencies
 
 # Core Framework Dependencies
