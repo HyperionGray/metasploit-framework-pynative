@@ -18,9 +18,53 @@ line_length = 120
 
 [tool.pytest.ini_options]
 testpaths = ["test", "spec"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
+python_files = ["test_*.py", "*_test.py", "*_spec.py"]
+python_classes = ["Test*", "Describe*"]
+python_functions = ["test_*", "it_*", "should_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=lib",
+    "--cov=modules",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml",
+    "--cov-branch",
+    "--cov-fail-under=80",
+    "--tb=short",
+    "--maxfail=10",
+    "-ra",
+    "--durations=10",
+    "--timeout=300"
+]
+markers = [
+    "unit: Unit tests for individual components",
+    "integration: Integration tests between components", 
+    "functional: Functional tests for complete workflows",
+    "security: Security-focused tests",
+    "performance: Performance and benchmark tests",
+    "network: Tests requiring network access",
+    "slow: Tests that take a long time to run",
+    "exploit: Tests for exploit modules",
+    "auxiliary: Tests for auxiliary modules",
+    "payload: Tests for payload modules",
+    "encoder: Tests for encoder modules",
+    "crypto: Tests for cryptographic functions",
+    "http: Tests for HTTP client functionality",
+    "rex: Tests for Rex library components",
+    "msf: Tests for MSF core components",
+    "ruby_compat: Tests for Ruby compatibility",
+    "external_deps: Tests requiring external tools"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore:.*urllib3.*:urllib3.exceptions.InsecureRequestWarning"
+]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
 [tool.mypy]
 python_version = "3.11"
