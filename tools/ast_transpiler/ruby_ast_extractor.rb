@@ -27,7 +27,14 @@ module RubyASTExtractor
     def parse
       @sexp = Ripper.sexp(@source, @filename)
       unless @sexp
-        raise "Failed to parse Ruby source"
+        # Try to get more detailed error information
+        begin
+          # Use Ripper.lex to get tokenization errors
+          tokens = Ripper.lex(@source)
+          raise "Failed to parse Ruby source: Tokenization succeeded but parsing failed. Check syntax."
+        rescue => lex_error
+          raise "Failed to parse Ruby source: #{lex_error.message}"
+        end
       end
       process_node(@sexp)
     end

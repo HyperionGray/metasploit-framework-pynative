@@ -16,11 +16,20 @@ The translation process:
 
 import ast
 import json
+import logging
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass
+
+# Setup logging
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+    logger.addHandler(handler)
+    logger.setLevel(logging.WARNING)
 
 
 @dataclass
@@ -127,8 +136,8 @@ class RubyASTTranslator:
         if handler:
             return handler(node)
         else:
-            # Unknown node type - log warning and skip
-            print(f"Warning: Unknown Ruby AST node type: {node_type}", file=sys.stderr)
+            # Unknown node type - log warning
+            logger.warning(f"Unknown Ruby AST node type: {node_type}")
             return None
     
     def _translate_classdefinition(self, node: Dict) -> ast.ClassDef:
@@ -328,15 +337,29 @@ class RubyASTTranslator:
         # Simple string without interpolation
         if isinstance(parts_node, dict):
             parts_list = parts_node.get('parts', [])
-            if isinstance(parts_list, list) and len(parts_list) == 1:
-                part = parts_list[0]
-                if isinstance(part, dict) and part.get('type') == 'StringContent':
-                    value = part.get('value', '')
-                    return ast.Constant(value=value)
+            if isinstance(parts_list, list):
+                if len(parts_list) == 0:
+                    return ast.Constant(value='')
+                elif len(parts_list) == 1:
+                    part = parts_list[0]
+                    if isinstance(part, dict) and part.get('type') == 'StringContent':
+                        value = part.get('value', '')
+                        return ast.Constant(value=value)
+                else:
+                    # Multiple parts - concatenate them
+                    string_parts = []
+                    for part in parts_list:
+                        if isinstance(part, dict):
+                            if part.get('type') == 'StringContent':
+                                string_parts.append(part.get('value', ''))
+                            elif part.get('type') == 'StringInterpolation':
+                                # TODO: Convert to f-string properly
+                                string_parts.append('{...}')
+                        else:
+                            string_parts.append(str(part))
+                    return ast.Constant(value=''.join(string_parts))
         
-        # String with interpolation - convert to f-string (JoinedStr)
-        # For now, simplify to regular string
-        # TODO: Implement proper f-string conversion
+        # Fallback to empty string if we can't parse it
         return ast.Constant(value='')
     
     def _translate_integer(self, node: Dict) -> ast.Constant:
@@ -681,8 +704,15 @@ class RubyASTTranslator:
         # The caller will wrap it in Expr if needed
         return base_call
     
-    def _translate_arguments(self, node: Dict) -> List[ast.expr]:
-        """Translate Ruby Arguments to list of Python expressions"""
+    def _translate_arguments(self, node: Dict) -> Optional[Union[ast.expr, ast.Tuple]]:
+        """
+        Translate Ruby Arguments to Python expression(s).
+        
+        Returns:
+            - Single expression if one argument
+            - Tuple if multiple arguments
+            - None if no arguments
+        """
         args_list = node.get('args', [])
         result = []
         
@@ -872,15 +902,26 @@ class ASTTranspiler:
         return json.loads(result.stdout)
     
     def _extract_ruby_ast_from_code(self, ruby_code: str) -> Dict[str, Any]:
-        """Extract Ruby AST from code string"""
+        """
+        Extract Ruby AST from code string.
+        
+        Note: This executes Ruby code for parsing. Only use with trusted input.
+        For untrusted input, consider sandboxing the Ruby execution environment.
+        """
         result = subprocess.run(
             ['ruby', str(self.ruby_extractor_path), '-e', ruby_code],
             capture_output=True,
             text=True,
-            check=True
+            timeout=30  # Add timeout to prevent DoS
         )
         
-        return json.loads(result.stdout)
+        if result.returncode != 0:
+            raise RuntimeError(f"Ruby AST extraction failed: {result.stderr}")
+        
+        try:
+            return json.loads(result.stdout)
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"Invalid JSON from Ruby AST extractor: {e}")
 
 
 def main():
