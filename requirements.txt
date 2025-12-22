@@ -1,3 +1,107 @@
+# Python requirements converted from Gemfile
+# Enhanced with comprehensive testing and development dependencies
+
+# Core Framework Dependencies
+requests>=2.28.0
+pycryptodome>=3.15.0
+paramiko>=2.11.0
+scapy>=2.5.0
+impacket>=0.10.0
+pwntools>=4.9.0
+urllib3>=1.26.0
+cryptography>=3.4.8
+pyopenssl>=22.0.0
+
+# Testing Framework (replaces rspec-rails, rspec-rerun)
+pytest>=7.2.0
+pytest-cov>=4.0.0
+pytest-xdist>=3.1.0
+pytest-mock>=3.10.0
+pytest-asyncio>=0.20.3
+pytest-timeout>=2.1.0
+pytest-html>=3.1.1
+pytest-benchmark>=4.0.0
+
+# Code Quality (replaces rubocop equivalents)
+flake8>=6.0.0
+black>=22.12.0
+isort>=5.11.4
+mypy>=0.991
+bandit>=1.7.4
+safety>=2.3.4
+
+# Documentation (replaces yard, redcarpet)
+sphinx>=5.3.0
+sphinx-rtd-theme>=1.1.1
+myst-parser>=0.18.1
+
+# Development Tools (replaces pry-byebug, debug)
+ipython>=8.7.0
+ipdb>=0.13.11
+rich>=12.6.0
+click>=8.1.3
+
+# Performance Profiling (replaces ruby-prof, memory_profiler)
+memory-profiler>=0.60.0
+py-spy>=0.3.14
+line-profiler>=4.0.2
+psutil>=5.9.4
+
+# Test Data and Mocking (replaces factory_bot_rails, timecop)
+factory-boy>=3.2.1
+freezegun>=1.2.2
+responses>=0.22.0
+httpretty>=1.1.4
+faker>=15.3.4
+
+# Coverage and Reporting (replaces simplecov, allure-rspec)
+coverage>=7.0.5
+pytest-allure-adaptor>=1.7.10
+codecov>=2.1.12
+
+# Binary Analysis and Reverse Engineering
+r2pipe>=1.7.4
+capstone>=4.0.2
+keystone-engine>=0.9.2
+unicorn>=2.0.1
+angr>=9.2.31
+
+# Network Security Testing
+dnspython>=2.2.1
+netaddr>=0.8.0
+python-nmap>=0.7.1
+pyshark>=0.5.3
+
+# Database Support (for MSF database integration)
+sqlalchemy>=1.4.45
+psycopg2-binary>=2.9.5
+pymongo>=4.3.3
+
+# Serialization and Data Formats
+pyyaml>=6.0
+msgpack>=1.0.4
+protobuf>=4.21.12
+lxml>=4.9.2
+
+# Async and Concurrency
+aiohttp>=3.8.3
+asyncio-mqtt>=0.11.1
+trio>=0.22.0
+
+# Logging and Monitoring
+structlog>=22.3.0
+colorlog>=6.7.0
+sentry-sdk>=1.12.1
+
+# CLI and Terminal
+typer>=0.7.0
+rich-click>=1.6.1
+prompt-toolkit>=3.0.36
+
+# Fuzzing and Testing Tools
+hypothesis>=6.61.0
+mutmut>=2.4.3
+atheris>=2.2.2
 # Metasploit Framework Python Dependencies
 # Core framework requirements for Python modules and exploits
 
