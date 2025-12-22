@@ -25,6 +25,7 @@ require 'rex'
 require 'optparse'
 require 'json'
 require 'uri'
+require 'fileutils'
 
 module Md5LookupUtility
 
@@ -62,6 +63,10 @@ module Md5LookupUtility
     end
 
     def save_setting(name, value)
+      # Ensure the config directory exists
+      config_dir = File.dirname(@config_path)
+      FileUtils.mkdir_p(config_dir) unless File.directory?(config_dir)
+      
       ini = Rex::Parser::Ini.new(@config_path)
       ini['MD5Lookup'] ||= {}
       ini['MD5Lookup'][name] = value

@@ -1,44 +1,63 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Configuration file (converted from boot.rb)
+Metasploit Framework Boot Configuration (Python-native)
+
+This file sets up the Python environment for Metasploit Framework,
+similar to how config/boot.rb sets up the Ruby environment.
 """
 
-# TODO: Convert Ruby configuration to Python
+import os
+import sys
+from pathlib import Path
 
-# Original Ruby code (for reference):
-"""
-require 'pathname'
-require 'rubygems'
+# Determine MSF root directory
+MSF_ROOT = Path(__file__).resolve().parent.parent
 
-GEMFILE_EXTENSIONS = [
-    '.local',
-    ''
-]
+# Add lib directory to Python path
+LIB_PATH = MSF_ROOT / 'lib'
+if str(LIB_PATH) not in sys.path:
+    sys.path.insert(0, str(LIB_PATH))
 
-msfenv_real_pathname = Pathname.new(__FILE__).realpath
-root = msfenv_real_pathname.parent.parent
+# Add python_framework to path
+PYTHON_FRAMEWORK_PATH = MSF_ROOT / 'python_framework'
+if str(PYTHON_FRAMEWORK_PATH) not in sys.path:
+    sys.path.insert(0, str(PYTHON_FRAMEWORK_PATH))
 
-unless ENV['BUNDLE_GEMFILE']
-  require 'pathname'
+# Set environment variables
+os.environ.setdefault('MSF_ROOT', str(MSF_ROOT))
+os.environ.setdefault('MSF_MODULE_PATHS', str(MSF_ROOT / 'modules'))
+os.environ.setdefault('MSF_PLUGIN_PATH', str(MSF_ROOT / 'plugins'))
+os.environ.setdefault('MSF_DATA_ROOT', str(MSF_ROOT / 'data'))
 
-  GEMFILE_EXTENSIONS.each do |extension|
-    extension_pathname = root.join("Gemfile#{extension}")
-
-    if extension_pathname.readable?
-      ENV['BUNDLE_GEMFILE'] = extension_pathname.to_path
-      break
-    end
-  end
-end
-
-begin
-  require 'bundler/setup'
-rescue Lo
-...
-"""
-
-# Python configuration
+# Configuration dictionary
 config = {
-    # TODO: Add configuration settings
+    'msf_root': MSF_ROOT,
+    'lib_path': LIB_PATH,
+    'python_framework_path': PYTHON_FRAMEWORK_PATH,
+    'module_paths': [MSF_ROOT / 'modules'],
+    'plugin_path': MSF_ROOT / 'plugins',
+    'data_root': MSF_ROOT / 'data',
 }
+
+def setup_environment():
+    """
+    Set up the Python environment for Metasploit Framework.
+    Call this function to ensure all paths and settings are configured.
+    """
+    # Ensure MSF_ROOT is in PATH
+    if str(MSF_ROOT) not in os.environ.get('PATH', ''):
+        os.environ['PATH'] = f"{MSF_ROOT}:{os.environ.get('PATH', '')}"
+    
+    # Set Python-specific environment
+    os.environ.setdefault('PYTHONUNBUFFERED', '1')
+    
+    return config
+
+if __name__ == '__main__':
+    print("Metasploit Framework Python Boot Configuration")
+    print(f"MSF_ROOT: {MSF_ROOT}")
+    print(f"LIB_PATH: {LIB_PATH}")
+    print(f"PYTHON_FRAMEWORK_PATH: {PYTHON_FRAMEWORK_PATH}")
+    print("\nCall setup_environment() to configure the environment.")
+

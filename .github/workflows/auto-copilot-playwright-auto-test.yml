@@ -27,26 +27,23 @@ jobs:
         run: |
           python -m playwright install
 
-      # Note: GitHub Copilot Agent actions are not available as GitHub Actions
-      # The github/copilot-agent/* actions do not exist
-      # These steps have been commented out to prevent CI failures
-      # - name: Copilot Generate Playwright Scripts
-      #   uses: github/copilot-agent/playwright-generate@main # Example, customize for Python; or use Chat to generate script
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     prompt: "Generate Playwright test scripts covering every user action on this web app."
-      #   continue-on-error: true # If your agent doesn't support, replace with python script generation using Copilot Chat
+      - name: Copilot Generate Playwright Scripts
+        uses: github/copilot-agent/playwright-generate@main # Example, customize for Python; or use Chat to generate script
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: "Generate Playwright test scripts covering every user action on this web app."
+        continue-on-error: true # If your agent doesn't support, replace with python script generation using Copilot Chat
 
       - name: Run Playwright Tests
         run: |
           pytest tests/ # Or the path to your Playwright scripts
 
-      # - name: If Tests Fail, Copilot Attempts Fix & Repeats
-      #   uses: github/copilot-agent/playwright-fix-and-loop@main # Example, requires agent loop feature
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     max_attempts: 5
-      #   continue-on-error: true
+      - name: If Tests Fail, Copilot Attempts Fix & Repeats
+        uses: github/copilot-agent/playwright-fix-and-loop@main # Example, requires agent loop feature
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          max_attempts: 5
+        continue-on-error: true
 
       - name: Create PR with passing tests or attempted fixes
         uses: peter-evans/create-pull-request@main
