@@ -245,7 +245,7 @@ jobs:
           script: |
             const fs = require('fs');
             const analysis = fs.readFileSync('/tmp/doc-analysis.md', 'utf8');
-            const reviewResults = fs.readFileSync('/tmp/doc-review.md', 'utf8');
+            const reviewResults = ''; // Removed non-existent file reference
             
             const date = new Date().toISOString().split('T')[0];
             const title = `Code Functionality & Documentation Review - ${date}`;
