@@ -305,9 +305,7 @@ class PythonToRubyTranspiler(ast.NodeVisitor):
         if node.orelse:
             if len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If):
                 # elif
-                self.dedent()
-                self.write("els")
-                self.indent()
+                self.write("else")
                 self.visit(node.orelse[0])
                 return
             else:
