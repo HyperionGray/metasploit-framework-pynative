@@ -520,8 +520,9 @@ class PythonToRubyTranspiler(ast.NodeVisitor):
             return "false"
         elif isinstance(value, str):
             # Handle string escaping
-            escaped = value.replace("\\", "\\\\").replace("'", "\\'")
-            return f"'{escaped}'"
+            # Use %q{} for robust string literal generation
+            escaped = value.replace("\\", "\\\\").replace("}", "\\}")
+            return f"%q{{{escaped}}}"
         elif isinstance(value, (int, float)):
             return str(value)
         else:
