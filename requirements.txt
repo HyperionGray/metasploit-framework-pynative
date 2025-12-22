@@ -1,1 +1,100 @@
-# Python requirements converted from Gemfile\n# Manual review recommended\n\n# simplecov - needs manual mapping\n# redcarpet - needs manual mapping\n# yard - needs manual mapping\n# pry-byebug - needs manual mapping\n# debug - needs manual mapping\n# octokit - needs manual mapping\n# memory_profiler - needs manual mapping\n# ruby-prof - needs manual mapping\n# metasploit-aggregator - needs manual mapping\n# license_finder - needs manual mapping\n# rake - needs manual mapping\n# rspec-rails - needs manual mapping\n# rspec-rerun - needs manual mapping\nflake81.75.7\n# test-prof - needs manual mapping\n# factory_bot_rails - needs manual mapping\n# fivemat - needs manual mapping\n# allure-rspec - needs manual mapping\n# timecop - needs manual mapping\n\n# Common Python packages for pentesting\nrequests>=2.28.0\npycryptodome>=3.15.0\nparamiko>=2.11.0\nscapy>=2.5.0\nimpacket>=0.10.0\npwntools>=4.9.0
+# Metasploit Framework Python Dependencies
+# Core framework requirements for Python modules and exploits
+
+# HTTP Client Libraries
+requests>=2.28.0
+urllib3>=1.26.0
+httpx>=0.24.0
+
+# Cryptography and Security
+cryptography>=3.4.8
+pycryptodome>=3.15.0
+pyopenssl>=22.0.0
+bcrypt>=3.2.0
+hashlib-compat>=1.0.1
+
+# Network Libraries
+scapy>=2.4.5
+netaddr>=0.8.0
+dnspython>=2.2.0
+impacket>=0.10.0
+
+# Serialization and Data Formats
+pyyaml>=6.0
+msgpack>=1.0.0
+pickle-mixin>=1.0.2
+xmltodict>=0.13.0
+lxml>=4.9.0
+
+# Database Connectivity
+psycopg2-binary>=2.9.0
+pymongo>=4.0.0
+redis>=4.3.0
+sqlalchemy>=1.4.0
+
+# Web Framework Components
+flask>=2.2.0
+tornado>=6.2.0
+websockets>=10.4
+
+# Encoding and Text Processing
+chardet>=5.0.0
+python-magic>=0.4.27
+base64io>=1.0.3
+
+# System and OS Integration
+psutil>=5.9.0
+pywin32>=304; sys_platform == "win32"
+python-registry>=1.4; sys_platform == "win32"
+
+# Exploit Development
+pwntools>=4.8.0
+capstone>=4.0.2
+keystone-engine>=0.9.2
+unicorn>=2.0.0
+
+# Modern Shell Handlers and C2
+pwncat-cs>=0.5.0
+
+# Binary Analysis (from existing requirements-binary-analysis.txt)
+r2pipe>=1.6.0
+
+# Command Line and Argument Parsing
+click>=8.1.0
+argparse-addons>=0.12.0
+colorama>=0.4.5
+
+# Logging and Debugging
+loguru>=0.6.0
+rich>=12.5.0
+tabulate>=0.9.0
+
+# Async and Threading
+asyncio-mqtt>=0.11.0
+aiohttp>=3.8.0
+concurrent-futures>=3.1.1
+
+# File and Archive Handling
+py7zr>=0.20.0
+rarfile>=4.0
+zipfile36>=0.1.3
+
+# Development and Testing
+pytest>=7.0.0
+pytest-cov>=3.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0
+pytest-xdist>=3.2.0
+pytest-html>=3.1.0
+black>=22.0.0
+flake8>=5.0.0
+mypy>=0.991
+
+# Optional: LLDB Python bindings (usually system-provided)
+# lldb-python
+
+# Framework-specific utilities
+python-dateutil>=2.8.0
+packaging>=21.3
+setuptools>=65.0.0
+wheel>=0.37.0
