@@ -1,0 +1,227 @@
+#!/bin/bash
+# -*- coding: utf-8 -*-
+# Metasploit Framework Shell Integration (msfrc)
+# 
+# Source this file to enable Metasploit commands in your shell environment
+# Similar to Python virtual environment activation
+#
+# Usage:
+#   source msfrc
+#   # or
+#   . msfrc
+#
+# To deactivate:
+#   msf_deactivate
+
+# Store original environment
+if [ -z "${MSF_ORIGINAL_PATH}" ]; then
+    export MSF_ORIGINAL_PATH="$PATH"
+fi
+
+if [ -z "${MSF_ORIGINAL_PS1}" ]; then
+    export MSF_ORIGINAL_PS1="$PS1"
+fi
+
+# Get the directory where this script is located
+MSF_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export MSF_ROOT
+
+# Add MSF tools to PATH
+export PATH="$MSF_ROOT:$PATH"
+
+# Set MSF environment variables
+export MSF_DATABASE_CONFIG="$MSF_ROOT/config/database.yml"
+export MSF_MODULE_PATHS="$MSF_ROOT/modules"
+export MSF_PLUGIN_PATHS="$MSF_ROOT/plugins"
+export MSF_DATA_ROOT="$MSF_ROOT/data"
+export MSF_CONFIG_ROOT="$MSF_ROOT/config"
+
+# Python-specific environment
+export PYTHONPATH="$MSF_ROOT/lib:$MSF_ROOT:$PYTHONPATH"
+export MSF_PYTHON_MODE=1
+
+# Update prompt to show MSF environment is active
+export PS1="(msf) $MSF_ORIGINAL_PS1"
+
+# Define MSF command functions
+msf_console() {
+    echo "🐍 MSF Python Console - Enhanced Metasploit Experience"
+    echo "   Traditional Ruby console: $MSF_ROOT/msfconsole"
+    echo "   Python framework: $MSF_ROOT/lib/msf.py"
+    echo ""
+    
+    if [ "$1" = "--ruby" ] || [ "$1" = "-r" ]; then
+        echo "Starting traditional Ruby console..."
+        "$MSF_ROOT/msfconsole" "${@:2}"
+    else
+        echo "Starting Python-enhanced console..."
+        python3 -c "
+import sys
+sys.path.insert(0, '$MSF_ROOT/lib')
+sys.path.insert(0, '$MSF_ROOT')
+
+try:
+    from msf import framework
+    print('MSF Python Framework loaded successfully!')
+    print('Type help() for available commands')
+    
+    # Start interactive Python session with MSF loaded
+    import code
+    code.interact(local=globals())
+except ImportError as e:
+    print(f'Error loading MSF Python framework: {e}')
+    print('Falling back to Ruby console...')
+    import subprocess
+    subprocess.run(['$MSF_ROOT/msfconsole'] + sys.argv[1:])
+" "$@"
+    fi
+}
+
+msf_venom() {
+    echo "🐍 MSF Venom - Payload Generator"
+    if [ -f "$MSF_ROOT/msfvenom.py" ]; then
+        echo "Using Python version..."
+        python3 "$MSF_ROOT/msfvenom.py" "$@"
+    else
+        echo "Using Ruby version..."
+        "$MSF_ROOT/msfvenom" "$@"
+    fi
+}
+
+msf_db() {
+    echo "🐍 MSF Database Management"
+    "$MSF_ROOT/msfdb" "$@"
+}
+
+msf_rpc() {
+    echo "🐍 MSF RPC Server"
+    "$MSF_ROOT/msfrpcd" "$@"
+}
+
+msf_update() {
+    echo "🐍 MSF Update"
+    "$MSF_ROOT/msfupdate" "$@"
+}
+
+msf_exploit() {
+    echo "🐍 Quick Exploit Launcher"
+    echo "Usage: msf_exploit <exploit_path> [options]"
+    if [ -z "$1" ]; then
+        echo "Available exploits:"
+        find "$MSF_ROOT/modules/exploits" -name "*.py" | head -10
+        echo "... (use 'find $MSF_ROOT/modules/exploits -name \"*.py\"' for full list)"
+        return 1
+    fi
+    
+    python3 -c "
+import sys
+sys.path.insert(0, '$MSF_ROOT/lib')
+sys.path.insert(0, '$MSF_ROOT')
+
+try:
+    from msf.core.exploit import Exploit
+    print(f'Loading exploit: $1')
+    # TODO: Implement exploit loading and execution
+    print('Exploit functionality coming soon!')
+except ImportError:
+    print('Python framework not ready, use msf_console for now')
+"
+}
+
+msf_check() {
+    echo "🐍 Quick Vulnerability Check"
+    echo "Usage: msf_check <target> [exploit_path]"
+    if [ -z "$1" ]; then
+        echo "Please specify a target"
+        return 1
+    fi
+    
+    echo "Checking target: $1"
+    # TODO: Implement check functionality
+    echo "Check functionality coming soon!"
+}
+
+msf_search() {
+    echo "🐍 MSF Module Search"
+    if [ -z "$1" ]; then
+        echo "Usage: msf_search <search_term>"
+        return 1
+    fi
+    
+    echo "Searching for: $1"
+    find "$MSF_ROOT/modules" -name "*$1*" -type f | head -20
+}
+
+msf_info() {
+    echo "🐍 MSF Environment Information"
+    echo "MSF Root: $MSF_ROOT"
+    echo "Python Path: $PYTHONPATH"
+    echo "Database Config: $MSF_DATABASE_CONFIG"
+    echo "Module Paths: $MSF_MODULE_PATHS"
+    echo "Plugin Paths: $MSF_PLUGIN_PATHS"
+    echo ""
+    echo "Available Commands:"
+    echo "  msf_console    - Start MSF console (Python-enhanced)"
+    echo "  msf_venom      - Payload generator"
+    echo "  msf_db         - Database management"
+    echo "  msf_rpc        - RPC server"
+    echo "  msf_update     - Update framework"
+    echo "  msf_exploit    - Quick exploit launcher"
+    echo "  msf_check      - Vulnerability checker"
+    echo "  msf_search     - Search modules"
+    echo "  msf_info       - Show this information"
+    echo "  msf_deactivate - Exit MSF environment"
+    echo ""
+    echo "Traditional commands still available:"
+    echo "  msfconsole, msfvenom, msfdb, msfrpcd, msfupdate"
+}
+
+msf_deactivate() {
+    echo "🐍 Deactivating MSF environment..."
+    
+    # Restore original environment
+    if [ -n "${MSF_ORIGINAL_PATH}" ]; then
+        export PATH="$MSF_ORIGINAL_PATH"
+        unset MSF_ORIGINAL_PATH
+    fi
+    
+    if [ -n "${MSF_ORIGINAL_PS1}" ]; then
+        export PS1="$MSF_ORIGINAL_PS1"
+        unset MSF_ORIGINAL_PS1
+    fi
+    
+    # Unset MSF environment variables
+    unset MSF_ROOT
+    unset MSF_DATABASE_CONFIG
+    unset MSF_MODULE_PATHS
+    unset MSF_PLUGIN_PATHS
+    unset MSF_DATA_ROOT
+    unset MSF_CONFIG_ROOT
+    unset MSF_PYTHON_MODE
+    
+    # Remove functions
+    unset -f msf_console
+    unset -f msf_venom
+    unset -f msf_db
+    unset -f msf_rpc
+    unset -f msf_update
+    unset -f msf_exploit
+    unset -f msf_check
+    unset -f msf_search
+    unset -f msf_info
+    unset -f msf_deactivate
+    
+    echo "MSF environment deactivated"
+}
+
+# Show activation message
+echo "🐍 Metasploit Framework Environment Activated!"
+echo ""
+echo "This gives you a Python virtual environment-like experience for MSF."
+echo "Type 'msf_info' for available commands or 'msf_console' to get started."
+echo ""
+echo "Traditional MSF commands (msfconsole, msfvenom, etc.) are still available"
+echo "and will show guidance toward the Python-enhanced versions."
+echo ""
+echo "To deactivate: msf_deactivate"
+echo ""

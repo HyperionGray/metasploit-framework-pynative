@@ -11,6 +11,19 @@
 # $Revision$
 #
 
+# Show guidance message for Python-enhanced experience
+unless ARGV.include?('-q') || ENV['MSF_QUIET'] == '1'
+  $stderr.puts ""
+  $stderr.puts "🐍 Metasploit Framework Daemon - Traditional Ruby Version"
+  $stderr.puts ""
+  $stderr.puts "💡 For an enhanced Python experience, try:"
+  $stderr.puts "   source msfrc          # Activate MSF shell environment"
+  $stderr.puts "   msf_rpc               # Python-enhanced RPC server"
+  $stderr.puts ""
+  $stderr.puts "   Or use -q flag to hide this message"
+  $stderr.puts ""
+end
+
 msfbase = __FILE__
 while File.symlink?(msfbase)
   msfbase = File.expand_path(File.readlink(msfbase), File.dirname(msfbase))
