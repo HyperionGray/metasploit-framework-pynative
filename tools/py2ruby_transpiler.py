@@ -658,16 +658,21 @@ class PythonToRubyTranspiler(ast.NodeVisitor):
     
     def visit_Compare(self, node: ast.Compare) -> str:
         """Visit comparison."""
-        left = self.visit_expr(node.left)
-        parts = [left]
-        
+        parts = []
+        current_left = self.visit_expr(node.left)
+
         for op, comparator in zip(node.ops, node.comparators):
-            op_str = self.visit_comparison_op(op)
             right = self.visit_expr(comparator)
-            parts.append(op_str)
-            parts.append(right)
+            if isinstance(op, ast.In):
+                parts.append(f"{right}.include?({current_left})")
+            elif isinstance(op, ast.NotIn):
+                parts.append(f"!{right}.include?({current_left})")
+            else:
+                op_str = self.visit_comparison_op(op)
+                parts.append(f"{current_left} {op_str} {right}")
+            current_left = right
         
-        return " ".join(parts)
+        return " && ".join(f"({part})" for part in parts)
     
     def visit_BoolOp(self, node: ast.BoolOp) -> str:
         """Visit boolean operation."""
