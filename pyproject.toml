@@ -65,9 +65,76 @@ log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+    "--color=yes"
+]
+markers = [
+    "unit: Unit tests for individual components",
+    "integration: Integration tests for component interaction", 
+    "functional: Functional tests for end-to-end workflows",
+    "security: Security-focused tests for cryptographic and exploit functions",
+    "performance: Performance and benchmark tests",
+    "slow: Tests that take a long time to run",
+    "network: Tests that require network access",
+    "binary_analysis: Tests for binary analysis tools (Radare2, LLDB)",
+    "exploit: Tests for exploit modules",
+    "payload: Tests for payload generation and handling",
+    "crypto: Tests for cryptographic functions",
+    "framework: Tests for core framework functionality"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning"
+]
+timeout = 300
+timeout_method = "thread"
+
+[tool.coverage.run]
+source = ["lib", "modules", "tools"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/virtualenv/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:"
+]
+show_missing = true
+precision = 2
 
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
+ignore_missing_imports = true
+no_strict_optional = true
+
+[tool.flake8]
+max-line-length = 120
+ignore = ["E203", "W503", "E501"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info"
+]

@@ -129,11 +129,44 @@ For a manual setup, consult the [Dev Environment Setup](https://docs.metasploit.
 
 ## Using Metasploit
 
-To get started with Metasploit:
+### Classic Console Experience
+
+To get started with the traditional Metasploit console:
 
 1. **Start `msfconsole`:** This is the primary interface for interacting with Metasploit.
 2. **Explore Resources:** 
    - Visit the [Using Metasploit](https://docs.metasploit.com/docs/using-metasploit/getting-started/index.html) section of the documentation.
+
+### Python-Native Experience (Recommended)
+
+For a more modern, Python-native workflow with virtualenv-like activation:
+
+```bash
+# Activate Metasploit environment (similar to Python virtualenv)
+source msfrc
+
+# Now MSF commands are available in your shell
+msfconsole    # Classic console
+msfvenom      # Payload generator
+msfd          # MSF daemon
+
+# Run Python exploit modules directly
+python3 modules/exploits/linux/http/example.py --help
+
+# Use transpiler tools
+python3 transpilers/ruby2py/converter.py old_module.rb
+python3 transpilers/py2ruby/transpiler.py new_module.py -o output.rb
+
+# Deactivate when done
+deactivate-msf
+```
+
+**Benefits of msfrc activation:**
+- ✅ All MSF commands available in your regular shell (no need to enter msfconsole)
+- ✅ Python-native module execution
+- ✅ Easy access to transpiler tools
+- ✅ Environment variables automatically configured
+- ✅ Similar workflow to Python virtualenv
 
 ## PF Framework Integration
 
