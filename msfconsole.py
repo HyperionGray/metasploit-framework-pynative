@@ -13,7 +13,6 @@ Converted from Ruby msfconsole script.
 
 import sys
 import os
-import subprocess
 from pathlib import Path
 
 
