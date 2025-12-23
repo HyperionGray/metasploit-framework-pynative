@@ -211,22 +211,21 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      - name: GitHub Copilot Documentation Review
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Review the documentation for this repository:
-            1. Check README.md completeness and quality
-            2. Verify all features and functionality are documented
-            3. Check for installation and usage instructions
-            4. Identify missing or outdated documentation
-            5. Suggest improvements for clarity and completeness
-            6. Verify code comments and inline documentation
-            7. Check for API documentation if applicable
-            8. Ensure contributing guidelines are present
-            
-            Provide specific recommendations with file names and sections.
+      - name: GitHub Copilot Documentation Review (Placeholder)
+        run: |
+          echo "GitHub Copilot Documentation Review step placeholder"
+          echo "Original action 'austenstone/copilot-cli-action@v2' is not available"
+          echo "This step was intended to:"
+          echo "1. Check README.md completeness and quality"
+          echo "2. Verify all features and functionality are documented"
+          echo "3. Check for installation and usage instructions"
+          echo "4. Identify missing or outdated documentation"
+          echo "5. Suggest improvements for clarity and completeness"
+          echo "6. Verify code comments and inline documentation"
+          echo "7. Check for API documentation if applicable"
+          echo "8. Ensure contributing guidelines are present"
+          echo ""
+          echo "Manual documentation review recommended for these areas."
         continue-on-error: true
 
       - name: Create Documentation Review Report
