@@ -48,35 +48,37 @@ This fork has successfully converted Metasploit Framework to Python:
 - **Tools**: All Ruby tools → Python tools
 - **Configuration**: Gemfile → requirements.txt, Rakefile → tasks.py
 
-See [TRANSPILATION_REPORT.md](TRANSPILATION_REPORT.md) for detailed statistics.
+See [docs/ruby2py/TRANSPILATION_REPORT.md](docs/ruby2py/TRANSPILATION_REPORT.md) for detailed statistics.
 
 ### Transpilation Tools
 
 **All Ruby files have been transpiled!** Tools available for future conversions:
 
-#### Ruby → Python (Comprehensive Transpiler)
+#### Ruby → Python Converter
 ```bash
-# Transpile ALL Ruby files to Python
-python3 master_transpiler.py
+# Convert a single Ruby module to Python
+python3 ruby2py/convert.py modules/exploits/path/to/module.rb
 
-# Transpile with dry-run
-python3 master_transpiler.py --dry-run
+# Convert with output file specified
+python3 ruby2py/convert.py input.rb -o output.py
 
-# Convert specific Ruby module
-python3 tools/ruby_to_python_converter.py modules/exploits/path/to/module.rb
+# Convert entire directory recursively
+python3 ruby2py/convert.py modules/exploits/linux/http/ --recursive
 ```
 
-#### Python → Ruby (Full Transpiler)
+#### Python → Ruby Transpiler
 ```bash
-# Transpile Python code to Ruby
-python3 tools/py2ruby_transpiler.py script.py -o output.rb
+# Transpile Python code back to Ruby
+python3 ruby2py/py2ruby/transpiler.py script.py -o output.rb
 ```
+
+See [ruby2py/README.md](ruby2py/README.md) for complete documentation.
 
 ### Quick Start with Python Modules
 
 ```bash
 # View transpilation report
-cat RUBY_TO_PYTHON_COMPLETE.md
+cat docs/ruby2py/RUBY_TO_PYTHON_COMPLETE.md
 
 # Run Python module example
 python3 modules/exploits/multi/http/generic_rce_example_2024.py
@@ -90,13 +92,8 @@ pip3 install -r requirements.txt
 ```
 
 See also:
-- **[RUBY_TO_PYTHON_COMPLETE.md](RUBY_TO_PYTHON_COMPLETE.md)** - **Complete transpilation summary (NEW!)**
-- **[TRANSPILATION_REPORT.md](TRANSPILATION_REPORT.md)** - **Detailed migration report (NEW!)**
-- [CONVERTER_GUIDE.md](CONVERTER_GUIDE.md) - Ruby→Python converter guide
-- [PY2RUBY_TRANSPILER_GUIDE.md](PY2RUBY_TRANSPILER_GUIDE.md) - Python→Ruby transpiler guide
-- [CONVERTER_EXAMPLE.md](CONVERTER_EXAMPLE.md) - Complete working example
-- [PYTHON_TRANSLATIONS.md](PYTHON_TRANSLATIONS.md) - List of 48+ converted modules
-- [PYTHON_QUICKSTART.md](PYTHON_QUICKSTART.md) - Python module quick start guide
+- **[docs/ruby2py/](docs/ruby2py/)** - **Complete Ruby→Python conversion documentation**
+- [ruby2py/README.md](ruby2py/README.md) - Conversion tools usage guide
 - [modules_legacy/README.md](modules_legacy/README.md) - Legacy module documentation
 
 ## Binary Analysis with Radare2
@@ -108,7 +105,7 @@ This fork includes advanced binary analysis capabilities with Radare2 integratio
 - **Binary Instrumentation**: AFL-style coverage tracking and code path analysis  
 - **In-Memory Fuzzing**: High-speed fuzzing with stack manipulation
 
-See [RADARE2_QUICKSTART.md](RADARE2_QUICKSTART.md) for installation and usage guide.
+See [docs/RADARE2_QUICKSTART.md](docs/RADARE2_QUICKSTART.md) for installation and usage guide.
 
 Quick start:
 ```bash
