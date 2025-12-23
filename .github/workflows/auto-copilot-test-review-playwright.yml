@@ -1,5 +1,9 @@
 name: "Comprehensive Test Review with Playwright"
 
+# REQUIREMENTS:
+# - A GitHub Personal Access Token with Copilot access must be created and stored as a repository secret named COPILOT_TOKEN
+# - See COPILOT_TOKEN_SETUP.md for detailed setup instructions
+
 on:
   push:
     branches:
@@ -148,6 +152,10 @@ jobs:
             ! -path "*/build/*" \
             ! -path "*/.venv/*" \
             ! -path "*/vendor/*" \
+            ! -path "*/modules/*" \
+            ! -path "*/external/*" \
+            ! -path "*/legacy/*" \
+            ! -path "*/transpiler/*" \
             ! -name "*test*" \
             ! -name "*spec*"); do
             basename=$(basename "$file" | sed 's/\.[^.]*$//')
@@ -160,27 +168,23 @@ jobs:
           
           cat /tmp/test-analysis.md
 
-      # Note: GitHub Copilot CLI Action is not available as a GitHub Action
-      # The github/copilot-cli-action@main action does not exist
-      # This step has been commented out to prevent CI failures
-      # - name: GitHub Copilot Test Review
-      #   uses: github/copilot-cli-action@main
-      #   with:
-      #     query: |
-      #       Review the test suite for this repository:
-      #       1. Verify all web-based functionality has Playwright tests (both headed and headless)
-      #       2. Identify missing test coverage for critical functionality
-      #       3. Check test quality and maintainability
-      #       4. Suggest improvements for test organization
-      #       5. Verify tests follow best practices (isolation, clarity, proper assertions)
-      #       6. Check for flaky tests or tests with timing issues
-      #       7. Ensure tests are running in CI/CD pipeline
-      #       
-      #       For any web tests not using Playwright, recommend migration.
-      #       Provide specific, actionable recommendations with file names.
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   continue-on-error: true
+      - name: GitHub Copilot Test Review
+        uses: austenstone/copilot-cli-action@v2
+        with:
+          copilot-token: ${{ secrets.COPILOT_TOKEN }}
+          prompt: |
+            Review the test suite for this repository:
+            1. Verify all web-based functionality has Playwright tests (both headed and headless)
+            2. Identify missing test coverage for critical functionality
+            3. Check test quality and maintainability
+            4. Suggest improvements for test organization
+            5. Verify tests follow best practices (isolation, clarity, proper assertions)
+            6. Check for flaky tests or tests with timing issues
+            7. Ensure tests are running in CI/CD pipeline
+            
+            For any web tests not using Playwright, recommend migration.
+            Provide specific, actionable recommendations with file names.
+        continue-on-error: true
 
       - name: Create or Update Test Review Issue
         uses: actions/github-script@main

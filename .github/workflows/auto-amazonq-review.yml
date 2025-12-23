@@ -125,6 +125,10 @@ jobs:
             ! -path "*/.venv/*" \
             ! -path "*/dist/*" \
             ! -path "*/build/*" \
+            ! -path "*/modules/*" \
+            ! -path "*/external/*" \
+            ! -path "*/legacy/*" \
+            ! -path "*/transpiler/*" \
             | wc -l > /tmp/file_count.txt
           
           FILE_COUNT=$(cat /tmp/file_count.txt)

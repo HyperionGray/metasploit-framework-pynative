@@ -54,6 +54,7 @@ jobs:
           echo "### Large Files (>500 lines):" >> /tmp/review-results/cleanliness.md
           find . -type f \( -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.java" -o -name "*.go" -o -name "*.cs" \) \
             ! -path "*/node_modules/*" ! -path "*/dist/*" ! -path "*/build/*" ! -path "*/.venv/*" \
+            ! -path "*/modules/*" ! -path "*/external/*" ! -path "*/legacy/*" ! -path "*/transpiler/*" \
             -exec sh -c 'lines=$(wc -l < "$1"); if [ "$lines" -gt 500 ]; then echo "$lines lines: $1"; fi' _ {} \; \
             | sort -rn >> /tmp/review-results/cleanliness.md || echo "No large files found" >> /tmp/review-results/cleanliness.md
           
@@ -164,7 +165,7 @@ jobs:
           echo "### Essential Documentation Files:" >> /tmp/review-results/documentation.md
           for doc in README.md CONTRIBUTING.md LICENSE.md CHANGELOG.md CODE_OF_CONDUCT.md SECURITY.md; do
             if [ -f "$doc" ]; then
-              word_count=$(wc -w < "$doc" 2>/dev/null | tr -d ' \t\n\r' || echo 0)
+              word_count=$(wc -w < "$doc" 2>/dev/null || echo 0)
               echo "✅ $doc ($word_count words)" >> /tmp/review-results/documentation.md
             else
               echo "❌ $doc (missing)" >> /tmp/review-results/documentation.md
