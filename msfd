@@ -11,14 +11,17 @@
 # $Revision$
 #
 
-# Show informational message about Python alternatives (unless quiet mode)
-unless ENV['MSF_QUIET'] || ARGV.include?('-q')
-  $stderr.puts "\n" + "="*70
-  $stderr.puts "  Msfd - Metasploit Daemon"
-  $stderr.puts "="*70
-  $stderr.puts "  TIP: For a modern Python-native workflow:"
-  $stderr.puts "    source msfrc    # Virtualenv-like environment"
-  $stderr.puts "="*70 + "\n"
+# Show guidance message for Python-enhanced experience
+unless ARGV.include?('-q') || ENV['MSF_QUIET'] == '1'
+  $stderr.puts ""
+  $stderr.puts "🐍 Metasploit Framework Daemon - Traditional Ruby Version"
+  $stderr.puts ""
+  $stderr.puts "💡 For an enhanced Python experience, try:"
+  $stderr.puts "   source msfrc          # Activate MSF shell environment"
+  $stderr.puts "   msf_rpc               # Python-enhanced RPC server"
+  $stderr.puts ""
+  $stderr.puts "   Or use -q flag to hide this message"
+  $stderr.puts ""
 end
 
 msfbase = __FILE__

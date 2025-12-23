@@ -1,0 +1,451 @@
+20795	OPEN	ssh_login_pubkey docs needc to be removed	suggestion-docs	2025-12-19T22:23:53Z
+20794	OPEN	ssh_login printing extraneous characters	bug	2025-12-19T22:22:18Z
+20790	OPEN	Add OptTimedelta datastore option	suggestion-feature	2025-12-18T15:38:31Z
+20789	OPEN	Remote command injection in FreeBSD via IPv6 processing	suggestion-module	2025-12-22T00:56:17Z
+20788	OPEN	CVE-2025-67888 — Control Web Panel <= 0.9.8.1208 Unauthenticated OS Command Injection Vulnerability	suggestion-module	2025-12-18T16:19:48Z
+20780	OPEN	PPC Meterpreter are broken	bug	2025-12-16T10:29:58Z
+20766	OPEN	Module Metadata Improvements	suggestion-feature	2025-12-18T11:03:07Z
+20765	OPEN	Meterpreter Compile-Time Obfuscation	suggestion-feature	2025-12-12T10:24:09Z
+20764	OPEN	Evasion Modules Overhaul	suggestion-feature	2025-12-12T10:24:12Z
+20763	OPEN	Add an HTTP NTLM Relay Server	suggestion-feature	2025-12-11T15:20:17Z
+20748	OPEN	PHP Meterpreter TCP Server Channels	suggestion-feature	2025-12-10T13:50:31Z
+20715	OPEN	Feature Request: Optional Lightweight TCP Redirector for Multi/Handler	suggestion-feature	2025-11-25T19:06:13Z
+20697	OPEN	#mkdir is inconsistent	bug, not-stale	2025-12-16T15:00:51Z
+20675	OPEN	payload/generic/shell_bind_aws_ssm Fails With a Database	bug, not-stale	2025-12-08T15:00:11Z
+20664	OPEN	No such file or directory @ rb_check_realpath_internal	bug	2025-12-04T02:04:39Z
+20663	OPEN	Setting up development environment issue	suggestion-docs	2025-10-28T01:03:06Z
+20653	OPEN	Add support for deprecated module options	bug, not-stale	2025-11-25T15:00:09Z
+20649	OPEN	DB (Postgres) - ERROR: relation "workspaces" does not exist	bug	2025-11-25T15:00:10Z
+20647	OPEN	Msf::Post::File: read_file returns zero bytes for some files on iOS	bug, not-stale	2025-12-04T01:07:31Z
+20642	OPEN	cmd_exec: Trailing line feed in command terminates ssh session	bug, cmd_exec is broken again, not-stale	2025-12-04T01:07:57Z
+20606	OPEN	Add OptArray type	suggestion-feature	2025-10-15T09:27:33Z
+20603	OPEN	Module Metadata Fields Arch and Platform Should be Automatic	suggestion-feature	2025-10-15T09:27:40Z
+20598	OPEN	Add support for password protected SSH keys	suggestion-feature	2025-10-15T09:27:43Z
+20587	OPEN	Option to adjust kerberos clock	suggestion-feature	2025-10-15T09:27:49Z
+20570	OPEN	FATAL: no pg_hba.conf entry for host "<eth0>", user "msf", database "postgres", SSL off	bug, Stale	2025-12-08T15:00:13Z
+20539	OPEN	Payload not working php/reverse_php	bug, Stale	2025-12-08T15:00:15Z
+20515	OPEN	unhook extension fails to load and crashes Meterpreter on Windows 11 24H2 and Server 2025	meterpreter, bug, confirmed	2025-09-18T16:17:41Z
+20506	OPEN	Feature Suggestion: Automated Vuln Target Building	suggestion-feature	2025-09-03T14:41:00Z
+20487	OPEN	add privileged for auxiliary scan and discovery	suggestion-feature	2025-08-21T18:19:06Z
+20468	OPEN	LDAP Signing and Channel Binding Requirements Check	suggestion-module	2025-08-12T20:34:12Z
+20467	OPEN	Add AD CS Web Enrollment Module	suggestion-module	2025-09-05T15:25:27Z
+20465	OPEN	SCCM Kerberos Authentication	suggestion-module	2025-08-12T20:12:25Z
+20464	OPEN	powershell	suggestion-docs	2025-08-11T21:52:23Z
+20453	OPEN	Certutil fetch payload creation method references non-existent option	bug, not-stale	2025-09-05T15:22:56Z
+20447	OPEN	Objective See KIller: OSX Antivirus Enumeration & Detection.	suggestion-module	2025-09-26T15:31:29Z
+20434	OPEN	`exec -m winpeas.exe -d notepad.exe` fails on Win 10x64	bug, Stale	2025-12-18T15:00:20Z
+20385	OPEN	ARM64 Windows Support	suggestion-feature	2025-08-14T14:50:52Z
+20374	OPEN	Persistence Category Refactor	suggestion-feature	2025-12-21T12:54:05Z
+20363	OPEN	CVE‑2025‑1094 (PostgreSQL libpq SQL injection → RCE)	suggestion-module	2025-08-20T21:03:38Z
+20344	OPEN	Unauthenticated remote code execution in CentOS Web Panel - CVE-2025-48703	suggestion-module	2025-07-10T22:08:28Z
+20323	OPEN	Pasting into msfconsole cmdline is slow	bug, confirmed	2025-07-19T17:15:44Z
+20284	OPEN	Reformat existing persistence modules into persistence directory format	suggestion-feature	2025-06-04T11:29:12Z
+20234	OPEN	Update and Consolidate Communication Channels in Documentation	suggestion-docs	2025-07-31T02:50:26Z
+20223	OPEN	Add Multiple Windows Shell Link (LNK) NTLM Leak	suggestion-module	2025-05-21T21:26:43Z
+20217	OPEN	Add module for BadSuccessor dMSA Priv Esc.	suggestion-module	2025-05-21T18:10:21Z
+20183	OPEN	fuzzers/smb/smb_create_pipe_corrupt crashes on start	bug, easy	2025-07-19T05:36:32Z
+20172	OPEN	Bailiwicked module exceptions	bug, easy, not-stale	2025-08-22T14:00:21Z
+20158	OPEN	post/windows/manage/rpcapd_start: run_rpcapd(cmdline) method does not run rpcapd with cmdline	bug, confirmed	2025-07-31T15:21:23Z
+20121	OPEN	RegEx Replacement Warning in smb_version	bug, confirmed	2025-06-12T12:56:49Z
+20103	OPEN	Msf::Post::File: readable? / exists? / read_file methods crash sessions with EOFError on Solaris	bug, confirmed	2025-07-31T15:21:40Z
+20078	OPEN	CVE-2024-10442 — RCE as root on Synology DS1823xs+ NAS	suggestion-module	2025-04-23T16:39:19Z
+20042	OPEN	MCP server	suggestion-feature	2025-05-16T18:03:08Z
+20030	OPEN	Msf::Post::File: format argument of stat command not behaving as expected	bug, confirmed	2025-05-21T23:24:37Z
+20029	OPEN	Please simplify msfvenom internal workflow, current implementation just trick bad hackers into thinking they're good sorry	suggestion-feature	2025-08-13T15:00:10Z
+20016	OPEN	new persistence method: wordpress mu plugins	suggestion-module	2025-04-09T19:41:59Z
+20004	OPEN	docs/metasploit-framework.wiki/Metasploit-Guide-MySQL.md	suggestion-docs	2025-08-01T14:07:45Z
+19989	OPEN	Add dedicated java meterpreter payload to pentest Forge (minecraft server launcher)	suggestion-feature	2025-03-28T10:20:09Z
+19981	OPEN	CVE-2024-9053 vLLM allows Remote Code Execution by Pickle Deserialization via AsyncEngineRPCServer() RPC server entrypoints	suggestion-module	2025-03-22T23:37:01Z
+19971	OPEN	CVE-2025-0927	suggestion-module	2025-03-18T19:15:36Z
+19958	OPEN	Running the same handler 3 times results in 2 jobs where 1 would be right	bug, not-stale	2025-04-15T08:47:05Z
+19951	OPEN	Ruby SMB Client is incompatible with Msf::Exploit::Remote::SMB::RelayServer	bug, not-stale	2025-04-08T14:53:46Z
+19949	OPEN	OpenFire CVE-2024-25420 & CVE-2024-25421 privesc auth bypass via admin.authorizedJIDs (no PoC)	suggestion-module	2025-03-07T06:40:52Z
+19948	OPEN	the webapp "tikiwiki_graph_formula_exec" no longer works	bug, confirmed	2025-08-08T02:21:39Z
+19924	OPEN	Improve sandbox detection based on InviZzzible's research	suggestion-feature	2025-02-28T16:09:44Z
+19923	OPEN	Add LPE Module for CVE-2025-21333	suggestion-module	2025-02-28T14:40:11Z
+19915	OPEN	CVE-2024-34331: MacOS Priv Esc -> Parallels	suggestion-module	2025-02-27T11:37:59Z
+19914	OPEN	CVE-2024-27822: macOS priv esc in PackageKit	suggestion-module	2025-07-21T20:59:11Z
+19905	OPEN	more Microsoft Windows modules	suggestion-module	2025-02-25T20:24:57Z
+19886	OPEN	MacOS Persistence	suggestion-module	2025-07-19T05:37:05Z
+19882	OPEN	Cacti RCE CVE-2025-22604	suggestion-module	2025-05-07T12:22:08Z
+19863	OPEN	Linux LPE: OtterRoot (CVE-2024-26809)	suggestion-module	2025-06-21T20:17:20Z
+19855	OPEN	Create kernel_rex_version to guard against Rex::Version crashes on local modules	suggestion-feature	2025-02-03T20:08:32Z
+19853	OPEN	rpc not starting listener	bug, Stale	2025-12-01T15:00:13Z
+19845	OPEN	docker entrypoint fallback to root		2025-11-26T16:33:48Z
+19839	OPEN	Automatic persistence suggestor	suggestion-feature	2025-02-07T16:18:00Z
+19811	OPEN	Payload cmd/unix/reverse_python gives "Syntax error" on recent Linux systems	bug, newbie-friendly	2025-11-30T04:40:48Z
+19784	OPEN	Bleeding Tooth: Linux Bluetooth Zero Click RCE Exploit	suggestion-feature, suggestion-module	2025-02-13T10:49:30Z
+19782	OPEN	Stock Management System (SMS) v1.0 RCE vulnerability exploit	suggestion-module	2025-01-09T20:56:41Z
+19775	OPEN	Update Sharphound	bug, confirmed	2025-01-29T17:04:48Z
+19727	OPEN	Add info about `msfconsole.rc` to docs	docs, not-stale	2025-02-06T21:00:51Z
+19725	OPEN	(CVE-2024-41713) Mitel MiCollab 0-day, auth-bypass bug to access sensitive files	suggestion-module	2025-12-13T13:26:23Z
+19697	OPEN	Rich Services Output	suggestion-feature	2024-12-05T20:51:34Z
+19688	OPEN	Update exploit/unix/x11/x11_keyboard_exec to use the x11 libraries	bug, not-stale	2025-03-06T15:55:16Z
+19680	OPEN	Why doesn't msfvenom have an option like SNI?	question, not-stale	2025-01-10T07:09:53Z
+19670	OPEN	Linux stageless Metereter is not shellcode	bug, not-stale	2025-01-06T15:00:11Z
+19669	OPEN	Inconsistencies among mettle arches/stage values and prepend/output types.	bug, not-stale	2025-03-25T18:55:06Z
+19668	OPEN	ARM32 LE Shared Object template alignment issue	bug, not-stale, arm	2025-01-17T15:05:05Z
+19638	OPEN	citrix unauth rce with poc	suggestion-module	2025-01-23T17:17:54Z
+19616	OPEN	Module Suggestion Cisco FTD Static Credential Vulnerability CVE-2024-20412	suggestion-module	2024-11-04T08:03:04Z
+19611	OPEN	Bypass of PHP's open_basedir	suggestion-module	2024-11-01T16:30:42Z
+19594	OPEN	Add DNS&ICMP reverse shell.	suggestion-feature	2024-10-29T16:37:38Z
+19592	OPEN	RFC: establish a separate module category for persistence modules	suggestion-feature	2025-01-19T21:18:23Z
+19590	OPEN	cve_2021_4034_pwnkit_lpe_pkexec: false positive CheckCode::Vulnerable	bug, not-stale	2024-12-17T13:50:07Z
+19589	OPEN	post/linux/gather/enum_psk: PSKs not retrieved on non-NetworkManager systems	bug, not-stale	2024-12-13T15:07:34Z
+19565	OPEN	Add Auxilary - Backup Scanner	suggestion-module	2024-10-22T23:46:08Z
+19560	OPEN	Borrow ideas from NetExec	suggestion-feature	2025-04-03T13:40:22Z
+19514	OPEN	add CVE-2024-38054	suggestion-module	2024-11-04T21:09:08Z
+19469	OPEN	Update LDAP-related module documentation to use DOMAIN/USERNAME/PASSWORD instead of BIND_DN/BIND_PW options	suggestion-docs	2025-01-06T15:58:59Z
+19465	OPEN	Improve flimsy architecture detection	library, not-stale, arm	2024-09-17T08:47:14Z
+19442	OPEN	msfdb: `ActiveRecord::StatementInvalid: PG::InsufficientPrivilege: ERROR: permission denied for schema public` + solution	confirmed	2025-03-05T17:10:04Z
+19440	OPEN	VMware Fusion (13.x before 13.6) priv esc (CVE-2024-38811)	suggestion-module	2024-10-29T16:46:22Z
+19399	OPEN	Real Readline option removal in favor of Reline	discussion	2024-08-19T12:49:30Z
+19387	OPEN	Kibana Authenticated RCE in Machine Learning (CVE-2024-37287)	suggestion-module	2024-08-14T10:37:26Z
+19364	OPEN	Add CVE-2024-21338 post module: Windows Applocker Diver LPE	suggestion-module	2024-11-14T17:21:01Z
+19335	OPEN	Add support for Windows 10 Enterprise LTSB 14393 x64 in 'windows/smb/ms17_010_eternalblue' and for x86 based processors	suggestion-feature	2024-08-14T16:04:54Z
+19303	OPEN	CVE-2024-6387 - Signal handler race condition in OpenSSH on glibc-based Linux systems.	suggestion-module	2025-01-07T10:54:46Z
+19281	OPEN	CVE-2024-30078: Windows WiFi Driver RCE	suggestion-module	2024-08-24T05:17:22Z
+19278	OPEN	Integrate ChromeKatz as Post Module or Meterp Extension	suggestion-feature	2024-06-26T15:33:29Z
+19276	OPEN	CVE-2023-21554 Microsoft Message Queuing RCE Exploit Module	suggestion-module	2025-05-28T11:26:13Z
+19250	OPEN	Post/aux modules for Recall collection	suggestion-feature	2024-06-19T08:49:05Z
+19216	OPEN	Fortinet FortiSIEM Unauthenticated Command Injection [CVE-2023-34992]	suggestion-module	2024-08-05T15:23:38Z
+19181	OPEN	Infinite loop when waiting on a socket with no remote part	bug, confirmed	2024-06-19T15:04:35Z
+19154	OPEN	Android Overhaul	bug, enhancement, android, suggestion-feature	2025-06-15T14:56:52Z
+19153	OPEN	Linux LPE (CVE-2024-1086)	suggestion-module	2024-11-04T18:27:14Z
+19093	OPEN	msfvenom fails to generate a payload with UTF-8 characters	bug, ascii-utf8-issues	2024-04-16T22:35:27Z
+19092	OPEN	SQLi progress feedback	suggestion-feature	2024-04-22T12:27:48Z
+19024	OPEN	Lpe cve-2024-28085 (wall escape)	suggestion-module	2024-03-29T00:15:27Z
+19023	OPEN	Expose session expiration timeout	suggestion-feature	2024-06-26T15:39:34Z
+19019	OPEN	Mark rpc_meterpreter_read as deprecated	suggestion-feature, breaking change	2024-04-30T08:43:39Z
+18990	OPEN	Add "privileged" to supported search columns	suggestion-feature	2024-04-21T12:35:59Z
+18989	OPEN	Armitage: Auxiliary aborted due to failure: bad-config: The PASSWORD option is required unless using Kerberos authentication.	bug, confirmed	2024-03-22T08:05:59Z
+18927	OPEN	Update modules to use splunk library	suggestion-feature	2024-04-22T12:25:51Z
+18888	OPEN	Add the ability to change the process name in which a session is living	suggestion-feature	2024-02-26T14:55:38Z
+18845	OPEN	Several issue with Java command shell payloads (and a proposed fix)	bug, confirmed	2024-03-22T15:05:52Z
+18824	OPEN	Add module for CVE-2024-21762 FortiOS out-of-bounds write to RCE	suggestion-module	2024-06-24T20:38:09Z
+18819	OPEN	Update `admin/mssql/mssql_sql` to handle required password changes when attempting login	suggestion-feature	2024-04-24T08:59:46Z
+18781	OPEN	Android exploit	suggestion-module	2024-11-07T12:30:58Z
+18771	OPEN	generate_true/generate_false for the sqli mixin	suggestion-feature	2024-01-30T17:52:01Z
+18765	OPEN	Container Rooting + Escape (GameOver(lay)) (CVE-2023-2640, CVE-2023-32629)	suggestion-module	2024-11-15T15:50:14Z
+18754	OPEN	Kill established session threads when we kill SMB server	suggestion-feature	2024-01-26T20:45:58Z
+18719	OPEN	CVE-2023-6546/ZDI-24-020 — Linux LPE	suggestion-module	2024-02-05T15:28:10Z
+18709	OPEN	Set options as a required option when a default value is set	code quality, not-stale	2024-02-19T15:57:19Z
+18699	OPEN	SessionExpirationTimeout option not working in payload/linux/aarch64/meterpreter_reverse_tcp	bug, confirmed	2024-01-17T11:55:31Z
+18658	OPEN	Stinger UAC bypass	suggestion-module	2024-09-10T23:33:05Z
+18650	OPEN	Evaluate WinSxS Research for inclusion	suggestion-feature	2024-01-01T17:24:05Z
+18629	OPEN	Corrected input with bad caracters not handled properly in msfconsole	bug, ascii-utf8-issues	2024-02-05T15:00:15Z
+18620	OPEN	ASM: Interface Dimensions	suggestion-feature	2023-12-20T21:34:17Z
+18608	OPEN	Systemd BSOD QR Payload	suggestion-feature	2023-12-29T21:09:41Z
+18605	OPEN	Add fetch payloads to shell_to_meterpreter	suggestion-feature	2023-12-07T14:56:50Z
+18573	OPEN	Cookie Jar Documentation Doesn't Work	easy, suggestion-docs	2024-03-25T20:51:19Z
+18559	OPEN	The enum_chrome module crashes when run as SYSTEM	bug, not-stale	2025-06-16T11:58:04Z
+18498	OPEN	after migrate explorer.exe, how to emergency	question, confirmed	2023-11-21T15:04:03Z
+18474	OPEN	CVE-2023-38408 RCE (SSH)	suggestion-module	2024-04-04T16:05:33Z
+18469	OPEN	Update the Meterpreter config block to use TLVs	suggestion-feature, breaking change	2023-10-19T17:48:01Z
+18439	OPEN	Remove support for msfdb remote webservice	question, not-stale	2025-08-10T09:39:21Z
+18409	OPEN	UAC Bypass (SSPI technique)	suggestion-module	2023-09-28T18:51:30Z
+18407	OPEN	Sharepoint Priv Esc (CVE-2023-29357)	suggestion-module	2023-09-28T11:28:07Z
+18319	OPEN	User-less approach for CVE-2023-32315	suggestion-feature	2023-08-25T09:25:48Z
+18311	OPEN	RubySMB + Kerberos - Track default_name, default_domain, dns_host_name	bug, confirmed	2023-09-26T15:00:15Z
+18261	OPEN	Module payloads can't specify defaults	bug, confirmed	2023-09-05T15:00:15Z
+18176	OPEN	Add Exploit for BadPotato	suggestion-module	2023-07-09T01:22:59Z
+18175	OPEN	Add Exploit for PrintNotifyPotato	suggestion-module	2023-07-09T01:20:36Z
+18174	OPEN	Add Exploit for GodPotato	suggestion-module	2023-07-09T01:16:24Z
+18163	OPEN	Fortinet Fortigate RCE (CVE-2023-27997)	suggestion-module, arm	2023-11-30T16:12:48Z
+18149	OPEN	modules/post/windows/gather/checkvm.rb improvement suggestions	enhancement, newbie-friendly, easy, suggestion-feature	2023-07-24T13:16:05Z
+18138	OPEN	Cleanup method is called twice when a Post module fails	bug, confirmed	2023-06-26T14:35:44Z
+18135	OPEN	Backdoor Locksmith for Phicomm routers	suggestion-module	2023-06-22T15:09:35Z
+18128	OPEN	Request for LPE CVE-2023-1829	suggestion-module	2023-06-21T11:56:06Z
+18116	OPEN	db_nmap option to auto tag hosts when they are inserted into the database	suggestion-feature	2023-06-15T11:14:38Z
+18091	OPEN	auxiliary/admin/ldap/vmware_vcenter_vmdir_auth_bypass broken and unable to use custom domain	bug, confirmed	2023-10-24T07:49:37Z
+18087	OPEN	documentation/modules/post/windows/gather/hashdump: Missing overview section	suggestion-docs	2023-06-11T14:15:03Z
+18081	OPEN	Win32k Elevation of Privilege Vulnerability (CVE-2023-29336)	suggestion-module	2023-06-22T20:41:47Z
+18053	OPEN	Migrate post/windows/manage /persistence_exe to an Exploit	suggestion-module	2023-06-02T13:33:53Z
+18017	OPEN	Beyond the ASCII shell - control chars, PTY, WinPTY	bug, confirmed, suggestion-feature, not-stale	2023-06-23T16:29:52Z
+18007	OPEN	Fix comm selection	bug, confirmed	2023-06-22T22:06:38Z
+18001	OPEN	Powershell sessions become unresponsive after starting cmd.exe	bug, not-stale	2023-06-16T15:25:50Z
+17999	OPEN	[Draft] Scanner module check method implementation is wrong	bug, confirmed	2023-06-16T20:32:04Z
+17966	OPEN	Oracle Opera Preauth RCE CVE-2023-21932.	suggestion-module	2023-10-23T16:09:42Z
+17962	OPEN	Add in Exploit for CVE-2023-1671 - Pre-Auth RCE in Sophos Web Appliance < 4.3.10.4	suggestion-module	2024-11-17T15:32:53Z
+17961	OPEN	Add in Exploit for CVE-2021-36955 - Microsoft Windows Common Log File System Driver Elevation of Privilege Vulnerability Exploit	suggestion-module	2023-08-15T13:05:56Z
+17932	OPEN	Msf::DBManager::Import::Acunetix: Vulnerabilities are not imported	bug, database, confirmed	2023-08-01T13:57:24Z
+17918	OPEN	shell_to_meterpreter: PAYLOAD_OVERRIDE does not override payload configuration on Windows	bug, not-stale	2023-06-06T13:56:10Z
+17891	OPEN	Exploit modules which start a handler automatically do not support bind payloads	bug, confirmed	2024-03-20T06:12:33Z
+17859	OPEN	backup_file.rb adds dictionary	suggestion-feature	2024-04-24T09:42:58Z
+17852	OPEN	A new logging method for auxillary module is needed.	suggestion-feature	2023-04-10T03:05:33Z
+17793	OPEN	db_import wapiti xml no data	bug, database, confirmed	2023-03-30T11:34:19Z
+17759	OPEN	[CVE-2022-47986] Deserialization vulnerability in IBM Aspera Faspex	suggestion-module	2023-03-09T17:07:05Z
+17740	OPEN	How Can I Use Custom Payload in Metasploit?	discussion	2023-04-24T15:07:52Z
+17728	OPEN	Apache htaccess Persistence	suggestion-module	2023-03-04T15:34:29Z
+17694	OPEN	apktool will drop suport for aapt1	android, not-stale	2023-02-24T03:04:00Z
+17683	OPEN	Update Discovering Base_Dn to be case insensitive	bug, confirmed	2023-02-22T19:53:09Z
+17662	OPEN	Browser Exploits: Auto-Forward	suggestion-feature	2023-02-21T13:54:51Z
+17651	OPEN	Write module for Dompdf RCE CVE-2022-28368	suggestion-module	2023-02-15T17:41:12Z
+17641	OPEN	Change ManageEngine CVE-2022-47966 to be more stealthy	enhancement, easy, suggestion-feature	2024-02-06T18:49:07Z
+17628	OPEN	Framework Native/Universal build for Apple Silicon (x86_64 & arm64)	suggestion-feature, arm	2024-04-03T17:46:18Z
+17608	OPEN	Add CVE-2021–21974 (ESXi unauth RCE)	suggestion-module	2023-02-13T15:55:10Z
+17606	OPEN	Improve NagiosXI authenticated exploit modules to increase resilience and for use with Autocheck disabled	newbie-friendly, easy, suggestion-feature	2024-04-26T03:50:51Z
+17579	OPEN	Lexmark 0day	suggestion-module	2023-02-12T16:31:28Z
+17431	OPEN	Create a module out of tools/smb_file_server.rb	suggestion-feature	2023-01-03T16:21:19Z
+17367	OPEN	Integrate Creds to Modules (autofill)	suggestion-feature	2023-01-29T14:02:46Z
+17292	OPEN	Meterpreter Portforward Breaks When Route is Added	bug, confirmed	2022-11-27T03:22:03Z
+17289	OPEN	sysinfo['Computer'] returns IP address not hostname on Linux sessions	library, bug	2022-11-22T13:13:15Z
+17249	OPEN	Meterpreters Should No Longer Return TLV_TYPE_ADDR_TYPE When Resolving Hostnames	payload, code quality, not-stale, breaking change	2023-10-30T12:41:12Z
+17248	OPEN	Native WMI Exec	suggestion-feature	2022-11-10T13:54:46Z
+17193	OPEN	How to solve the problem that too many Meterpreter Sessions will cause MSF RPC API calls to get stuck	question, not-stale	2022-12-13T16:18:44Z
+17148	OPEN	Remote Code Execution in JXPath Library (CVE-2022-41852)	suggestion-module	2022-10-16T12:24:40Z
+17144	OPEN	Microsoft Teams Authenticated Cookie post module	suggestion-module	2023-02-06T06:44:31Z
+17136	OPEN	Consistency in Post modules and Post module libraries	discussion	2022-10-23T04:56:27Z
+17095	OPEN	[Idea / Suggestion] "Hardening" done via metasploit on different computers / operating systems	suggestion-feature	2023-08-03T21:44:44Z
+17074	OPEN	Snap package of Metasploit is now available	suggestion-feature	2023-12-06T09:01:24Z
+17047	OPEN	Windows Seagate Media Sync privesc (CVE-2022-40286)	suggestion-module	2022-10-01T05:30:51Z
+17010	OPEN	Add pagination to JSON RPC APIs	not-stale, breaking change	2022-11-10T18:08:19Z
+16937	OPEN	Add pluggable C2 transport mechanism to metasploit	suggestion-feature, breaking change	2022-08-24T13:35:44Z
+16927	OPEN	Post: Powershell methods do not escape special characters ($) in command strings	bug, confirmed	2022-09-21T00:00:08Z
+16826	OPEN	Dockerhub metasploit-framework releases are old	bug, confirmed	2023-09-11T16:40:51Z
+16791	OPEN	Windows persistence techniques	suggestion-module	2022-07-19T17:10:39Z
+16751	OPEN	Reduce likelihood of RubySMB Changes breaking Kerberos authentication	suggestion, code quality	2022-07-06T15:19:24Z
+16694	OPEN	IPv6 support for autoroute module	suggestion-feature	2022-06-19T00:09:24Z
+16687	OPEN	web_delivery module serves payload over LHOST, not SRVHOST	bug, not-stale	2022-11-24T14:40:19Z
+16683	OPEN	NamedPipe connections failure in lateral movement	bug, not-stale	2022-09-03T15:48:52Z
+16659	OPEN	exploit/solaris/ssh/pam_username_bof doesn't work in Metasploit recent versions	bug, not-stale	2022-07-08T15:14:06Z
+16655	OPEN	Exiting the final session crashes intermediate session in named_pipe pivoted sessions	bug, not-stale	2022-07-09T02:48:32Z
+16642	OPEN	`windows/*/reverse_ord_tcp` does not appear to work?	bug, payload, confirmed	2022-07-09T04:06:20Z
+16579	OPEN	Native Windows Credential Extraction	suggestion-feature	2023-01-12T15:57:51Z
+16536	OPEN	Improve stagers to consistently prepend payload size	suggestion-feature, breaking change	2025-10-29T14:57:17Z
+16503	OPEN	Reverse HTTP stagers do not handle ReverseHTTPProxyType SOCKS correctly	bug, not-stale	2022-06-28T15:00:39Z
+16362	OPEN	android/local/su_exec: Does not work with su on modern Android	module, bug, android, not-stale	2023-05-18T02:58:00Z
+16267	OPEN	Meterpreter Extension Base IDs	confirmed, breaking change	2022-04-05T15:00:26Z
+16226	OPEN	Add in support for TLSv1.3 to Framework and Rex::Proto::Http::Client	confirmed, suggestion-feature	2023-04-18T15:34:35Z
+16208	OPEN	android payload permissions not registered	bug, android, not-stale	2025-04-16T05:46:22Z
+16183	OPEN	Development environment fails to run tests without msfdb --msf-test-db-user-name option	bug, confirmed	2022-03-16T15:25:28Z
+16176	OPEN	Port Over Printer Bug from "The Unintended Risks of Trusting Active Directory" Talk	suggestion-feature	2022-02-12T22:27:25Z
+16108	OPEN	Rex::Zip: Add support for repairing zip files	enhancement	2022-01-28T09:24:30Z
+16107	OPEN	Linux armle stager_sock_reverse is unstable	bug, not-stale, arm	2023-11-30T16:13:06Z
+16074	OPEN	multi/manage/sudo writes clear text password to world-readable file in /tmp/	module, bug, not-stale	2022-04-11T15:41:16Z
+16070	OPEN	cmd_exec returns only 65536 bytes (sometimes)	bug, cmd_exec is broken again, not-stale	2022-02-27T07:27:31Z
+16017	OPEN	Stageless Java Meterpreter Payloads	suggestion-module	2023-04-14T02:47:46Z
+15966	OPEN	ipmi_dumphashes silently fails with IPv6 addresses	bug, not-stale	2022-01-28T02:15:50Z
+15959	OPEN	make_token and incognito revamp	suggestion-feature	2021-12-22T08:05:35Z
+15949	OPEN	local_exploit_suggester: Many viable modules are never checked	bug, confirmed	2022-12-17T11:20:29Z
+15885	OPEN	Mechanism to disable iteration of all IP's reported for the FQDN in Scanner modules	suggestion-feature	2021-11-17T18:29:14Z
+15850	OPEN	ProxyShell module uploads a webshell that doesn't seem to work as expected	bug, not-stale	2022-03-02T20:15:34Z
+15714	OPEN	process migration (Linux)	feature, question	2023-07-03T16:15:39Z
+15701	OPEN	Directly support extend user details in the Meterpreter API	suggestion-feature	2021-09-23T14:56:09Z
+15602	OPEN	Update the Block API to use the Length Field	bug, not-stale	2025-05-21T12:46:41Z
+15426	OPEN	Metasploit v6.0.52-dev SMB connections fail against Samba 4.2.3 where it previously worked with v4.16.48-dev	confirmed	2021-08-26T18:03:42Z
+15275	OPEN	Enumerate Meterpreter Channels	suggestion-feature, breaking change	2021-05-28T16:22:13Z
+15159	OPEN	exploit/windows/smb/psexec does not work while impacket-psexec does	bug, not-stale, needs-more-information	2022-12-28T00:28:46Z
+15147	OPEN	sessions -C execute fails with a nil:NilClass	bug, confirmed	2021-07-09T20:48:32Z
+15121	OPEN	CmdStager doesn't support python payloads	suggestion-feature	2022-04-06T13:25:28Z
+15108	OPEN	Make BRUTEFORCE_SPEED more dynamic	suggestion-feature	2021-04-28T12:44:12Z
+15089	OPEN	Reverse Port Forwarding to get meterpreter through pivoting meterpreter sessions	bug, confirmed	2021-06-07T14:22:46Z
+15025	OPEN	ARM targets	suggestion-feature, arm	2024-04-22T13:47:13Z
+14915	OPEN	Duplication in Exploit::Remote::Ftp and Rex::Proto::Ftp Libraries	library, bug	2021-04-05T12:11:17Z
+14868	OPEN	redis_replication_cmd_exec: write to data/exploits/redis/module.c fails due insufficient permissions	bug, confirmed	2025-11-19T08:40:50Z
+14837	OPEN	Incorrect call to get_notepad_pathname in modules/post/windows/manage/migrate.rb	bug, confirmed	2021-03-02T10:30:08Z
+14827	OPEN	Using java/jsp_shell_reverse_tcp with exploit/multi/handler results in a Windows shell with the wrong "shell type"	bug, confirmed	2021-08-31T14:26:30Z
+14820	OPEN	Automatic payload selection ignores that Meterpreter no longer supports Windows systems prior to XP SP2	bug, not-stale	2021-04-07T15:19:21Z
+14767	OPEN	mfs > exploit(ms08_067_netapi) > pull-request ?	suggestion-feature	2021-02-22T12:46:33Z
+14742	OPEN	Post libraries do no quote file paths	bug, not-stale	2021-03-16T15:05:50Z
+14612	OPEN	Exitfunc thread crashes process	bug, not-stale	2024-09-08T14:37:23Z
+14513	OPEN	Mixins defining `connect` can cause issues with other mixins	bug, confirmed, mixin madness	2021-01-14T17:55:07Z
+14508	OPEN	Meterpreter's shell command no longer interactive after getsystem command is run	bug, confirmed	2023-05-02T17:22:54Z
+14471	OPEN	msfconsole crashing when enumerating wp login	bug, confirmed	2020-12-08T14:59:28Z
+14464	OPEN	is_known_pipeline faild	question, confirmed, not-stale	2021-06-24T08:58:57Z
+14456	OPEN	[msfrpc] Include action information in auxiliary/post modules	suggestion-feature, breaking change	2022-10-04T13:41:41Z
+14406	OPEN	Add `*` for "all columns" to hosts (and others) `-c` option.	suggestion-feature, needs-more-information	2021-02-10T17:21:42Z
+14369	OPEN	Fully-interactive shell from within meterpreter session?	suggestion-feature	2021-06-22T13:43:38Z
+14333	OPEN	ASM error in Payload::Linux::BindTcp	bug, not-stale	2020-12-02T15:28:09Z
+14322	OPEN	Failed to load the OCI library (on windowns)	bug, not-stale	2021-01-04T15:24:14Z
+14286	OPEN	inconsistent target listing in cve_2019_0708_bluekeep_rce.rb	suggestion-docs	2020-11-02T10:34:49Z
+14278	OPEN	post/multi/gather/chrome_cookies: Post failed: NoMethodError undefined method `type' for nil:NilClass	question, confirmed, needs-issue-template	2022-07-11T09:48:30Z
+14257	OPEN	Runaway jobs can't be killed with jobs -K	bug, confirmed	2020-11-23T18:36:09Z
+14248	OPEN	Select the cipher specification for encrypting SSH connections	suggestion-feature	2020-10-30T16:21:26Z
+14231	OPEN	Feature Request - HTTP(s) logs	suggestion-feature	2025-04-27T22:36:43Z
+14189	OPEN	The console will have problems entering Chinese	bug, confirmed, ascii-utf8-issues	2020-11-30T13:40:46Z
+14149	OPEN	unix/webapp/joomla_comfields_sqli_rce - Error retrieving table prefix	bug, confirmed	2022-06-21T15:55:29Z
+14147	OPEN	Tomcat modules do not distinguish between the Manager being disabled vs. enabled with auth	module, bug, confirmed	2021-02-24T00:22:02Z
+14134	OPEN	snmp_login false positives	bug, confirmed	2020-10-15T15:41:25Z
+14132	OPEN	Suggestion: `search` by module options	suggestion-feature	2020-09-16T09:04:32Z
+14063	OPEN	URLDNS in ysoserial_payloads.json	suggestion-feature	2020-08-28T08:17:39Z
+14022	OPEN	post/osx/gather/enum_osx: review and rewrite	module, enhancement, not-stale	2020-09-21T09:15:49Z
+13977	OPEN	exploit/linux/samba/is_known_pipename only works with SMB1	bug, not-stale	2020-10-07T20:52:18Z
+13955	OPEN	auxiliary/gather/enum_dns ENUM_AXFR - Failed to parse RR packet from offset	bug, not-stale	2020-09-08T09:06:11Z
+13952	OPEN	auxiliary/gather/enum_dns - Auxiliary failed: NoMethodError undefined method `port' for #<Dnsruby::RR::IN::CNAME:0x000055891929efa8>	bug, confirmed	2020-08-10T16:20:28Z
+13947	OPEN	MacOS installation and quick start needs clarity	suggestion-docs	2023-02-05T13:49:34Z
+13797	OPEN	Update openvas-omp gem	plugin, confirmed, suggestion-feature	2024-03-18T17:58:09Z
+13788	OPEN	Payload names inconsistency	enhancement, confirmed, usability	2020-07-10T19:07:57Z
+13776	OPEN	vmauthd_version & vmauthd_login does not seem to work	question, confirmed	2021-02-17T16:30:06Z
+13738	OPEN	session.shell_upgrade should return upgraded session ID as well along with the success status	suggestion-feature	2020-09-16T15:15:24Z
+13736	OPEN	Add VLC H26X packetizer exploit (CVE-2020-13428)	suggestion-module	2020-07-25T07:19:31Z
+13519	OPEN	windows post exploitation to disable windows defender with exclusion path option	suggestion	2021-02-24T00:24:50Z
+13434	OPEN	multi/meterpreter/reverse_https fails when using x64 payloads stagers with EnableStageEncoding = True	not-stale	2020-11-15T16:07:46Z
+13414	OPEN	Is it still necessary to cleanup session info by removing non-ASCII characters? (minor issue)	confirmed, not-stale, ascii-utf8-issues	2021-05-25T15:14:26Z
+13324	OPEN	Kitty doesn't have a terminfo file for metasploit.	confirmed	2020-05-30T15:42:27Z
+13320	OPEN	Suggestion: Make Cookies Useful	suggestion	2020-04-23T20:18:38Z
+13296	OPEN	grafana_auth_bypass - No Vhost Option	suggestion-module	2020-06-23T15:24:56Z
+13230	OPEN	Add netman dll hijacking	suggestion	2020-04-10T17:26:35Z
+13149	OPEN	auxiliary/gather/java_rmi_registry - Auxiliary failed: ArgumentError negative length -28869 given	module, bug, confirmed	2020-10-07T15:22:39Z
+13137	OPEN	auxiliary/scanner/ftp/ftp_version	suggestion	2023-10-26T18:07:29Z
+13110	OPEN	Add CVE-2019-0803	suggestion	2020-04-28T07:35:05Z
+12979	OPEN	Imported Vuln created_at datetime inconsistent with Host and VulnAttempt	database, confirmed	2020-11-16T11:32:52Z
+12919	OPEN	Payload & Stager Redesign RFC 1337	feature, payload, suggestion	2020-02-11T21:51:41Z
+12918	OPEN	WordPress mixin needs to be updated for 5.x	library, bug, not-stale	2024-01-10T11:12:19Z
+12893	OPEN	No reverse payloads work on Ubuntu 18	bug, payload, easy, confirmed, usability	2023-05-28T18:24:33Z
+12876	OPEN	msfvenom -p windows/download_exec not working on 64bit / WOW64	msfvenom, suggestion	2020-11-25T15:16:52Z
+12848	OPEN	openvas_report_list OpenVAS OMP: Error in OMP request/response	plugin, confirmed	2020-10-15T15:40:35Z
+12715	OPEN	openvas-omp -> greenbone-omp	suggestion, plugin	2020-07-25T17:52:04Z
+12713	OPEN	[Suggestion] Persistent Meterpreter 'NAME' in Database	suggestion	2021-01-22T15:16:32Z
+12626	OPEN	doublepulsar_rce.rb Why can't it work on windows7-32bit?	enhancement, suggestion-module	2020-09-17T20:41:08Z
+12590	OPEN	Lack of reverse_tcp_dns for x64 windows	payload, question, suggestion	2019-11-18T17:41:14Z
+12525	OPEN	Failure/Error Msf::OptAddressLocal behaves like an option with valid values en0	tests, bug, confirmed	2019-11-01T16:16:10Z
+12512	OPEN	RC4 windows shell payloads broken when using venom	bug, msfvenom, payload, confirmed	2019-11-01T14:11:20Z
+12487	OPEN	Command/Power shell establishment errors	bug, payload, confirmed, cmd_exec is broken again	2019-11-17T04:43:33Z
+12485	OPEN	Command tokenisation is failing on bash command shells	bug, payload, confirmed	2020-10-20T12:10:34Z
+12471	OPEN	Not all external modules support `check`	external modules, not-stale	2020-10-19T15:35:22Z
+12440	OPEN	OSX Terminal savedState File Post Module	osx, suggestion-module	2023-11-27T15:00:19Z
+12415	OPEN	Update Browser Autopwn 2	enhancement, suggestion	2020-01-15T03:45:48Z
+12389	OPEN	Auxiliary Scanner Docs	docs, newbie-friendly	2025-05-30T10:39:14Z
+12378	OPEN	Rex::Arch.adjust_stack_pointer supports only x86	library, enhancement, suggestion	2020-09-17T20:42:51Z
+12340	OPEN	Not able to run CVE-2019-0708	question, confirmed	2020-04-08T14:56:55Z
+12222	OPEN	[Suggestion] Add rogue MySQL server for file theft	suggestion-module	2020-06-23T15:24:51Z
+12210	OPEN	Keylog_recorder disables accents on victim's machine	module, confirmed	2025-02-09T04:38:58Z
+12208	OPEN	post/windows/gather/hashdump throws error	module, bug, creds, database, msf5, not-stale	2023-06-06T13:41:09Z
+12075	OPEN	EternalBlue does not store vuln for DoublePulsar infection	bug, database, confirmed	2025-03-22T08:46:15Z
+12067	OPEN	Windows meterpreter `search` builtin doesn't recurse into AppData	bug, not-stale	2020-10-21T04:27:40Z
+12066	OPEN	enum_applications shows many (but not all) doubled entries	easy, confirmed, usability	2025-01-15T00:09:46Z
+12043	OPEN	choose_payload should be refactored and extricated from CommandDispatcher	library, enhancement, not-stale	2020-10-19T15:31:33Z
+12006	OPEN	Linux shell input not captured by spool	bug, confirmed	2020-08-12T11:37:35Z
+11988	OPEN	framework.db.import issue with remote data service	bug, database, msf5	2020-11-17T14:29:10Z
+11973	OPEN	VIM RCE via crafted textfile	easy, suggestion-module	2021-03-25T11:26:51Z
+11946	OPEN	Should workspace has it's own directory?	feature, database, suggestion	2019-10-24T18:26:14Z
+11909	OPEN	db_nmap service state doesn't update when services no longer running	enhancement, database	2023-02-28T21:05:40Z
+11901	OPEN	Feature request: support multiple files in Msf::Exploit::Remote::SMB::Server::Share	library, enhancement	2021-01-22T15:16:35Z
+11889	OPEN	auxiliary/admin/chromecast/chromecast_youtube no longer works	module, bug, confirmed, not-stale	2020-11-16T16:06:02Z
+11850	OPEN	Next-Gen AV Evasion - custom http(s) stager and metsrv.dll that unhook's windows API before running	suggestion	2019-07-29T02:25:03Z
+11837	OPEN	post/windows/gather/enum_ad_computers	bug, database	2021-01-22T15:16:35Z
+11826	OPEN	msfconsole startup error v5.0.21-dev console lib	bug, database	2021-01-22T15:16:35Z
+11788	OPEN	Feature request: implement native support for PHP unserialize	library, suggestion	2019-04-27T13:19:59Z
+11773	OPEN	Feature request: implement a metashell command prefix or escape menu	library, enhancement, not-stale	2020-11-16T16:06:51Z
+11772	OPEN	Feature request: handle ^D (EOF) in interactive command shells	library, enhancement, suggestion	2023-03-29T21:32:11Z
+11755	OPEN	Cannot delete notes from DB using RPC client	bug, database	2020-11-17T14:29:20Z
+11748	OPEN	RFC: Contributing Java Serialization Framework	library, suggestion	2019-11-12T11:44:04Z
+11728	OPEN	loot type filter appears broken	bug, database, confirmed	2023-05-02T17:22:47Z
+11715	OPEN	Feature request: background CmdStager payload and don't block deletion	library, enhancement, not-stale	2020-11-19T20:37:37Z
+11633	OPEN	Feature request: specify new session name as modules option	enhancement, suggestion	2019-10-24T18:34:48Z
+11624	OPEN	Oracle 18c hash_dump, JTR format not supported	suggestion-feature, not-stale	2020-11-20T16:11:26Z
+11610	OPEN	Feature request: IgnoreComments advanced option for word list processing	feature, enhancement, not-stale	2020-11-20T16:03:37Z
+11562	OPEN	Session manipulation failed: Problem updating session: Couldn't find Mdm::Session	bug, database, confirmed	2023-10-26T18:06:34Z
+11457	OPEN	Augment winrm_auth_methods module to decode and print NTLM info	enhancement, suggestion-module	2021-02-24T04:43:47Z
+11456	OPEN	Review exploit/windows/winrm/winrm_script_exec	module, enhancement, not-stale	2022-11-25T04:42:00Z
+11367	OPEN	Metasploit is not following the XDG directory standards	enhancement	2025-06-29T16:22:02Z
+11364	OPEN	wmap failed to add website.	bug, database, msf5, plugin	2022-01-12T12:09:31Z
+11341	OPEN	MSSQL login falls over when a server specified isn't an MSSQL server	module, bug, confirmed	2022-07-05T15:56:21Z
+11318	OPEN	new RHOSTS feature with THREADS	library, feature, suggestion	2019-02-26T18:40:07Z
+11306	OPEN	Feature Request: Stageless RC4 Payloads	payload, suggestion	2020-10-09T16:13:22Z
+11063	OPEN	scanner/oracle/oracle_login - NoMethodError undefined method `doctype' for Rex::Parser::NmapXMLStreamParser	bug, not-stale	2025-10-24T13:42:23Z
+10980	OPEN	Use of CmdStager in various Windows modules can be replaced by PowerShell	suggestion	2021-01-22T15:16:37Z
+10928	OPEN	Fail to use post/windows/gather/enum_chrome and then the session is ruined	module, bug, not-stale	2020-12-02T15:53:16Z
+10909	OPEN	Old Detours is vulnerable and proprietary, new one is safe and MIT	not-stale	2020-12-02T15:23:51Z
+10908	OPEN	sslcert in auxiliary/server/capture/* isn't validated as an ssl cert	confirmed	2020-12-02T15:53:38Z
+10903	OPEN	Need Http / Https Meterpreter TLS/Cert Update	library, enhancement	2021-03-18T09:47:31Z
+10805	OPEN	WINDOWS Needing to run msfdb reinit before every run of msfconsole	bug, database	2019-02-27T22:20:09Z
+10796	OPEN	SIP options module broken	module, bug, not-stale	2020-12-02T18:15:33Z
+10777	OPEN	Umlauts in Windows username seem to foil "is_system" checks.	ascii-utf8-issues	2020-12-02T15:52:00Z
+10769	OPEN	Potential new module? (Mojave security feature; origin spoofing)	module, feature	2021-01-22T15:16:37Z
+10679	OPEN	smb_fingerprint_windows_os() returns wrong XP service pack	library, bug	2021-01-22T15:16:38Z
+10661	OPEN	Reconnected TCP sessions aren't marked as encrypted	library, meterpreter, bug, confirmed	2020-12-02T17:11:37Z
+10635	OPEN	ms17_010_eternalblue fails against some DCs	confirmed	2020-12-02T17:12:55Z
+10547	OPEN	Feature request: PTY support in Mettle a la POSIX Meterpreter	meterpreter, feature, suggestion-feature	2020-12-02T17:23:22Z
+10515	OPEN	Exploits spawning telnetd don't stop the service on session close	module, bug, confirmed	2020-12-02T17:25:32Z
+10439	OPEN	current_user_psexec fails to resolve hostnames	module, bug, not-stale	2021-12-14T14:34:52Z
+10395	OPEN	Add Disable Event log like event::drop in mimikatz	suggestion-feature	2020-12-02T17:29:32Z
+10390	OPEN	post/windows/gather/lsa_secrets appends junk data to passwords	bug, confirmed, not-stale	2022-08-14T14:32:03Z
+10289	OPEN	New socks functionality question (possibly feature request?)	enhancement, usability	2021-01-22T15:16:38Z
+10265	OPEN	Switchboard routing gets out of sync with Meterpreter and can't be flushed	meterpreter, bug, confirmed	2023-04-26T16:22:39Z
+10264	OPEN	Feature suggestion: validate session liveness in a accurate way	payload, suggestion	2019-03-28T19:20:21Z
+10223	OPEN	Feature request: python hashdump	meterpreter, feature, suggestion, usability	2020-02-23T21:25:37Z
+10146	OPEN	Information field seems weird while a reverse shell session is created	bug, usability, not-stale	2020-12-02T17:42:41Z
+10132	OPEN	Add SMBv2 support for exploit/windows/smb/smb_delivery	enhancement, suggestion-feature	2020-12-02T17:40:43Z
+10114	OPEN	Error message (`no session`) printed when `ExitOnSession` is set to `false` even session created actually	enhancement, suggestion-feature	2020-12-02T17:52:39Z
+10090	OPEN	RMI class loader couldn't find the payload	bug, confirmed	2024-10-17T02:04:24Z
+9923	OPEN	Dependency inversion in payload_generator library	library, bug, confirmed	2023-04-26T19:18:35Z
+9870	OPEN	Failed to load the OCI library: cannot load such file -- oci8	enhancement	2023-04-06T08:17:50Z
+9792	OPEN	Msfvenom add win32 shellcode doesn't work for Jar file	enhancement	2021-01-22T15:16:41Z
+9720	OPEN	vncinject does not work with reverse_*http*	bug, confirmed	2020-12-02T18:05:44Z
+9709	OPEN	windows/smb/psexec fails when setting LPORT for a bind payload that does not use ports	bug, confirmed	2020-12-02T18:06:30Z
+9664	OPEN	python payload seems not compatible with msf modules	enhancement	2021-01-22T15:16:41Z
+9550	OPEN	web_delivery + PSH should support full stageless payloads without command line limits	enhancement	2024-08-24T17:32:57Z
+9537	OPEN	Converted Python meterpreter to .exe with pyinstaller throws errors	enhancement	2022-01-24T22:20:43Z
+9498	OPEN	Solaris x86 shell payloads segfault on Solaris 11	bug, payload, confirmed, not-stale	2020-12-03T21:18:47Z
+9495	OPEN	Netsparker import doesn't appear in `vulns` command, only `wmap_vulns -l`	database, usability	2023-06-01T16:38:32Z
+9485	OPEN	HTTP/2 prospect	enhancement, suggestion	2020-12-04T15:14:52Z
+9447	OPEN	Command history not storing all characters	bug, ascii-utf8-issues	2020-11-30T13:39:08Z
+9405	OPEN	psnuffle Auxiliary failed: ArgumentError malformed UTF-8 character	bug, ascii-utf8-issues	2024-04-26T03:18:43Z
+9319	OPEN	couchdb_login auxiliary module does not bruteforce standard user creds	enhancement	2021-01-22T15:16:42Z
+9318	OPEN	Java RMI client and modules only work with JRMI version 2	enhancement	2020-12-11T15:42:57Z
+9278	OPEN	"query:" prefix for OptAddressRange	feature, msfconsole	2021-01-22T15:16:42Z
+9244	OPEN	UDPScanner library does not detect broadcast packets	library, enhancement	2020-12-11T15:45:07Z
+9147	OPEN	Arbitrary second stage payload selection option on handler	payload, enhancement	2018-07-02T18:29:06Z
+9057	OPEN	Several scanner modules do not honor proxy settings	enhancement, usability	2020-02-24T15:25:44Z
+8962	OPEN	add reverse_dns stager	enhancement, analysis paralysis!	2021-04-13T04:42:02Z
+8886	OPEN	TLVCrypt: provide state injection option	enhancement	2017-08-29T00:58:32Z
+8812	OPEN	Inconsistent printing of `peer` in auxiliary login modules	suggestion-feature	2021-02-05T16:24:08Z
+8705	OPEN	Modules should not use Net::HTTP or Rex::Proto::Http::Client.new	enhancement, usability	2020-02-22T22:24:11Z
+8677	OPEN	add option for CMD & ARCH_CMD to CmdStager exploits by default	module, enhancement	2020-09-17T20:49:22Z
+8669	OPEN	add option to use all available cmdstagers one after another	library, feature, suggestion-feature	2024-01-31T14:30:16Z
+8641	OPEN	PHP download_exec payload depend on allow_url_fopen (offer curl/sockets fallbacks)	enhancement	2018-07-02T18:54:44Z
+8621	OPEN	Meterpreter continuity	meterpreter, enhancement	2018-07-30T06:10:15Z
+8598	OPEN	Feature Request - Screenshot based workspace	feature	2017-08-29T01:37:15Z
+8528	OPEN	Add module that abuses R via SQL server	module, feature	2017-08-17T23:33:13Z
+8425	OPEN	Add "label" support to sessions	library, enhancement	2017-05-22T03:37:11Z
+8423	OPEN	Non-ASCII characters in auxiliary/scanner/smb/smb_login	bug, rubysmb, ascii-utf8-issues	2022-05-23T12:20:08Z
+8407	OPEN	use minimal permission in buffer allocations in stager shellcode	payload, enhancement	2017-08-29T02:10:31Z
+8375	OPEN	php/base64 encoder generate PHP Notice	enhancement	2018-07-02T18:55:16Z
+8374	OPEN	PHP payloads use unneeded double quotes instead of single quotes	payload, enhancement	2017-08-29T02:36:23Z
+8357	OPEN	Strange Stage Encoder behaviour	library, bug	2017-05-09T16:07:27Z
+8202	OPEN	file? method from Msf::Post::File module returns "false" with a big file	bug, confirmed	2021-01-06T16:13:05Z
+8068	OPEN	Add CIA Vault7 tools	module, feature	2023-04-25T14:01:07Z
+8044	OPEN	Add AtomBombing payload for AV evasion	feature	2017-08-29T01:42:04Z
+8033	OPEN	Improved bash-like recursive tab completion with modules	library, feature, msfconsole	2017-03-01T06:56:56Z
+7986	OPEN	UTF-8 characters allow deletion of command prompt	bug, msfconsole, ascii-utf8-issues	2020-11-30T13:38:24Z
+7945	OPEN	Feature Request: DCERPC Capture Module	module, feature	2017-08-29T03:21:39Z
+7879	OPEN	fetch and use the value of PayloadUUIDxx (xx like as PayloadUUIDRaw) in MSF-RPC	enhancement	2019-03-28T19:42:05Z
+7878	OPEN	Pre-order and Post-order results of executed meterpreter CMD in Python-MSFRPC	enhancement	2018-07-02T18:55:58Z
+7710	OPEN	Stageless Meterpreter Payload Proxy options aren't present	bug, payload, not-stale	2021-01-06T16:17:02Z
+7673	OPEN	bypassuac_injection needs updating due to changes in Windows 10	bug, confirmed	2021-01-06T16:18:03Z
+7380	OPEN	beholder plugin should manage sessions per host+user	enhancement	2018-07-02T18:56:07Z
+7312	OPEN	Meterpreter session architectures not tracked in MSF properly	library, meterpreter, bug	2020-02-18T15:54:01Z
+7103	OPEN	Feature Request - Meterpreter download: Store Full Path and Display Download Status	library, meterpreter, feature	2017-10-06T21:25:47Z
+7070	OPEN	Fix arbitrary size of payloads on functionally unlimited space exploits.	library, bug	2023-05-30T15:23:41Z
+7056	OPEN	enable_rdp.rb Key Generator Error	module, bug, not-stale	2023-05-30T14:57:35Z
+7029	OPEN	Allow setting socket options on pivoted sockets	library, feature	2016-07-22T15:51:54Z
+6894	OPEN	Feature Request - EXTAPI "-r" Service management	meterpreter, feature, suggestion	2020-03-05T00:08:48Z
+6861	OPEN	Feature Request - x (Reverse Resolution)	feature, suggestion	2020-03-05T00:08:48Z
+6858	OPEN	x64 shellcode support reverse_tcp_dns?	feature, payload	2016-05-24T15:48:52Z
+6796	OPEN	reverse_http(s) LURI URI Parameters	feature, payload	2017-03-29T21:10:36Z
+6783	OPEN	OpenSSL::SSL::SSLError SSL_connect returned=1 errno=0 state=error: dh key too small	bug, confirmed	2023-02-21T15:53:37Z
+6754	OPEN	[request] JBoss Unserialize module	suggestion-module	2022-01-29T11:16:40Z
+6490	OPEN	jboss_maindeployer - Improving chances of exploitation	enhancement, usability	2020-03-05T00:02:32Z
+6481	OPEN	Error An encoding exception occurred linux/armle/shell_reverse_tcp	feature, arm	2024-10-04T18:10:36Z
+6453	OPEN	Python vs Elf reverse_tcp	library, bug	2016-02-02T16:27:36Z
+6443	OPEN	PHP Meterpreter times out while downloading a large file	bug, payload, confirmed	2021-01-06T16:27:20Z
+6420	OPEN	[Feature request] Make shell path configurable in linux/x86/shell_reverse_tcp	feature	2016-02-02T16:29:26Z
+6349	OPEN	Python Extension Modules	docs, meterpreter, not-stale	2021-01-07T15:09:20Z
+6274	OPEN	Increase command timeout for Python, powershell extensions	meterpreter, suggestion-feature	2023-09-13T17:43:17Z
+6149	OPEN	post/windows/gather/checkvm returns a bad result on java meterpreter	module, meterpreter, bug, confirmed	2023-09-05T12:04:26Z
+6104	OPEN	Add support for custom headers/cookies in HTTP(S) Meterpreters	meterpreter, feature, enhancement	2017-08-29T04:08:46Z
+5843	OPEN	The notes command should be able to search based on sub-field	feature	2015-09-01T01:37:44Z
+5808	OPEN	Feature request: Alias functionality (or generic: extensibility) for meterpreter shells.	feature, msfconsole, enhancement, informative, usability	2020-03-15T14:59:25Z
+5634	OPEN	Feature request: add DOMAIN NAME to session output	enhancement	2016-07-29T04:32:28Z
+5571	OPEN	Channels should be logged (or at least Shell channels)	library, enhancement	2016-07-29T04:32:27Z
+5441	OPEN	Make machine_id result consistant across Meterpreters	meterpreter, bug, not-stale	2021-01-18T15:29:08Z
+5232	OPEN	support utf-8 conversion in ADSI meterpreter code	meterpreter, bug, feature	2020-07-25T13:19:56Z
+5048	OPEN	Binding HTTPServer (Non SSL) and reverse_*https to same port doesn't give a warning	module, library, bug, payload	2017-03-29T20:55:29Z
+4895	OPEN	Comprehensively refactor Windows reverse_http stagers	module, library, meterpreter, bug	2022-06-30T08:28:47Z
+4863	OPEN	MIPS (LE/BE) encoder modules are Linux only due to cacheflush system call	module, library	2015-03-02T20:37:19Z
+4820	OPEN	reverse_https times out with bypassuac_injection	module, bug, confirmed	2021-01-18T15:29:58Z
+4555	OPEN	Replace session/channel signal handlers in msfconsole with detach & kill commands	library, bug, msfconsole	2018-02-14T14:54:54Z
+3803	OPEN	Fail-over Routes	feature	2016-12-07T02:31:43Z
+3753	OPEN	HTTP client & server mixins don't play nice in the same module (datastore overloads)	module, feature	2015-10-15T15:49:28Z
