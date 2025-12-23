@@ -152,6 +152,10 @@ jobs:
             ! -path "*/build/*" \
             ! -path "*/.venv/*" \
             ! -path "*/vendor/*" \
+            ! -path "*/modules/*" \
+            ! -path "*/external/*" \
+            ! -path "*/legacy/*" \
+            ! -path "*/transpiler/*" \
             ! -name "*test*" \
             ! -name "*spec*"); do
             basename=$(basename "$file" | sed 's/\.[^.]*$//')

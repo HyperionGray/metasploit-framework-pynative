@@ -185,13 +185,23 @@ module Md5LookupUtility
   #
   class Driver
 
-    def initialize
+    def initialize(argv = nil)
+      @argv = argv
       @options = {}
       @output_handle = nil
+      
+      # Parse options immediately if argv is provided (for tests)
+      # Otherwise defer to run method (for production)
+      if @argv
+        @options = OptsConsole.parse(@argv)
+      end
     end
 
     def run
-      @options = OptsConsole.parse(ARGV)
+      # Parse options if not already done
+      unless @options && !@options.empty?
+        @options = OptsConsole.parse(@argv || ARGV)
+      end
       
       disclaimer = Disclaimer.new
       unless disclaimer.send(:has_waiver?)
@@ -228,7 +238,7 @@ module Md5LookupUtility
     end
 
     def save_result(result)
-      if result[:cracked_hash] && !result[:cracked_hash].empty?
+      if result[:cracked_hash] && !result[:cracked_hash].empty? && @output_handle
         @output_handle.write("#{result[:hash]} = #{result[:cracked_hash]}\n")
       end
     end

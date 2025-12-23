@@ -1,63 +1,57 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Metasploit Framework Boot Configuration (Python-native)
-
-This file sets up the Python environment for Metasploit Framework,
-similar to how config/boot.rb sets up the Ruby environment.
+Metasploit Framework Boot Configuration
+Python implementation of config/boot.rb
 """
 
 import os
 import sys
 from pathlib import Path
 
-# Determine MSF root directory
-MSF_ROOT = Path(__file__).resolve().parent.parent
+# Get the root directory of the framework
+MSF_ROOT = Path(__file__).parent.parent.resolve()
 
-# Add lib directory to Python path
-LIB_PATH = MSF_ROOT / 'lib'
-if str(LIB_PATH) not in sys.path:
-    sys.path.insert(0, str(LIB_PATH))
-
-# Add python_framework to path
-PYTHON_FRAMEWORK_PATH = MSF_ROOT / 'python_framework'
-if str(PYTHON_FRAMEWORK_PATH) not in sys.path:
-    sys.path.insert(0, str(PYTHON_FRAMEWORK_PATH))
+# Add framework paths to Python path
+sys.path.insert(0, str(MSF_ROOT / 'lib'))
+sys.path.insert(0, str(MSF_ROOT))
 
 # Set environment variables
 os.environ.setdefault('MSF_ROOT', str(MSF_ROOT))
-os.environ.setdefault('MSF_MODULE_PATHS', str(MSF_ROOT / 'modules'))
-os.environ.setdefault('MSF_PLUGIN_PATH', str(MSF_ROOT / 'plugins'))
+os.environ.setdefault('MSF_CONFIG_ROOT', str(MSF_ROOT / 'config'))
 os.environ.setdefault('MSF_DATA_ROOT', str(MSF_ROOT / 'data'))
+os.environ.setdefault('MSF_MODULE_PATHS', str(MSF_ROOT / 'modules'))
+os.environ.setdefault('MSF_PLUGIN_PATHS', str(MSF_ROOT / 'plugins'))
 
-# Configuration dictionary
+# Database configuration
+database_config_file = MSF_ROOT / 'config' / 'database.yml'
+if database_config_file.exists():
+    os.environ.setdefault('MSF_DATABASE_CONFIG', str(database_config_file))
+
+# Python-specific configuration
 config = {
     'msf_root': MSF_ROOT,
-    'lib_path': LIB_PATH,
-    'python_framework_path': PYTHON_FRAMEWORK_PATH,
-    'module_paths': [MSF_ROOT / 'modules'],
-    'plugin_path': MSF_ROOT / 'plugins',
+    'config_root': MSF_ROOT / 'config',
     'data_root': MSF_ROOT / 'data',
+    'module_paths': [MSF_ROOT / 'modules'],
+    'plugin_paths': [MSF_ROOT / 'plugins'],
+    'lib_paths': [MSF_ROOT / 'lib'],
+    'python_mode': True,
+    'debug': os.environ.get('MSF_DEBUG', '0') == '1',
+    'quiet': os.environ.get('MSF_QUIET', '0') == '1',
 }
 
-def setup_environment():
-    """
-    Set up the Python environment for Metasploit Framework.
-    Call this function to ensure all paths and settings are configured.
-    """
-    # Ensure MSF_ROOT is in PATH
-    if str(MSF_ROOT) not in os.environ.get('PATH', ''):
-        os.environ['PATH'] = f"{MSF_ROOT}:{os.environ.get('PATH', '')}"
-    
-    # Set Python-specific environment
-    os.environ.setdefault('PYTHONUNBUFFERED', '1')
-    
-    return config
+def initialize_framework():
+    """Initialize the Python MSF framework"""
+    try:
+        # Try to import the main framework
+        import msf
+        return True
+    except ImportError as e:
+        if not config['quiet']:
+            print(f"Warning: Could not load Python MSF framework: {e}")
+            print("Falling back to Ruby framework...")
+        return False
 
-if __name__ == '__main__':
-    print("Metasploit Framework Python Boot Configuration")
-    print(f"MSF_ROOT: {MSF_ROOT}")
-    print(f"LIB_PATH: {LIB_PATH}")
-    print(f"PYTHON_FRAMEWORK_PATH: {PYTHON_FRAMEWORK_PATH}")
-    print("\nCall setup_environment() to configure the environment.")
-
+# Auto-initialize if this module is imported
+_framework_initialized = initialize_framework()

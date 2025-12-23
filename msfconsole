@@ -5,6 +5,19 @@
 # framework.
 #
 
+# Show guidance message for Python-enhanced experience
+unless ENV['MSF_QUIET'] == '1'
+  puts ""
+  puts "🐍 Metasploit Framework - Traditional Ruby Console"
+  puts ""
+  puts "💡 For an enhanced Python experience, try:"
+  puts "   source msfrc          # Activate MSF shell environment"
+  puts "   msf_console           # Python-enhanced console"
+  puts ""
+  puts "   Or set MSF_QUIET=1 to hide this message"
+  puts ""
+end
+
 require 'pathname'
 begin
 
