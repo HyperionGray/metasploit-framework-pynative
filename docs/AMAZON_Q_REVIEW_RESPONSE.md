@@ -163,7 +163,7 @@ The `.github/workflows/auto-amazonq-review.yml` workflow is currently a **placeh
 To enable full Amazon Q Developer integration, the following is needed:
 
 1. **AWS Credentials** (Repository Secrets)
-   ```
+   ```text
    AWS_ACCESS_KEY_ID
    AWS_SECRET_ACCESS_KEY
    ```

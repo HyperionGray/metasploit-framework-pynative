@@ -299,27 +299,33 @@ Amazon Q complements existing code quality tools:
 ### Common Issues
 
 **Issue:** "AWS credentials not configured"
-```bash
-# Solution: Add secrets to GitHub repository
-Settings → Secrets → Add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+```text
+Solution: Add secrets to GitHub repository
+GitHub UI: Settings → Secrets → Add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 ```
 
 **Issue:** "Amazon Q CLI not found"
-```bash
-# Solution: Wait for official Amazon Q CLI release or use AWS CodeWhisperer
-# Check AWS documentation for latest installation instructions
+```text
+Solution: Wait for official Amazon Q CLI release or use AWS CodeWhisperer
+Check AWS documentation for latest installation instructions
 ```
 
 **Issue:** "Too many false positives in exploit modules"
-```bash
+```yaml
 # Solution: Update .amazonq/config.yml to exclude exploit modules
-# Or add specific patterns to allowlist
+exclude:
+  - modules/exploits/**
+  - modules/auxiliary/**
+# Or add specific patterns to allowlist in rules section
 ```
 
 **Issue:** "Workflow times out"
-```bash
+```yaml
 # Solution: Increase timeout in workflow file
-# Or exclude large directories from scanning
+jobs:
+  amazonq-code-review:
+    timeout-minutes: 60  # Increase from default 30
+# Or exclude large directories from scanning in .amazonq/config.yml
 ```
 
 ### Getting Help
