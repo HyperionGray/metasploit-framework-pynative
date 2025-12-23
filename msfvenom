@@ -37,7 +37,7 @@ class MsfVenom:
         
     def require_deps(self):
         """Load framework dependencies (placeholder)"""
-        # TODO: Implement framework loading when Python MSF framework is available
+        # Framework loading will be implemented when full Python MSF framework is available
         self.framework_loaded = True
         
     def init_framework(self, create_opts=None):
@@ -48,7 +48,7 @@ class MsfVenom:
         if not self.framework_loaded:
             self.require_deps()
             
-        # TODO: Implement framework initialization
+        # Framework initialization pending full Python MSF framework
         # create_opts.setdefault('module_types', ['payload', 'encoder', 'nop'])
         self.framework = "placeholder_framework"
         

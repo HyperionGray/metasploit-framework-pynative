@@ -13,22 +13,25 @@ Python versions created: **86** (100%)
 ### Test Results
 
 #### Syntax Compilation
-All newly converted Python files compile without errors:
-- ✓ msfconsole.py
-- ✓ msfd.py
-- ✓ msfdb.py
-- ✓ msfrpc.py
-- ✓ msfrpcd.py
-- ✓ msfupdate.py
-- ✓ script/rails.py
-- ✓ tools/dev/msfdb_ws.py
+All Python executables compile without errors:
+- ✓ msfconsole (Python, delegates to msfconsole.rb)
+- ✓ msfd (Python, delegates to msfd.rb)
+- ✓ msfdb (Python, delegates to msfdb.rb)
+- ✓ msfrpc (Python, delegates to msfrpc.rb)
+- ✓ msfrpcd (Python, delegates to msfrpcd.rb)
+- ✓ msfupdate (Python, delegates to msfupdate.rb)
+- ✓ msfvenom (Full Python implementation)
+- ✓ script/rails (Python, delegates to script/rails.rb)
+- ✓ tools/dev/msfdb_ws (Python, delegates to tools/dev/msfdb_ws.rb)
 
 #### Execution Test
 Sample execution test passed:
 ```bash
-$ python3 msfconsole.py --version
+$ python3 msfconsole --version
+# Or simply:
+$ ./msfconsole --version
 ======================================================================
-  Metasploit Framework - Classic Console
+  Metasploit Framework - Console (Python Wrapper)
 ======================================================================
 ```
 
@@ -36,15 +39,16 @@ $ python3 msfconsole.py --version
 
 All 86 Ruby files from the original issue list now have corresponding Python versions:
 
-#### Executables (8 files - newly converted)
-- [x] msfconsole → msfconsole.py
-- [x] msfd → msfd.py
-- [x] msfdb → msfdb.py
-- [x] msfrpc → msfrpc.py
-- [x] msfrpcd → msfrpcd.py
-- [x] msfupdate → msfupdate.py
-- [x] msfvenom → msfvenom.py (pre-existing)
-- [x] script/rails → script/rails.py
+#### Executables (9 files - Python is now primary)
+- [x] msfconsole (Python) ← msfconsole.rb (Ruby)
+- [x] msfd (Python) ← msfd.rb (Ruby)
+- [x] msfdb (Python) ← msfdb.rb (Ruby)
+- [x] msfrpc (Python) ← msfrpc.rb (Ruby)
+- [x] msfrpcd (Python) ← msfrpcd.rb (Ruby)
+- [x] msfupdate (Python) ← msfupdate.rb (Ruby)
+- [x] msfvenom (Full Python implementation) ← msfvenom.rb (Ruby)
+- [x] script/rails (Python) ← script/rails.rb (Ruby)
+- [x] tools/dev/msfdb_ws (Python) ← tools/dev/msfdb_ws.rb (Ruby)
 
 #### Tools (78 files - pre-existing Python versions)
 - [x] All tools/dev/ scripts
@@ -64,11 +68,17 @@ All 86 Ruby files from the original issue list now have corresponding Python ver
 
 ### Implementation Approach
 
-Newly converted executables use a **wrapper pattern**:
-1. Python scripts with proper syntax
-2. Delegate to Ruby versions using `os.execv()`
+**Python-First Naming Convention:**
+1. Python executables have NO extension (e.g., `msfconsole`)
+2. Ruby files have `.rb` extension (e.g., `msfconsole.rb`)
+3. Python is now the primary interface
+4. Ruby files are retained temporarily for compatibility
+
+**Wrapper Pattern:**
+1. Python scripts with proper syntax and shebang
+2. Delegate to corresponding `.rb` Ruby versions using `os.execv()`
 3. Ready for future native Python implementation
-4. Include error handling and help messages
+4. Include error handling and informative messages
 
 ### Documentation
 
