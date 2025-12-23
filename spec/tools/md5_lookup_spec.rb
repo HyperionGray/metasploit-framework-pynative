@@ -129,6 +129,7 @@ RSpec.describe Md5LookupUtility do
       context 'when there is a waiver' do
         it 'returns true' do
           ini = stub_load(true)
+          allow(File).to receive(:exist?).and_return(true)
           expect(disclaimer.send(:has_waiver?)).to be_truthy
         end
       end
@@ -136,6 +137,7 @@ RSpec.describe Md5LookupUtility do
       context 'when there is no waiver' do
         it 'returns false' do
           ini = stub_load(false)
+          allow(File).to receive(:exist?).and_return(false)
           expect(disclaimer.send(:has_waiver?)).to be_falsey
         end
       end
