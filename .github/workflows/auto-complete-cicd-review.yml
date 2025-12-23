@@ -358,6 +358,13 @@ jobs:
             *Amazon Q review will follow automatically.*
             `;
             
+            // Truncate body if it exceeds GitHub's limit (65536 characters)
+            let finalBody = body;
+            if (body.length > 65000) {
+              const truncateMessage = '\n\n---\n**Note: Report was truncated due to length. Full analysis available in workflow logs.**';
+              finalBody = body.substring(0, 65000 - truncateMessage.length) + truncateMessage;
+            }
+            
             // Check for existing review issues
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -375,18 +382,25 @@ jobs:
             
             if (recentIssue) {
               console.log(`Recent issue found: #${recentIssue.number}, updating`);
+              
+              let commentBody = `## Updated Review (${date})\n\n${report}`;
+              if (commentBody.length > 65000) {
+                const truncateMessage = '\n\n---\n**Note: Comment was truncated due to length. Full analysis available in workflow logs.**';
+                commentBody = commentBody.substring(0, 65000 - truncateMessage.length) + truncateMessage;
+              }
+              
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: recentIssue.number,
-                body: `## Updated Review (${date})\n\n${report}`
+                body: commentBody
               });
             } else {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: title,
-                body: body,
+                body: finalBody,
                 labels: ['ci-cd-review', 'automated', 'needs-review']
               });
             }

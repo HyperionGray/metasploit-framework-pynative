@@ -63,11 +63,56 @@ jobs:
           cat /tmp/gpt5-analysis.md
         continue-on-error: true
 
-      # Note: GitHub Copilot CLI action removed due to unavailability
-      # The code analysis results are still captured and will be included in the issue
+      - name: GPT-5 Advanced Code Analysis
+        uses: austenstone/copilot-cli-action@v2
+        with:
+          copilot-token: ${{ secrets.COPILOT_TOKEN }}
+          prompt: |
+            Perform a comprehensive code analysis of this repository using GPT-5's advanced capabilities:
+            
+            1. **Code Quality & Architecture**
+               - Analyze overall code structure and organization
+               - Identify architectural patterns and anti-patterns
+               - Suggest improvements for maintainability and scalability
+            
+            2. **Security Analysis**
+               - Detect potential security vulnerabilities
+               - Identify unsafe coding patterns
+               - Recommend security best practices
+            
+            3. **Performance Optimization**
+               - Identify performance bottlenecks
+               - Suggest optimization opportunities
+               - Recommend efficient algorithms and data structures
+            
+            4. **Best Practices**
+               - Verify adherence to language-specific best practices
+               - Check for proper error handling
+               - Ensure code follows SOLID principles
+            
+            5. **Documentation & Maintainability**
+               - Assess code documentation quality
+               - Identify areas needing better comments
+               - Suggest improvements for code readability
+            
+            Provide specific, actionable recommendations with file names and line numbers where applicable.
+        continue-on-error: true
 
-      # Note: GitHub Copilot CLI action removed due to unavailability
-      # The test coverage analysis results are still captured and will be included in the issue
+      - name: GPT-5 Test Coverage Analysis
+        uses: austenstone/copilot-cli-action@v2
+        with:
+          copilot-token: ${{ secrets.COPILOT_TOKEN }}
+          prompt: |
+            Analyze the test coverage and testing strategy:
+            
+            1. Identify files that lack adequate test coverage
+            2. Suggest missing test cases for critical functionality
+            3. Recommend improvements to existing tests
+            4. Identify edge cases that should be tested
+            5. Suggest integration and end-to-end test scenarios
+            
+            Focus on critical paths and business logic.
+        continue-on-error: true
 
       - name: Create GPT-5 Analysis Report
         uses: actions/github-script@main
@@ -144,6 +189,13 @@ jobs:
             For more information about GPT-5 models, see [Supported AI Models](https://docs.github.com/en/copilot/reference/ai-models/supported-models).
             `;
             
+            // Truncate body if it exceeds GitHub's limit (65536 characters)
+            let finalBody = body;
+            if (body.length > 65000) {
+              const truncateMessage = '\n\n---\n**Note: Report was truncated due to length. Full analysis available in workflow logs.**';
+              finalBody = body.substring(0, 65000 - truncateMessage.length) + truncateMessage;
+            }
+            
             // Only create issue if in PR or on main branch
             if (context.eventName === 'pull_request' || context.ref === 'refs/heads/main' || context.ref === 'refs/heads/master') {
               // Check for existing issues
@@ -163,18 +215,25 @@ jobs:
               
               if (recentIssue) {
                 console.log(`Recent GPT-5 issue found: #${recentIssue.number}, updating`);
+                
+                let commentBody = `## Updated GPT-5 Analysis (${date})\n\n${analysis}\n\n---\n\n*Analysis performed using GPT-5 model via GitHub Copilot.*`;
+                if (commentBody.length > 65000) {
+                  const truncateMessage = '\n\n---\n**Note: Comment was truncated due to length. Full analysis available in workflow logs.**';
+                  commentBody = commentBody.substring(0, 65000 - truncateMessage.length) + truncateMessage;
+                }
+                
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: recentIssue.number,
-                  body: `## Updated GPT-5 Analysis (${date})\n\n${analysis}\n\n---\n\n*Analysis performed using GPT-5 model via GitHub Copilot.*`
+                  body: commentBody
                 });
               } else {
                 await github.rest.issues.create({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   title: title,
-                  body: body,
+                  body: finalBody,
                   labels: ['gpt5', 'code-analysis', 'automated', 'copilot']
                 });
               }
