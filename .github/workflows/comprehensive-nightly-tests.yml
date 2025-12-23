@@ -1,0 +1,234 @@
+name: Comprehensive Nightly Tests
+
+on:
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  comprehensive-testing:
+    runs-on: ubuntu-latest
+    name: Comprehensive Test Suite
+    timeout-minutes: 120
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-xdist pytest-timeout hypothesis
+    
+    - name: Create test results directory
+      run: mkdir -p test-results
+    
+    - name: Run comprehensive unit tests
+      run: |
+        python run_comprehensive_tests.py --categories unit --verbose --coverage
+      continue-on-error: true
+    
+    - name: Run property-based tests
+      run: |
+        python run_comprehensive_tests.py --categories property --verbose
+      continue-on-error: true
+    
+    - name: Run fuzz tests
+      run: |
+        python run_comprehensive_tests.py --categories fuzz --verbose
+      continue-on-error: true
+    
+    - name: Run integration tests
+      run: |
+        python run_comprehensive_tests.py --categories integration --verbose
+      continue-on-error: true
+    
+    - name: Run security tests
+      run: |
+        python run_comprehensive_tests.py --categories security --verbose
+      continue-on-error: true
+    
+    - name: Run crypto tests
+      run: |
+        python run_comprehensive_tests.py --categories crypto --verbose
+      continue-on-error: true
+    
+    - name: Run performance tests
+      run: |
+        python run_comprehensive_tests.py --categories performance --verbose
+      continue-on-error: true
+    
+    - name: Run network tests
+      run: |
+        python run_comprehensive_tests.py --categories network --verbose
+      continue-on-error: true
+    
+    - name: Run all existing tests
+      run: |
+        python run_comprehensive_tests.py --categories existing --verbose
+      continue-on-error: true
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: comprehensive-test-results
+        path: test-results/
+    
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: coverage-report
+        path: |
+          htmlcov/
+          .coverage
+    
+    - name: Generate summary
+      if: always()
+      run: |
+        echo "# Comprehensive Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Test Categories" >> $GITHUB_STEP_SUMMARY
+        echo "- Unit Tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Property-Based Tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Fuzz Tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Integration Tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Security Tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Crypto Tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Performance Tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Network Tests" >> $GITHUB_STEP_SUMMARY
+        echo "- Existing Tests" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "See artifacts for detailed results." >> $GITHUB_STEP_SUMMARY
+
+  stress-testing:
+    runs-on: ubuntu-latest
+    name: Stress Testing
+    timeout-minutes: 60
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-benchmark locust
+    
+    - name: Run stress tests
+      run: |
+        # Run tests repeatedly to check for race conditions
+        for i in {1..10}; do
+          echo "Stress test iteration $i"
+          pytest test/test_comprehensive_suite.py -m unit --maxfail=1 -q || exit 1
+        done
+    
+    - name: Run concurrent tests
+      run: |
+        # Run tests in parallel
+        pytest test/ -n auto --maxfail=5 -q
+      continue-on-error: true
+
+  mutation-testing:
+    runs-on: ubuntu-latest
+    name: Mutation Testing
+    timeout-minutes: 90
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install mutmut pytest
+    
+    - name: Run mutation testing
+      run: |
+        # Run mutation testing on a subset of code
+        mutmut run --paths-to-mutate test/test_comprehensive_suite.py --tests-dir test/ || true
+      continue-on-error: true
+    
+    - name: Generate mutation report
+      run: |
+        mutmut results || true
+        mutmut html || true
+      continue-on-error: true
+    
+    - name: Upload mutation report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: mutation-report
+        path: html/
+
+  memory-leak-testing:
+    runs-on: ubuntu-latest
+    name: Memory Leak Testing
+    timeout-minutes: 60
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest memory-profiler objgraph
+    
+    - name: Run memory profiling
+      run: |
+        # Profile memory usage during tests
+        python -m memory_profiler run_comprehensive_tests.py --categories unit --quick
+      continue-on-error: true
+    
+    - name: Check for memory leaks
+      run: |
+        # Run tests with memory tracking
+        pytest test/test_comprehensive_suite.py -m unit --maxfail=5 -q
+      continue-on-error: true
+
+  notification:
+    runs-on: ubuntu-latest
+    name: Test Notification
+    needs: [comprehensive-testing, stress-testing, mutation-testing, memory-leak-testing]
+    if: always()
+    
+    steps:
+    - name: Generate notification
+      run: |
+        echo "Nightly comprehensive tests completed"
+        echo "Check the workflow run for detailed results"

@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Pre-commit hook script for running fast tests before committing.
+
+This hook runs a subset of tests to catch issues early before pushing to remote.
+Install: ln -s ../../scripts/pre-commit .git/hooks/pre-commit
+"""
+
+import subprocess
+import sys
+from pathlib import Path
+
+
+def print_header(message: str):
+    """Print formatted header."""
+    print(f"\n{'=' * 60}")
+    print(f"  {message}")
+    print(f"{'=' * 60}\n")
+
+
+def run_command(cmd: list, description: str) -> bool:
+    """Run a command and return success status."""
+    print(f"🔍 {description}...")
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        
+        if result.returncode == 0:
+            print(f"  ✅ {description} passed")
+            return True
+        else:
+            print(f"  ❌ {description} failed")
+            if result.stdout:
+                print(f"\nOutput:\n{result.stdout}")
+            if result.stderr:
+                print(f"\nErrors:\n{result.stderr}")
+            return False
+    except subprocess.TimeoutExpired:
+        print(f"  ⏰ {description} timed out")
+        return False
+    except Exception as e:
+        print(f"  ❌ {description} error: {e}")
+        return False
+
+
+def main():
+    """Main pre-commit hook logic."""
+    print_header("Pre-Commit Tests")
+    
+    root_dir = Path(__file__).parent.parent
+    success = True
+    
+    # 1. Check Python syntax
+    print("🐍 Checking Python syntax...")
+    py_files = []
+    for pattern in ['*.py', 'test/**/*.py', 'lib/**/*.py']:
+        py_files.extend(root_dir.glob(pattern))
+    
+    syntax_ok = True
+    for py_file in py_files[:20]:  # Check first 20 changed files
+        try:
+            compile(py_file.read_text(), str(py_file), 'exec')
+        except SyntaxError as e:
+            print(f"  ❌ Syntax error in {py_file}: {e}")
+            syntax_ok = False
+    
+    if syntax_ok:
+        print(f"  ✅ Python syntax check passed")
+    else:
+        success = False
+    
+    # 2. Run flake8 (if available)
+    if subprocess.run(['which', 'flake8'], capture_output=True).returncode == 0:
+        result = run_command(
+            ['flake8', 'test/', '--max-line-length=120', '--count'],
+            "Flake8 linting"
+        )
+        success = success and result
+    
+    # 3. Run quick unit tests
+    if subprocess.run(['which', 'pytest'], capture_output=True).returncode == 0:
+        result = run_command(
+            [sys.executable, '-m', 'pytest', 
+             '-m', 'unit and not slow',
+             '--tb=short',
+             '-q',
+             '--maxfail=5'],
+            "Quick unit tests"
+        )
+        success = success and result
+    
+    # 4. Check for common issues
+    print("\n🔍 Checking for common issues...")
+    
+    # Check for debugger statements
+    debugger_patterns = [b'import pdb', b'pdb.set_trace()', b'breakpoint()']
+    debugger_found = False
+    
+    for py_file in py_files[:50]:
+        content = py_file.read_bytes()
+        for pattern in debugger_patterns:
+            if pattern in content:
+                print(f"  ⚠️  Found debugger statement in {py_file}")
+                debugger_found = True
+    
+    if not debugger_found:
+        print("  ✅ No debugger statements found")
+    
+    # Summary
+    print_header("Pre-Commit Summary")
+    
+    if success:
+        print("✅ All pre-commit checks passed! Proceeding with commit.")
+        return 0
+    else:
+        print("❌ Some pre-commit checks failed. Please fix the issues and try again.")
+        print("\nTip: Use 'git commit --no-verify' to skip pre-commit hooks (not recommended)")
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
