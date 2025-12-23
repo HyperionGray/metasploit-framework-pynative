@@ -1,0 +1,217 @@
+.PHONY: help test test-all test-unit test-integration test-security test-coverage test-quick clean install-dev
+
+# Default target
+help:
+	@echo "Metasploit Framework Testing Targets"
+	@echo "====================================="
+	@echo ""
+	@echo "Setup:"
+	@echo "  make install-dev    Install development dependencies"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test           Run comprehensive test suite"
+	@echo "  make test-all       Run ALL tests (very comprehensive)"
+	@echo "  make test-unit      Run only unit tests"
+	@echo "  make test-property  Run property-based tests"
+	@echo "  make test-fuzz      Run fuzz tests"
+	@echo "  make test-integration  Run integration tests"
+	@echo "  make test-security  Run security tests"
+	@echo "  make test-crypto    Run cryptographic tests"
+	@echo "  make test-performance  Run performance tests"
+	@echo "  make test-network   Run network tests"
+	@echo "  make test-quick     Run quick tests only (no slow tests)"
+	@echo ""
+	@echo "Coverage:"
+	@echo "  make test-coverage  Run tests with coverage report"
+	@echo "  make coverage-html  Generate HTML coverage report"
+	@echo "  make coverage-report  Show coverage report"
+	@echo ""
+	@echo "Quality:"
+	@echo "  make lint           Run linters (flake8, black, isort)"
+	@echo "  make format         Auto-format code with black and isort"
+	@echo "  make type-check     Run type checking with mypy"
+	@echo ""
+	@echo "Cleanup:"
+	@echo "  make clean          Clean test artifacts and cache"
+	@echo "  make clean-all      Deep clean including coverage data"
+
+# Installation
+install-dev:
+	@echo "Installing development dependencies..."
+	pip install -r requirements.txt
+	pip install pytest pytest-cov pytest-xdist pytest-timeout pytest-benchmark
+	pip install hypothesis faker freezegun responses
+	pip install flake8 black isort mypy bandit safety
+	@echo "✅ Development dependencies installed"
+
+# Test targets
+test:
+	@echo "🚀 Running comprehensive test suite..."
+	python run_comprehensive_tests.py --verbose
+
+test-all:
+	@echo "🚀 Running ALL tests (this will take a while)..."
+	python run_comprehensive_tests.py --verbose --coverage
+
+test-unit:
+	@echo "🧪 Running unit tests..."
+	python run_comprehensive_tests.py --categories unit --verbose
+
+test-property:
+	@echo "🎲 Running property-based tests..."
+	python run_comprehensive_tests.py --categories property --verbose
+
+test-fuzz:
+	@echo "🐛 Running fuzz tests..."
+	python run_comprehensive_tests.py --categories fuzz --verbose
+
+test-integration:
+	@echo "🔗 Running integration tests..."
+	python run_comprehensive_tests.py --categories integration --verbose
+
+test-security:
+	@echo "🔐 Running security tests..."
+	python run_comprehensive_tests.py --categories security --verbose
+
+test-crypto:
+	@echo "🔒 Running cryptographic tests..."
+	python run_comprehensive_tests.py --categories crypto --verbose
+
+test-performance:
+	@echo "⚡ Running performance tests..."
+	python run_comprehensive_tests.py --categories performance --verbose
+
+test-network:
+	@echo "🌐 Running network tests..."
+	python run_comprehensive_tests.py --categories network --verbose
+
+test-quick:
+	@echo "⚡ Running quick tests..."
+	python run_comprehensive_tests.py --quick --verbose
+
+test-existing:
+	@echo "📚 Running all existing test files..."
+	python run_comprehensive_tests.py --categories existing --verbose
+
+# Coverage targets
+test-coverage:
+	@echo "📊 Running tests with coverage..."
+	python -m pytest test/ --cov=lib --cov=python_framework \
+		--cov-report=term-missing --cov-report=html --cov-report=xml \
+		--cov-branch --tb=short -v
+
+coverage-html:
+	@echo "📊 Generating HTML coverage report..."
+	python -m pytest test/ --cov=lib --cov=python_framework \
+		--cov-report=html --tb=short -q
+	@echo "✅ Coverage report generated in htmlcov/index.html"
+
+coverage-report:
+	@echo "📊 Coverage Report:"
+	python -m coverage report --show-missing
+
+# Code quality targets
+lint:
+	@echo "🔍 Running linters..."
+	@echo "Running flake8..."
+	flake8 test/ lib/ python_framework/ --max-line-length=120 --statistics || true
+	@echo "Checking with black..."
+	black --check test/ lib/ python_framework/ || true
+	@echo "Checking with isort..."
+	isort --check-only test/ lib/ python_framework/ || true
+
+format:
+	@echo "✨ Formatting code..."
+	black test/ lib/ python_framework/
+	isort test/ lib/ python_framework/
+	@echo "✅ Code formatted"
+
+type-check:
+	@echo "🔍 Running type checks..."
+	mypy test/ lib/ python_framework/ --ignore-missing-imports || true
+
+security-check:
+	@echo "🔐 Running security checks..."
+	@echo "Running bandit..."
+	bandit -r lib/ python_framework/ -f json -o bandit-results.json || true
+	@echo "Running safety..."
+	safety check --json --output safety-results.json || true
+	@echo "✅ Security check complete"
+
+# Cleanup targets
+clean:
+	@echo "🧹 Cleaning test artifacts..."
+	rm -rf .pytest_cache
+	rm -rf test/.pytest_cache
+	rm -rf __pycache__
+	rm -rf test/__pycache__
+	rm -rf lib/__pycache__
+	rm -rf python_framework/__pycache__
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
+	rm -rf test-results/*.xml
+	@echo "✅ Test artifacts cleaned"
+
+clean-all: clean
+	@echo "🧹 Deep cleaning..."
+	rm -rf htmlcov/
+	rm -rf .coverage
+	rm -rf coverage.xml
+	rm -rf .hypothesis/
+	rm -rf .mypy_cache/
+	rm -rf test-results/
+	@echo "✅ Deep clean complete"
+
+# Continuous testing
+watch:
+	@echo "👁️  Watching for changes and running tests..."
+	python -m pytest test/ --tb=short -v --looponfail
+
+# Pre-commit setup
+setup-hooks:
+	@echo "🔧 Setting up pre-commit hooks..."
+	ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
+	@echo "✅ Pre-commit hooks installed"
+
+# Test discovery
+list-tests:
+	@echo "📋 Available tests:"
+	python -m pytest test/ --collect-only -q
+
+# Parallel testing
+test-parallel:
+	@echo "⚡ Running tests in parallel..."
+	python -m pytest test/ -n auto -v --tb=short
+
+# Specific test file targets
+test-comprehensive:
+	python -m pytest test/test_comprehensive_suite.py -v
+
+test-property-based:
+	python -m pytest test/test_property_based.py -v
+
+test-fuzz-suite:
+	python -m pytest test/test_fuzz.py -v
+
+test-integration-suite:
+	python -m pytest test/test_integration_comprehensive.py -v
+
+# Benchmarking
+benchmark:
+	@echo "⚡ Running benchmarks..."
+	python -m pytest test/ -v --benchmark-only --benchmark-autosave
+
+# Documentation for tests
+docs-tests:
+	@echo "📚 Generating test documentation..."
+	@echo "See TESTING_COMPREHENSIVE_GUIDE.md for details"
+	cat TESTING_COMPREHENSIVE_GUIDE.md
+
+# CI simulation
+ci-test:
+	@echo "🔄 Simulating CI test run..."
+	make clean
+	make lint
+	make test-coverage
+	@echo "✅ CI simulation complete"
