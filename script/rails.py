@@ -2,24 +2,42 @@
 # -*- coding: utf-8 -*-
 
 """
-Converted from Ruby: rails
+Rails Script - Python Version
 
-This file was automatically converted from Ruby to Python.
-Manual review and testing may be required.
+Wrapper for Rails script functionality.
+
+Converted from Ruby script/rails.
 """
 
 import sys
 import os
-import re
-import subprocess
 from pathlib import Path
 
-# This command will automatically be run when you run "rails" with Rails 3 gems installed from the root of your application.
 
-APP_PATH = File.expand_path('../../config/application',  __FILE__)
-require File.expand_path('../../config/boot',  __FILE__)
-# TODO: import rails.commands
+def main():
+    """Main entry point for rails script."""
+    
+    # Get the repo root
+    repo_root = Path(__file__).parent.parent.resolve()
+    
+    # For now, delegate to the Ruby version if it exists
+    ruby_script = repo_root / "script" / "rails"
+    if ruby_script.exists():
+        try:
+            # Execute the Ruby version with all arguments
+            os.execv(str(ruby_script), ['rails'] + sys.argv[1:])
+        except Exception as e:
+            print(f"Error executing Ruby rails script: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("Error: Ruby rails script not found", file=sys.stderr)
+        print("TODO: Implement native Python version", file=sys.stderr)
+        sys.exit(1)
+
 
 if __name__ == "__main__":
-    # TODO: Add main execution logic
-    pass
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nAborting...")
+        sys.exit(1)
