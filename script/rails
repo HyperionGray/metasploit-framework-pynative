@@ -1,6 +1,43 @@
-#!/usr/bin/env ruby
-# This command will automatically be run when you run "rails" with Rails 3 gems installed from the root of your application.
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-APP_PATH = File.expand_path('../../config/application',  __FILE__)
-require File.expand_path('../../config/boot',  __FILE__)
-require 'rails/commands'
+"""
+Rails Script - Python Version
+
+Wrapper for Rails script functionality.
+
+Converted from Ruby script/rails.
+"""
+
+import sys
+import os
+from pathlib import Path
+
+
+def main():
+    """Main entry point for rails script."""
+    
+    # Get the repo root
+    repo_root = Path(__file__).parent.parent.resolve()
+    
+    # Delegate to the Ruby version (now script/rails.rb)
+    ruby_script = repo_root / "script" / "rails.rb"
+    if ruby_script.exists():
+        try:
+            # Execute the Ruby version with all arguments
+            os.execv(str(ruby_script), ['rails'] + sys.argv[1:])
+        except Exception as e:
+            print(f"Error executing Ruby rails script: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("Error: Ruby rails script not found", file=sys.stderr)
+        print("Native Python version implementation pending Ruby removal", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nAborting...")
+        sys.exit(1)

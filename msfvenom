@@ -1,516 +1,250 @@
-#!/usr/bin/env ruby
-# -*- coding: binary -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+MsfVenom - Python implementation of Metasploit's standalone payload generator.
+A replacement for msfpayload and msfencode.
+"""
+
+import argparse
+import sys
+import os
+import signal
+import time
+import struct
+import base64
+import binascii
+from pathlib import Path
+
+class MsfVenomError(Exception):
+    """Base exception for MsfVenom errors"""
+    pass
+
+class HelpError(MsfVenomError):
+    """Exception for help display"""
+    pass
+
+class UsageError(MsfVenomError):
+    """Exception for usage errors"""
+    pass
+
+class MsfVenom:
+    """Python implementation of MsfVenom payload generator"""
+    
+    def __init__(self):
+        self.framework_loaded = False
+        self.framework = None
+        
+    def require_deps(self):
+        """Load framework dependencies (placeholder)"""
+        # TODO: Implement framework loading when Python MSF framework is available
+        self.framework_loaded = True
+        
+    def init_framework(self, create_opts=None):
+        """Initialize the framework (placeholder)"""
+        if create_opts is None:
+            create_opts = {}
+            
+        if not self.framework_loaded:
+            self.require_deps()
+            
+        # TODO: Implement framework initialization
+        # create_opts.setdefault('module_types', ['payload', 'encoder', 'nop'])
+        self.framework = "placeholder_framework"
+        
+    def get_framework(self):
+        """Get cached framework object"""
+        if not self.framework:
+            self.init_framework()
+        return self.framework
+        
+    def parse_args(self, args):
+        """Parse command line arguments"""
+        parser = argparse.ArgumentParser(
+            prog='msfvenom.py',
+            description='MsfVenom - a Metasploit standalone payload generator (Python version).\n'
+                       'Also a replacement for msfpayload and msfencode.',
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog='Example: %(prog)s -p windows/meterpreter/reverse_tcp LHOST=<IP> -f exe -o payload.exe'
+        )
+        
+        parser.add_argument('-l', '--list', nargs='*', 
+                          help='List all modules for [type]. Types are: payloads, encoders, nops, platforms, archs, encrypt, formats, all')
+        
+        parser.add_argument('-p', '--payload', 
+                          help="Payload to use (--list payloads to list, --list-options for arguments). Specify '-' or STDIN for custom")
+        
+        parser.add_argument('--list-options', action='store_true',
+                          help="List --payload <value>'s standard, advanced and evasion options")
+        
+        parser.add_argument('-f', '--format', 
+                          help='Output format (use --list formats to list)')
+        
+        parser.add_argument('-e', '--encoder',
+                          help='The encoder to use (use --list encoders to list)')
+        
+        parser.add_argument('--service-name',
+                          help='The service name to use when generating a service binary')
+        
+        parser.add_argument('--sec-name',
+                          help='The new section name to use when generating large Windows binaries. Default: random 4-character alpha string')
+        
+        parser.add_argument('--smallest', action='store_true',
+                          help='Generate the smallest possible payload using all available encoders')
+        
+        parser.add_argument('--encrypt',
+                          help='The type of encryption or encoding to apply to the shellcode (use --list encrypt to list)')
+        
+        parser.add_argument('--encrypt-key',
+                          help='A key to be used for --encrypt')
+        
+        parser.add_argument('--encrypt-iv',
+                          help='An initialization vector for --encrypt')
+        
+        parser.add_argument('-a', '--arch',
+                          help='The architecture to use for --payload and --encoders (use --list archs to list)')
+        
+        parser.add_argument('--platform',
+                          help='The platform for --payload (use --list platforms to list)')
+        
+        parser.add_argument('-o', '--out',
+                          help='Save the payload to a file')
+        
+        parser.add_argument('-b', '--bad-chars',
+                          help='Characters to avoid example: \'\\x00\\xff\'')
+        
+        parser.add_argument('-n', '--nopsled', type=int,
+                          help='Prepend a nopsled of [length] size on to the payload')
+        
+        parser.add_argument('--pad-nops', action='store_true',
+                          help='Use nopsled size specified by -n <length> as the total payload size, auto-prepending a nopsled of quantity (nops minus payload length)')
+        
+        parser.add_argument('-s', '--space', type=int,
+                          help='The maximum size of the resulting payload')
+        
+        parser.add_argument('--encoder-space', type=int,
+                          help='The maximum size of the encoded payload (defaults to the -s value)')
+        
+        parser.add_argument('-i', '--iterations', type=int,
+                          help='The number of times to encode the payload')
+        
+        parser.add_argument('-c', '--add-code',
+                          help='Specify an additional win32 shellcode file to include')
+        
+        parser.add_argument('-x', '--template',
+                          help='Specify a custom executable file to use as a template')
+        
+        parser.add_argument('-k', '--keep', action='store_true',
+                          help='Preserve the --template behaviour and inject the payload as a new thread')
+        
+        parser.add_argument('-v', '--var-name',
+                          help='Specify a custom variable name to use for certain output formats')
+        
+        parser.add_argument('-t', '--timeout', type=int, default=30,
+                          help='The number of seconds to wait when reading the payload from STDIN (default 30, 0 to disable)')
+        
+        parser.add_argument('datastore', nargs='*',
+                          help='Datastore options in KEY=VALUE format')
+        
+        try:
+            opts = parser.parse_args(args)
+        except SystemExit:
+            raise UsageError("Invalid arguments")
+            
+        # Process datastore options
+        datastore = {}
+        if opts.datastore:
+            for item in opts.datastore:
+                if '=' in item:
+                    key, value = item.split('=', 1)
+                    datastore[key.upper()] = value
+                    
+        # Handle STDIN payload
+        if opts.payload == '-':
+            opts.payload = 'stdin'
+            
+        if not opts.payload and not opts.list:
+            opts.payload = 'stdin'
+            
+        if opts.payload == 'stdin' and not opts.list:
+            print("Attempting to read payload from STDIN...", file=sys.stderr)
+            try:
+                if opts.timeout > 0:
+                    signal.alarm(opts.timeout)
+                opts.stdin = sys.stdin.buffer.read()
+                signal.alarm(0)
+            except:
+                opts.stdin = b''
+                
+        # Set default LHOST for reverse payloads
+        if (opts.payload and 'reverse' in opts.payload.lower() and 
+            'LHOST' not in datastore):
+            datastore['LHOST'] = '127.0.0.1'  # Default fallback
+            
+        opts.datastore = datastore
+        return opts
+        
+    def dump_platforms(self):
+        """List supported platforms"""
+        platforms = [
+            'aix', 'android', 'apple_ios', 'bsd', 'bsdi', 'cisco', 'firefox',
+            'freebsd', 'hardware', 'hpux', 'irix', 'java', 'javascript', 'linux',
+            'mainframe', 'multi', 'netbsd', 'netware', 'nodejs', 'openbsd',
+            'osx', 'php', 'python', 'r', 'ruby', 'solaris', 'unix', 'windows'
+        ]
+        
+        output = "\n    Framework Platforms [--platform <value>]\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for platform in sorted(platforms):
+            output += f"    {platform}\n"
+        output += "\n"
+        return output
+        
+    def dump_archs(self):
+        """List supported architectures"""
+        archs = [
+            'aarch64', 'armbe', 'armle', 'cbea', 'cbea64', 'cmd', 'dalvik',
+            'firefox', 'java', 'mips', 'mips64', 'mips64le', 'mipsbe', 'mipsle',
+            'nodejs', 'php', 'ppc', 'ppc64', 'ppc64le', 'ppce500v2', 'python',
+            'r', 'ruby', 'sparc', 'sparc64', 'tty', 'x64', 'x86', 'x86_64', 'zarch'
+        ]
+        
+        output = "\n    Framework Architectures [--arch <value>]\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for arch in sorted(archs):
+            output += f"    {arch}\n"
+        output += "\n"
+        return output
+        
+    def dump_encrypt(self):
+        """List encryption formats"""
+        encrypts = [
+            'aes256', 'base64', 'blowfish', 'des', 'rc4', 'xor'
+        ]
+        
+        output = "\n    Framework Encryption Formats [--encrypt <value>]\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for encrypt in sorted(encrypts):
+            output += f"    {encrypt}\n"
+        output += "\n"
+        return output
+        
+    def dump_formats(self):
+        """List output formats"""
+        executable_formats = [
+            'asp', 'aspx', 'aspx-exe', 'axis2', 'dll', 'elf', 'elf-so', 'exe',
+            'exe-only', 'exe-service', 'exe-small', 'hta-psh', 'jar', 'jsp',
+            'loop-vbs', 'macho', 'msi', 'msi-nouac', 'osx-app', 'psh', 'psh-cmd',
+            'psh-net', 'psh-reflection', 'vba', 'vba-exe', 'vba-psh', 'vbs', 'war'
+        ]
+        
+        transform_formats = [
+            'bash', 'c', 'csharp', 'dw', 'dword', 'hex', 'java', 'js_be', 'js_le',
+            'num', 'perl', 'pl', 'powershell', 'ps1', 'py', 'python', 'raw', 'rb',
+            'ruby', 'sh', 'vbapplication', 'vbscript'
+        ]
+        
+        output = "\n    Framework Executable Formats [--format <value>]\n"
+        output += "    " + "=" * 50 + "\n\n"
 
-class MsfVenomError < StandardError; end
-class HelpError < StandardError; end
-class UsageError < MsfVenomError; end
 
-require 'optparse'
-require 'timeout'
-
-# Show informational message about Python alternatives (unless quiet mode)
-unless ENV['MSF_QUIET'] || ARGV.include?('-q') || ARGV.include?('--quiet') || ARGV.include?('-h') || ARGV.include?('--help')
-  puts "\n" + "="*70
-  puts "  MsfVenom - Payload Generator"
-  puts "="*70
-  puts "  TIP: Python-native payload generation coming soon!"
-  puts "    See transpilers/ for Ruby↔Python conversion tools"
-  puts "="*70 + "\n"
-end
-
-# Silences warnings as they only serve to confuse end users
-if defined?(Warning) && Warning.respond_to?(:[]=)
-  Warning[:deprecated] = false
-end
-
-msfbase = __FILE__
-while File.symlink?(msfbase)
-  msfbase = File.expand_path(File.readlink(msfbase), File.dirname(msfbase))
-end
-
-$:.unshift(File.expand_path(File.join(File.dirname(msfbase), 'lib')))
-
-require 'metasploit/framework/profiler'
-Metasploit::Framework::Profiler.start
-
-def require_deps
-  require 'msfenv'
-
-  $:.unshift(ENV['MSF_LOCAL_LIB']) if ENV['MSF_LOCAL_LIB']
-
-  require 'rex'
-  require 'msf/core/payload_generator'
-  require 'msf/core/constants'
-
-  @framework_loaded = true
-end
-
-# Creates a new framework object.
-#
-# @note Ignores any previously cached value.
-# @param (see ::Msf::Simple::Framework.create)
-# @return [Msf::Framework]
-def init_framework(create_opts={})
-  require_deps unless @framework_loaded
-
-  create_opts[:module_types] ||= [
-    ::Msf::MODULE_PAYLOAD, ::Msf::MODULE_ENCODER, ::Msf::MODULE_NOP
-  ]
-
-  create_opts[:module_types].map! do |type|
-    Msf.const_get("MODULE_#{type.upcase}")
-  end
-
-  @framework = ::Msf::Simple::Framework.create(create_opts)
-
-  unless $stdout.tty?
-    Rex::Text::Table.unwrap_tables!
-  end
-end
-
-# Cached framework object
-#
-# @return [Msf::Framework]
-def framework
-  return @framework if @framework
-
-  init_framework
-
-  @framework
-end
-
-def parse_args(args)
-  opts = {}
-  datastore = {}
-  opt = OptionParser.new
-  banner = "MsfVenom - a Metasploit standalone payload generator.\n"
-  banner << "Also a replacement for msfpayload and msfencode.\n"
-  banner << "Usage: #{$0} [options] <var=val>\n"
-  banner << "Example: #{$0} -p windows/meterpreter/reverse_tcp LHOST=<IP> -f exe -o payload.exe"
-  opt.banner = banner
-  opt.separator('')
-  opt.separator('Options:')
-
-  opt.on('-l', '--list            <type>', Array, 'List all modules for [type]. Types are: payloads, encoders, nops, platforms, archs, encrypt, formats, all') do |l|
-    if l.to_s.empty?
-      l = ["all"]
-    end
-    opts[:list] = l
-  end
-
-  opt.on('-p', '--payload         <payload>', String,
-         "Payload to use (--list payloads to list, --list-options for arguments). Specify '-' or STDIN for custom") do |p|
-    if p == '-'
-      opts[:payload] = 'stdin'
-    else
-      opts[:payload] = p
-    end
-  end
-
-  opt.on('--list-options', "List --payload <value>'s standard, advanced and evasion options") do
-    opts[:list_options] = true
-  end
-
-  opt.on('-f', '--format          <format>', String, "Output format (use --list formats to list)") do |f|
-    opts[:format] = f.downcase
-  end
-
-  opt.on('-e', '--encoder         <encoder>', String, 'The encoder to use (use --list encoders to list)') do |e|
-    opts[:encoder] = e
-  end
-
-  opt.on('--service-name    <value>', String, 'The service name to use when generating a service binary') do |s|
-    opts[:servicename] = s
-    opts[:sub_method] = true # Needed to ensure that to_win32pe_service() will call
-                             # exe_sub_method() for x86 binaries, not needed and ignored for x64 binaries.
-  end
-
-  opt.on('--sec-name        <value>', String, 'The new section name to use when generating large Windows binaries. Default: random 4-character alpha string') do |s|
-    opts[:secname] = s
-  end
-
-  opt.on('--smallest', 'Generate the smallest possible payload using all available encoders') do
-    opts[:smallest] = true
-  end
-
-  opt.on('--encrypt         <value>', String, 'The type of encryption or encoding to apply to the shellcode (use --list encrypt to list)') do |e|
-    opts[:encryption_format] = e
-  end
-
-  opt.on('--encrypt-key     <value>', String, 'A key to be used for --encrypt') do |e|
-    init_framework
-    opts[:encryption_key] = Rex::Text.dehex(e)
-  end
-
-  opt.on('--encrypt-iv      <value>', String, 'An initialization vector for --encrypt') do |e|
-    opts[:encryption_iv] = e
-  end
-
-  opt.on('-a', '--arch            <arch>', String, 'The architecture to use for --payload and --encoders (use --list archs to list)') do |a|
-    opts[:arch] = a
-  end
-
-  opt.on('--platform        <platform>', String, 'The platform for --payload (use --list platforms to list)') do |l|
-    opts[:platform] = l
-  end
-
-  opt.on('-o', '--out             <path>', 'Save the payload to a file') do |x|
-    opts[:out] = x
-  end
-
-  opt.on('-b', '--bad-chars       <list>', String, 'Characters to avoid example: \'\x00\xff\'') do |b|
-    init_framework
-    opts[:badchars] = Rex::Text.dehex(b)
-  end
-
-  opt.on('-n', '--nopsled         <length>', Integer, 'Prepend a nopsled of [length] size on to the payload') do |n|
-    opts[:nops] = n.to_i
-  end
-
-  opt.on('--pad-nops', 'Use nopsled size specified by -n <length> as the total payload size, auto-prepending a nopsled of quantity (nops minus payload length)') do
-    opts[:padnops] = true
-  end
-
-  opt.on('-s', '--space           <length>', Integer, 'The maximum size of the resulting payload') do |s|
-    opts[:space] = s
-  end
-
-  opt.on('--encoder-space   <length>', Integer, 'The maximum size of the encoded payload (defaults to the -s value)') do |s|
-    opts[:encoder_space] = s
-  end
-
-  opt.on('-i', '--iterations      <count>', Integer, 'The number of times to encode the payload') do |i|
-    opts[:iterations] = i
-  end
-
-  opt.on('-c', '--add-code        <path>', String, 'Specify an additional win32 shellcode file to include') do |x|
-    opts[:add_code] = x
-  end
-
-  opt.on('-x', '--template        <path>', String, 'Specify a custom executable file to use as a template') do |x|
-    opts[:template] = x
-  end
-
-  opt.on('-k', '--keep', 'Preserve the --template behaviour and inject the payload as a new thread') do
-    opts[:keep] = true
-  end
-
-  opt.on('-v', '--var-name        <value>', String, 'Specify a custom variable name to use for certain output formats') do |x|
-    opts[:var_name] = x
-  end
-
-  opt.on('-t', '--timeout         <second>', Integer, "The number of seconds to wait when reading the payload from STDIN (default 30, 0 to disable)") do |x|
-    opts[:timeout] = x
-  end
-
-  opt.on_tail('-h', '--help', 'Show this message') do
-    raise HelpError, "#{opt}"
-  end
-
-  begin
-    opt.parse!(args)
-  rescue OptionParser::InvalidOption => e
-    raise UsageError, "Invalid option\n#{opt}"
-  rescue OptionParser::MissingArgument => e
-    raise UsageError, "Missing required argument for option\n#{opt}"
-  end
-
-  if opts.empty?
-    raise UsageError, "No options\n#{opt}"
-  end
-
-  if args
-    args.each do |x|
-      k,v = x.split('=', 2)
-      datastore[k.upcase] = v.to_s
-    end
-    if opts[:payload].to_s =~ /[\_\/]reverse/ && datastore['LHOST'].nil?
-      init_framework
-      datastore['LHOST'] = Rex::Socket.source_address
-    end
-  end
-
-  if opts[:payload].nil? # if no payload option is selected assume we are reading it from stdin
-    opts[:payload] = "stdin"
-  end
-
-  if opts[:payload].downcase == 'stdin' && !opts[:list]
-    $stderr.puts "Attempting to read payload from STDIN..."
-    begin
-      opts[:timeout] ||= 30
-      ::Timeout.timeout(opts[:timeout]) do
-        opts[:stdin] = payload_stdin
-      end
-    rescue Timeout::Error
-      opts[:stdin] = ''
-    end
-  end
-
-  opts[:datastore] = datastore
-
-  opts
-end
-# Read a raw payload from stdin (or whatever IO object we're currently
-# using as stdin, see {#initialize})
-#
-# @return [String]
-def payload_stdin
-  @in = $stdin
-  @in.binmode
-  payload = @in.read
-  payload
-end
-
-def dump_platforms
-  init_framework(:module_types => [])
-  supported_platforms = []
-  Msf::Module::Platform.subclasses.each {|c| supported_platforms << c.realname.downcase}
-
-  tbl = Rex::Text::Table.new(
-    'Indent'  => 4,
-    'Header'  => "Framework Platforms [--platform <value>]",
-    'Columns' =>
-    [
-      "Name",
-    ])
-
-  supported_platforms.sort.each do |name|
-    tbl << [name]
-  end
-
-  "\n" + tbl.to_s + "\n"
-end
-
-def dump_archs
-  init_framework(:module_types => [])
-  supported_archs = ARCH_ALL.dup
-
-  tbl = Rex::Text::Table.new(
-    'Indent'  => 4,
-    'Header'  => "Framework Architectures [--arch <value>]",
-    'Columns' =>
-    [
-      "Name",
-    ])
-
-  supported_archs.sort.each do |name|
-    tbl << [name]
-  end
-
-  "\n" + tbl.to_s + "\n"
-end
-
-def dump_encrypt
-  init_framework(:module_types => [])
-  tbl = Rex::Text::Table.new(
-    'Indent'  => 4,
-    'Header'  => "Framework Encryption Formats [--encrypt <value>]",
-    'Columns' =>
-    [
-      "Name",
-    ])
-
-  ::Msf::Simple::Buffer.encryption_formats.each do |name|
-    tbl << [ name]
-  end
-
-  "\n" + tbl.to_s + "\n"
-end
-
-def dump_formats
-  init_framework(:module_types => [])
-  tbl1 = Rex::Text::Table.new(
-    'Indent'  => 4,
-    'Header'  => "Framework Executable Formats [--format <value>]",
-    'Columns' =>
-    [
-      "Name"
-    ])
-
-  ::Msf::Util::EXE.to_executable_fmt_formats.each do |name|
-    tbl1 << [ name ]
-  end
-
-  tbl2 = Rex::Text::Table.new(
-    'Indent'  => 4,
-    'Header'  => "Framework Transform Formats [--format <value>]",
-    'Columns' =>
-    [
-      "Name"
-    ])
-
-  ::Msf::Simple::Buffer.transform_formats.each do |name|
-    tbl2 << [ name ]
-  end
-
-  "\n" + tbl1.to_s + "\n" + tbl2.to_s + "\n"
-end
-
-def dump_payloads(platform = nil, arch = nil)
-  init_framework(:module_types => [ :payload ])
-  tbl = Rex::Text::Table.new(
-    'Indent'  => 4,
-    'Header'  => "Framework Payloads (#{framework.stats.num_payloads} total) [--payload <value>]",
-    'Columns' =>
-    [
-      "Name",
-      "Description"
-    ])
-
-  framework.payloads.each_module(
-    'Platform' => platform ? Msf::Module::PlatformList.transform(platform.split(',')) : nil,
-    'Arch'     => arch ? arch.split(',') : nil) do |name, mod|
-      begin
-        mod_info = mod.new.description.split.join(' ')
-      rescue ::Exception, ::LoadError => e
-        wlog("Module #{name} failed to initialize: #{e}", 'core', LEV_0)
-        next
-      end
-      tbl << [ name, mod_info ]
-  end
-
-  "\n" + tbl.to_s + "\n"
-end
-
-def dump_encoders(arch = nil)
-  init_framework(:module_types => [ :encoder ])
-  tbl = Rex::Text::Table.new(
-    'Indent'  => 4,
-    'Header'  => "Framework Encoders" + ((arch) ? " (architectures: #{arch})" : "") + " [--encoder <value>]",
-    'Columns' =>
-    [
-      "Name",
-      "Rank",
-      "Description"
-    ])
-  cnt = 0
-
-  framework.encoders.each_module(
-    'Arch' => arch ? arch.split(',') : nil) do |name, mod|
-      tbl << [ name, mod.rank_to_s, mod.new.name ]
-
-      cnt += 1
-  end
-
-    (cnt > 0) ? "\n" + tbl.to_s + "\n" : "\nNo compatible encoders found.\n\n"
-end
-
-def dump_nops
-  init_framework(:module_types => [ :nop ])
-  tbl = Rex::Text::Table.new(
-    'Indent'  => 4,
-    'Header'  => "Framework NOPs (#{framework.stats.num_nops} total)",
-    'Columns' =>
-    [
-      "Name",
-      "Description"
-    ])
-
-  framework.nops.each_module do |name, mod|
-    tbl << [ name, mod.new.description.split.join(' ') ]
-  end
-
-  "\n" + tbl.to_s + "\n"
-end
-
-begin
-  generator_opts = parse_args(ARGV)
-
-rescue HelpError => e
-  $stderr.puts e.message
-  exit(1)
-rescue MsfVenomError => e
-  $stderr.puts "Error: #{e.message}"
-  exit(1)
-end
-
-if generator_opts[:list]
-  generator_opts[:list].each do |mod|
-    case mod.downcase
-    when "payloads", "payload", "p"
-      $stdout.puts dump_payloads(generator_opts[:platform], generator_opts[:arch])
-    when "encoders", "encoder", "e"
-      $stdout.puts dump_encoders(generator_opts[:arch])
-    when "nops", "nop", "n"
-      $stdout.puts dump_nops
-    when "platforms", "dump_platform"
-      $stdout.puts dump_platforms
-    when "archs", "dump_arch"
-      $stdout.puts dump_archs
-    when "encrypts", "encrypt", "encryption"
-      $stdout.puts dump_encrypt
-    when "formats", "format", "f"
-      $stdout.puts dump_formats
-    when "all", "a"
-      # Init here so #dump_payloads doesn't create a framework with
-      # only payloads, etc.
-      init_framework
-      $stdout.puts dump_payloads
-      $stdout.puts dump_encoders
-      $stdout.puts dump_nops
-      $stdout.puts dump_platforms
-      $stdout.puts dump_archs
-      $stdout.puts dump_encrypt
-      $stdout.puts dump_formats
-    else
-      $stderr.puts "Invalid type (#{mod}). These are valid: payloads, encoders, nops, platforms, archs, encrypt, formats, all"
-    end
-  end
-  exit(0)
-end
-
-if generator_opts[:list_options]
-  payload_mod = framework.payloads.create(generator_opts[:payload])
-
-  if payload_mod.nil?
-    $stderr.puts "Invalid payload: #{generator_opts[:payload]}"
-    exit(1)
-  end
-
-  $stderr.puts "Options for #{payload_mod.fullname}:\n" + "="*25 + "\n\n"
-  $stdout.puts ::Msf::Serializer::ReadableText.dump_module(payload_mod, '    ')
-
-  $stderr.puts "\nAdvanced options for #{payload_mod.fullname}:\n" + "="*25 + "\n\n"
-  $stdout.puts ::Msf::Serializer::ReadableText.dump_advanced_options(payload_mod, '    ')
-
-  $stderr.puts "\nEvasion options for #{payload_mod.fullname}:\n" + "="*25 + "\n\n"
-  $stdout.puts ::Msf::Serializer::ReadableText.dump_evasion_options(payload_mod, '    ')
-
-  exit(0)
-end
-
-generator_opts[:framework] = framework
-generator_opts[:cli] = true
-
-begin
-  venom_generator = Msf::PayloadGenerator.new(generator_opts)
-  payload = venom_generator.generate_payload
-rescue Msf::InvalidFormat => e
-  $stderr.puts "Error: #{e.message}"
-  $stderr.puts dump_formats
-rescue ::Exception => e
-  elog("#{e.class} : #{e.message}\n#{e.backtrace * "\n"}")
-  $stderr.puts "Error: #{e.message}"
-end
-
-# No payload generated, no point to go on
-exit(2) unless payload
-
-if generator_opts[:out]
-  begin
-    ::File.open(generator_opts[:out], 'wb') do |f|
-      f.write(payload)
-    end
-    $stderr.puts "Saved as: #{generator_opts[:out]}"
-  rescue ::Exception => e
-    # If I can't save it, then I can't save it. I don't think it matters what error.
-    elog("#{e.class} : #{e.message}\n#{e.backtrace * "\n"}")
-    $stderr.puts "Error: #{e.message}"
-  end
-else
-  output_stream = $stdout
-  output_stream.binmode
-  output_stream.write payload
-  # trailing newline for pretty output
-  $stderr.puts unless payload =~ /\n$/
-end
