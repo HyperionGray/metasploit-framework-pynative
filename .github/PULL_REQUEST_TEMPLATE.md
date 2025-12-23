@@ -14,6 +14,18 @@ List the steps needed to make sure this thing works
 - [ ] **Verify** the thing does not do what it should not
 - [ ] **Document** the thing and how it works ([Example](https://github.com/rapid7/metasploit-framework/blob/master/documentation/modules/post/multi/gather/aws_keys.md))
 
+## Code Quality Checklist
+
+- [ ] Code follows style guidelines (run `black` and `flake8` for Python, `rubocop` for Ruby)
+- [ ] All new code has appropriate test coverage (aim for 80%+)
+- [ ] Tests pass locally (`pytest` for Python, `rspec` for Ruby)
+- [ ] No new security vulnerabilities introduced
+- [ ] TODO/FIXME comments include context and GitHub issue references
+- [ ] Documentation updated (if applicable)
+- [ ] Commit messages follow the [50/72 rule](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
+
+See [TESTING.md](../TESTING.md) and [CODE_QUALITY.md](../CODE_QUALITY.md) for detailed guidelines.
+
 If you are opening a PR for a new module that exploits a **specific** piece of hardware or requires a **complex or hard-to-find** testing environment, we recommend that you send us a demo of your module executing correctly. Seeing your module in action will help us review your PR faster!
 
 Specific Hardware Examples:
