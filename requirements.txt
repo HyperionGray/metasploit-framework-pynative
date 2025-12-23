@@ -161,7 +161,7 @@ r2pipe>=1.7.4
 capstone>=4.0.2
 keystone-engine>=0.9.2
 unicorn>=2.0.1
-# angr>=9.2.31  # Optional - very heavy dependency, install separately if needed
+# angr>=9.2.31  # Optional: Binary analysis framework - very large dependency. Install with: pip install angr
 
 # Network Security Testing
 dnspython>=2.2.1
@@ -198,7 +198,7 @@ prompt-toolkit>=3.0.36
 # Fuzzing and Testing Tools
 hypothesis>=6.61.0
 mutmut>=2.4.3
-# atheris>=2.2.2  # Optional - fuzzing tool, install separately if needed
+# atheris>=2.2.2  # Optional: Fuzzing tool for Python. Install with: pip install atheris
 # Metasploit Framework Python Dependencies
 # Core framework requirements for Python modules and exploits
 
@@ -255,7 +255,7 @@ keystone-engine>=0.9.2
 unicorn>=2.0.0
 
 # Modern Shell Handlers and C2
-# pwncat-cs>=0.5.0  # Optional - may not be available
+# pwncat-cs>=0.5.0  # Optional: Modern shell handler and C2 framework. Install with: pip install pwncat-cs
 
 # Binary Analysis (from existing requirements-binary-analysis.txt)
 r2pipe>=1.6.0
