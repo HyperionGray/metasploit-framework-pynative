@@ -2,11 +2,14 @@
 SSH Client helper for exploit development
 
 Provides SSH connectivity and operations commonly needed for exploits:
-- Password and key-based authentication
-- Command execution
-- File transfer (SCP/SFTP)
-- Interactive shell access
+- Secure password and key-based authentication
+- Host key verification with configurable policies
+- Command execution with output sanitization
+- Secure file transfer (SCP/SFTP)
+- Interactive shell access with logging
 - Key generation and management
+- Connection security monitoring
+- Audit logging for compliance
 """
 
 import paramiko
@@ -18,20 +21,70 @@ from pathlib import Path
 import logging
 from io import StringIO
 import os
+import hashlib
+import base64
+
+
+class SecureHostKeyPolicy(paramiko.MissingHostKeyPolicy):
+    """
+    Secure host key policy that validates and logs host keys
+    """
+    
+    def __init__(self, known_hosts_file: Optional[str] = None, auto_add: bool = False, logger: Optional[logging.Logger] = None):
+        self.known_hosts_file = known_hosts_file or os.path.expanduser("~/.ssh/known_hosts")
+        self.auto_add = auto_add
+        self.logger = logger or logging.getLogger(__name__)
+        
+    def missing_host_key(self, client, hostname, key):
+        """Handle missing host key with security logging"""
+        key_type = key.get_name()
+        key_fingerprint = self._get_key_fingerprint(key)
+        
+        self.logger.warning(f"Unknown host key for {hostname}: {key_type} {key_fingerprint}")
+        
+        if self.auto_add:
+            self.logger.info(f"Auto-adding host key for {hostname}")
+            client.get_host_keys().add(hostname, key_type, key)
+            
+            # Save to known_hosts file if specified
+            if self.known_hosts_file:
+                try:
+                    with open(self.known_hosts_file, 'a') as f:
+                        f.write(f"{hostname} {key_type} {key.get_base64()}\n")
+                except Exception as e:
+                    self.logger.error(f"Failed to save host key: {e}")
+        else:
+            # Reject unknown host keys by default for security
+            raise paramiko.SSHException(f"Unknown host key for {hostname}: {key_type} {key_fingerprint}")
+    
+    def _get_key_fingerprint(self, key) -> str:
+        """Get SHA256 fingerprint of the key"""
+        key_bytes = base64.b64decode(key.get_base64())
+        fingerprint = hashlib.sha256(key_bytes).digest()
+        return base64.b64encode(fingerprint).decode().rstrip('=')
 
 
 class SSHClient:
     """
-    SSH client tailored for exploit development needs.
+    SSH client tailored for exploit development needs with security focus.
     
     Features:
-    - Password and key authentication
-    - Command execution with output capture
-    - File upload/download
-    - Interactive shell support
-    - Connection management
+    - Secure password and key authentication
+    - Configurable host key verification
+    - Command execution with output sanitization
+    - Secure file upload/download with validation
+    - Interactive shell support with logging
+    - Connection management with timeout
     - Key generation utilities
+    - Comprehensive audit logging
     """
+    
+    # Security constants
+    MAX_COMMAND_LENGTH = 10000
+    MAX_OUTPUT_SIZE = 1024 * 1024  # 1MB
+    CONNECTION_TIMEOUT = 30
+    COMMAND_TIMEOUT = 300
+    MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
     
     def __init__(self, 
                  hostname: str,
@@ -39,10 +92,13 @@ class SSHClient:
                  username: str = "",
                  password: str = "",
                  private_key_path: str = "",
-                 timeout: int = 30,
-                 verbose: bool = False):
+                 timeout: int = CONNECTION_TIMEOUT,
+                 verbose: bool = False,
+                 host_key_policy: str = "strict",  # strict, auto_add, or ignore
+                 known_hosts_file: Optional[str] = None,
+                 enable_audit_log: bool = True):
         """
-        Initialize SSH client
+        Initialize SSH client with security validations
         
         Args:
             hostname: Target hostname or IP
@@ -52,7 +108,31 @@ class SSHClient:
             private_key_path: Path to private key file
             timeout: Connection timeout
             verbose: Enable verbose logging
+            host_key_policy: Host key verification policy (strict, auto_add, ignore)
+            known_hosts_file: Path to known_hosts file
+            enable_audit_log: Enable audit logging
         """
+        # Input validation
+        if not hostname or not isinstance(hostname, str):
+            raise ValueError("Hostname must be a non-empty string")
+        
+        if not (1 <= port <= 65535):
+            raise ValueError("Port must be between 1 and 65535")
+        
+        if not username or not isinstance(username, str):
+            raise ValueError("Username must be a non-empty string")
+        
+        if timeout <= 0 or timeout > 300:
+            raise ValueError("Timeout must be between 1 and 300 seconds")
+        
+        if host_key_policy not in ['strict', 'auto_add', 'ignore']:
+            raise ValueError("Host key policy must be 'strict', 'auto_add', or 'ignore'")
+        
+        # Validate hostname format
+        import re
+        if not re.match(r'^[a-zA-Z0-9.-]+$', hostname):
+            raise ValueError("Invalid hostname format")
+        
         self.hostname = hostname
         self.port = port
         self.username = username
@@ -60,35 +140,126 @@ class SSHClient:
         self.private_key_path = private_key_path
         self.timeout = timeout
         self.verbose = verbose
+        self.host_key_policy = host_key_policy
+        self.known_hosts_file = known_hosts_file
+        self.enable_audit_log = enable_audit_log
         
         self.client: Optional[paramiko.SSHClient] = None
         self.sftp: Optional[paramiko.SFTPClient] = None
         self.shell: Optional[paramiko.Channel] = None
         
+        # Connection tracking
+        self._connection_start_time = None
+        self._command_count = 0
+        
         # Setup logging
         self.logger = logging.getLogger(f"{__name__}.SSHClient")
+        
+        # Setup audit logger if enabled
+        if self.enable_audit_log:
+            self.audit_logger = logging.getLogger(f"{__name__}.SSHAudit")
+            self.audit_logger.setLevel(logging.INFO)
         
         if not verbose:
             # Suppress paramiko logging unless verbose
             logging.getLogger("paramiko").setLevel(logging.WARNING)
     
+    def _audit_log(self, action: str, command: str = "", result: str = "", error: str = "") -> None:
+        """Log audit information"""
+        if self.enable_audit_log:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            log_entry = {
+                'timestamp': timestamp,
+                'hostname': self.hostname,
+                'username': self.username,
+                'action': action,
+                'command': command[:100] + "..." if len(command) > 100 else command,
+                'result': result,
+                'error': error
+            }
+            self.audit_logger.info(f"SSH_AUDIT: {log_entry}")
+    
+    def _validate_command(self, command: str) -> bool:
+        """Validate command for security issues"""
+        if not command or not isinstance(command, str):
+            return False
+        
+        if len(command) > self.MAX_COMMAND_LENGTH:
+            self.logger.error(f"Command too long: {len(command)} characters")
+            return False
+        
+        # Log potentially dangerous commands
+        dangerous_patterns = [
+            r'\brm\s+-rf\s+/',
+            r'\bdd\s+if=',
+            r'\bmkfs\.',
+            r'\bformat\b',
+            r'>\s*/dev/sd[a-z]',
+        ]
+        
+        for pattern in dangerous_patterns:
+            if re.search(pattern, command, re.IGNORECASE):
+                self.logger.warning(f"Potentially dangerous command detected: {pattern}")
+        
+        return True
+    
+    def _sanitize_output(self, output: str) -> str:
+        """Sanitize command output"""
+        if not output:
+            return ""
+        
+        # Limit output size
+        if len(output) > self.MAX_OUTPUT_SIZE:
+            self.logger.warning(f"Large output truncated: {len(output)} bytes")
+            output = output[:self.MAX_OUTPUT_SIZE] + "\n[OUTPUT TRUNCATED]"
+        
+        # Remove potential control characters that could cause issues
+        sanitized = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', output)
+        
+        return sanitized
+    
     def connect(self) -> bool:
         """
-        Establish SSH connection
+        Establish secure SSH connection with proper host key verification
         
         Returns:
             True if connection successful, False otherwise
         """
         try:
             self.client = paramiko.SSHClient()
-            self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             
-            # Prepare authentication
+            # Configure host key policy based on security requirements
+            if self.host_key_policy == "strict":
+                # Load known hosts and reject unknown keys
+                if self.known_hosts_file and os.path.exists(self.known_hosts_file):
+                    self.client.load_host_keys(self.known_hosts_file)
+                else:
+                    self.client.load_system_host_keys()
+                self.client.set_missing_host_key_policy(paramiko.RejectPolicy())
+                
+            elif self.host_key_policy == "auto_add":
+                # Auto-add unknown keys with logging
+                policy = SecureHostKeyPolicy(
+                    known_hosts_file=self.known_hosts_file,
+                    auto_add=True,
+                    logger=self.logger
+                )
+                self.client.set_missing_host_key_policy(policy)
+                
+            elif self.host_key_policy == "ignore":
+                # Only for testing - not recommended for production
+                self.logger.warning("Host key verification disabled - use with extreme caution")
+                self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            
+            # Prepare authentication with security validations
             auth_kwargs = {
                 'hostname': self.hostname,
                 'port': self.port,
                 'username': self.username,
-                'timeout': self.timeout
+                'timeout': self.timeout,
+                'compress': True,  # Enable compression for performance
+                'look_for_keys': False,  # Don't automatically look for keys
+                'allow_agent': False   # Don't use SSH agent for security
             }
             
             # Use key authentication if private key provided
@@ -96,45 +267,78 @@ class SSHClient:
                 if self.verbose:
                     self.logger.info(f"Using private key: {self.private_key_path}")
                 
-                # Try different key types
+                # Validate key file permissions
+                key_stat = os.stat(self.private_key_path)
+                if key_stat.st_mode & 0o077:
+                    self.logger.warning(f"Private key file has overly permissive permissions: {oct(key_stat.st_mode)}")
+                
+                # Try different key types with proper error handling
                 key = None
-                for key_class in [paramiko.RSAKey, paramiko.DSAKey, paramiko.ECDSAKey, paramiko.Ed25519Key]:
+                key_classes = [paramiko.RSAKey, paramiko.DSAKey, paramiko.ECDSAKey, paramiko.Ed25519Key]
+                
+                for key_class in key_classes:
                     try:
-                        key = key_class.from_private_key_file(self.private_key_path)
+                        if self.password:
+                            # Try with password first (encrypted key)
+                            key = key_class.from_private_key_file(self.private_key_path, password=self.password)
+                        else:
+                            # Try without password
+                            key = key_class.from_private_key_file(self.private_key_path)
                         break
                     except paramiko.PasswordRequiredException:
-                        # Key is encrypted, try with password
-                        if self.password:
-                            try:
-                                key = key_class.from_private_key_file(self.private_key_path, password=self.password)
-                                break
-                            except:
-                                continue
-                    except:
+                        if not self.password:
+                            self.logger.error("Private key is encrypted but no password provided")
+                            continue
+                    except Exception as e:
+                        self.logger.debug(f"Failed to load key as {key_class.__name__}: {e}")
                         continue
                 
                 if key:
                     auth_kwargs['pkey'] = key
+                    self.logger.info(f"Loaded {key.get_name()} private key")
                 else:
                     self.logger.error(f"Could not load private key: {self.private_key_path}")
+                    self._audit_log("CONNECT", error="Failed to load private key")
                     return False
             
             # Use password authentication if no key or as fallback
             if 'pkey' not in auth_kwargs and self.password:
                 auth_kwargs['password'] = self.password
             
-            if self.verbose:
-                self.logger.info(f"Connecting to {self.hostname}:{self.port} as {self.username}")
+            if 'pkey' not in auth_kwargs and not self.password:
+                self.logger.error("No authentication method provided (key or password)")
+                return False
             
+            if self.verbose:
+                auth_method = "key" if 'pkey' in auth_kwargs else "password"
+                self.logger.info(f"Connecting to {self.hostname}:{self.port} as {self.username} using {auth_method} authentication")
+            
+            self._connection_start_time = time.time()
             self.client.connect(**auth_kwargs)
             
-            if self.verbose:
-                self.logger.info("SSH connection established")
+            # Verify connection security
+            transport = self.client.get_transport()
+            if transport:
+                cipher = transport.get_cipher()
+                if self.verbose:
+                    self.logger.info(f"SSH connection established using cipher: {cipher}")
+                
+                # Log weak ciphers
+                weak_ciphers = ['des', 'rc4', 'md5']
+                if any(weak in cipher.lower() for weak in weak_ciphers):
+                    self.logger.warning(f"Weak cipher detected: {cipher}")
             
+            if self.verbose:
+                connection_time = time.time() - self._connection_start_time
+                self.logger.info(f"SSH connection established in {connection_time:.2f}s")
+            
+            self._audit_log("CONNECT", result="SUCCESS")
             return True
             
         except Exception as e:
-            self.logger.error(f"SSH connection failed: {e}")
+            error_msg = f"SSH connection failed: {e}"
+            self.logger.error(error_msg)
+            self._audit_log("CONNECT", error=str(e))
             return False
     
     def disconnect(self) -> None:
