@@ -163,8 +163,13 @@ module Acceptance
     def write(data)
       log("[write] #{data}")
       @all_data.write(data)
-      stdin.write(data)
-      stdin.flush
+      begin
+        stdin.write(data)
+        stdin.flush
+      rescue Errno::EPIPE
+        # Process has terminated, stdin is closed
+        log("[write] Process terminated, cannot write to stdin")
+      end
     end
 
     # @param [String] s Send line of data to the stdin of the running process
