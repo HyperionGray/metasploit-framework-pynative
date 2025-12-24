@@ -5,15 +5,25 @@ name: "GPT-5 Implementation Action"
 # - The default GITHUB_TOKEN does not have Copilot access and cannot be used
 # - To create the token: GitHub Settings -> Developer settings -> Personal access tokens -> Generate new token
 # - The token needs the 'copilot' scope enabled
+#
+# NOTE: This workflow is currently disabled because COPILOT_TOKEN is not configured.
+# To enable GPT-5 analysis:
+# 1. Create a GitHub Personal Access Token with 'copilot' scope
+# 2. Add it as a repository secret named COPILOT_TOKEN
+# 3. Re-enable this workflow by changing 'workflow_dispatch' trigger
 
 on:
-  push:
-    branches:
-      - main
-      - master
-  pull_request:
-    types: [opened, synchronize, reopened]
+  # Disabled by default - change to 'push' to enable
   workflow_dispatch:
+    inputs:
+      enable_analysis:
+        description: 'Enable GPT-5 analysis (requires COPILOT_TOKEN)'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 permissions:
   contents: write
@@ -23,96 +33,121 @@ permissions:
 jobs:
   gpt5-analysis:
     runs-on: ubuntu-latest
+    # Only run if explicitly enabled and token exists
+    if: github.event.inputs.enable_analysis == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@main
 
+      - name: Check COPILOT_TOKEN
+        id: check-token
+        run: |
+          if [ -z "${{ secrets.COPILOT_TOKEN }}" ]; then
+            echo "token_exists=false" >> $GITHUB_OUTPUT
+            echo "::warning::COPILOT_TOKEN secret is not configured. GPT-5 analysis will be skipped."
+            echo "::warning::To enable GPT-5 analysis, add COPILOT_TOKEN as a repository secret."
+          else
+            echo "token_exists=true" >> $GITHUB_OUTPUT
+            echo "COPILOT_TOKEN is configured"
+          fi
+
       - name: Setup Node.js
+        if: steps.check-token.outputs.token_exists == 'true'
         uses: actions/setup-node@main
         with:
           node-version: '20'
-        continue-on-error: true
 
       - name: Setup Python
+        if: steps.check-token.outputs.token_exists == 'true'
         uses: actions/setup-python@main
         with:
           python-version: '3.11'
-        continue-on-error: true
 
       - name: Prepare Repository Analysis
         id: prepare-analysis
         run: |
           echo "## GPT-5 Code Analysis" > /tmp/gpt5-analysis.md
           echo "" >> /tmp/gpt5-analysis.md
-          echo "### Repository Statistics:" >> /tmp/gpt5-analysis.md
           
-          # Count different file types
-          python_files=$(find . -name "*.py" ! -path "*/.venv/*" ! -path "*/node_modules/*" | wc -l)
-          js_files=$(find . -name "*.js" ! -path "*/node_modules/*" ! -path "*/dist/*" | wc -l)
-          ts_files=$(find . -name "*.ts" ! -path "*/node_modules/*" ! -path "*/dist/*" | wc -l)
-          go_files=$(find . -name "*.go" ! -path "*/vendor/*" | wc -l)
-          java_files=$(find . -name "*.java" ! -path "*/target/*" | wc -l)
-          
-          echo "- Python files: $python_files" >> /tmp/gpt5-analysis.md
-          echo "- JavaScript files: $js_files" >> /tmp/gpt5-analysis.md
-          echo "- TypeScript files: $ts_files" >> /tmp/gpt5-analysis.md
-          echo "- Go files: $go_files" >> /tmp/gpt5-analysis.md
-          echo "- Java files: $java_files" >> /tmp/gpt5-analysis.md
+          if [ "${{ steps.check-token.outputs.token_exists }}" != "true" ]; then
+            echo "### ⚠️ Configuration Required" >> /tmp/gpt5-analysis.md
+            echo "" >> /tmp/gpt5-analysis.md
+            echo "This workflow requires the \`COPILOT_TOKEN\` repository secret to be configured." >> /tmp/gpt5-analysis.md
+            echo "" >> /tmp/gpt5-analysis.md
+            echo "**To enable GPT-5 analysis:**" >> /tmp/gpt5-analysis.md
+            echo "" >> /tmp/gpt5-analysis.md
+            echo "1. Create a GitHub Personal Access Token with 'copilot' scope:" >> /tmp/gpt5-analysis.md
+            echo "   - Go to: Settings → Developer settings → Personal access tokens → Generate new token" >> /tmp/gpt5-analysis.md
+            echo "   - Enable the 'copilot' scope" >> /tmp/gpt5-analysis.md
+            echo "2. Add the token as a repository secret:" >> /tmp/gpt5-analysis.md
+            echo "   - Repository Settings → Secrets and variables → Actions → New repository secret" >> /tmp/gpt5-analysis.md
+            echo "   - Name: \`COPILOT_TOKEN\`" >> /tmp/gpt5-analysis.md
+            echo "   - Value: Your personal access token" >> /tmp/gpt5-analysis.md
+            echo "3. Re-enable the workflow trigger in \`.github/workflows/auto-gpt5-implementation.yml\`" >> /tmp/gpt5-analysis.md
+            echo "" >> /tmp/gpt5-analysis.md
+            echo "**Current Status:** GPT-5 analysis is disabled due to missing token." >> /tmp/gpt5-analysis.md
+          else
+            echo "### Repository Statistics:" >> /tmp/gpt5-analysis.md
+            echo "" >> /tmp/gpt5-analysis.md
+            
+            # Count different file types
+            python_files=$(find . -name "*.py" ! -path "*/.venv/*" ! -path "*/node_modules/*" | wc -l)
+            js_files=$(find . -name "*.js" ! -path "*/node_modules/*" ! -path "*/dist/*" | wc -l)
+            ts_files=$(find . -name "*.ts" ! -path "*/node_modules/*" ! -path "*/dist/*" | wc -l)
+            go_files=$(find . -name "*.go" ! -path "*/vendor/*" | wc -l)
+            java_files=$(find . -name "*.java" ! -path "*/target/*" | wc -l)
+            
+            echo "- Python files: $python_files" >> /tmp/gpt5-analysis.md
+            echo "- JavaScript files: $js_files" >> /tmp/gpt5-analysis.md
+            echo "- TypeScript files: $ts_files" >> /tmp/gpt5-analysis.md
+            echo "- Go files: $go_files" >> /tmp/gpt5-analysis.md
+            echo "- Java files: $java_files" >> /tmp/gpt5-analysis.md
+          fi
           
           echo "" >> /tmp/gpt5-analysis.md
           cat /tmp/gpt5-analysis.md
+
+      # GPT-5 Advanced Code Analysis step temporarily disabled
+      # The austenstone/copilot-cli-action@v2 action is not available
+      # TODO: Replace with a working Copilot integration when available
+      - name: GPT-5 Advanced Code Analysis (Disabled)
+        if: steps.check-token.outputs.token_exists == 'true'
+        id: gpt5-code-analysis
+        run: |
+          echo "GPT-5 Advanced Code Analysis step is temporarily disabled"
+          echo "The austenstone/copilot-cli-action@v2 action is not available"
+          echo "Manual code analysis is recommended"
+          echo "response=GPT-5 analysis temporarily unavailable" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: GPT-5 Advanced Code Analysis
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Perform a comprehensive code analysis of this repository using GPT-5's advanced capabilities:
-            
-            1. **Code Quality & Architecture**
-               - Analyze overall code structure and organization
-               - Identify architectural patterns and anti-patterns
-               - Suggest improvements for maintainability and scalability
-            
-            2. **Security Analysis**
-               - Detect potential security vulnerabilities
-               - Identify unsafe coding patterns
-               - Recommend security best practices
-            
-            3. **Performance Optimization**
-               - Identify performance bottlenecks
-               - Suggest optimization opportunities
-               - Recommend efficient algorithms and data structures
-            
-            4. **Best Practices**
-               - Verify adherence to language-specific best practices
-               - Check for proper error handling
-               - Ensure code follows SOLID principles
-            
-            5. **Documentation & Maintainability**
-               - Assess code documentation quality
-               - Identify areas needing better comments
-               - Suggest improvements for code readability
-            
-            Provide specific, actionable recommendations with file names and line numbers where applicable.
+      - name: Capture Code Analysis Results
+        if: steps.check-token.outputs.token_exists == 'true' && steps.gpt5-code-analysis.outcome == 'success'
+        run: |
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "## Code Quality Analysis Results" >> /tmp/gpt5-analysis.md
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "${{ steps.gpt5-code-analysis.outputs.response }}" >> /tmp/gpt5-analysis.md
+
+      # GPT-5 Test Coverage Analysis step temporarily disabled
+      # The austenstone/copilot-cli-action@v2 action is not available
+      # TODO: Replace with a working Copilot integration when available
+      - name: GPT-5 Test Coverage Analysis (Disabled)
+        if: steps.check-token.outputs.token_exists == 'true'
+        id: gpt5-test-analysis
+        run: |
+          echo "GPT-5 Test Coverage Analysis step is temporarily disabled"
+          echo "The austenstone/copilot-cli-action@v2 action is not available"
+          echo "Manual test analysis is recommended"
+          echo "response=GPT-5 test analysis temporarily unavailable" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: GPT-5 Test Coverage Analysis
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Analyze the test coverage and testing strategy:
-            
-            1. Identify files that lack adequate test coverage
-            2. Suggest missing test cases for critical functionality
-            3. Recommend improvements to existing tests
-            4. Identify edge cases that should be tested
-            5. Suggest integration and end-to-end test scenarios
-            
-            Focus on critical paths and business logic.
-        continue-on-error: true
+      - name: Capture Test Analysis Results
+        if: steps.check-token.outputs.token_exists == 'true' && steps.gpt5-test-analysis.outcome == 'success'
+        run: |
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "## Test Coverage Analysis Results" >> /tmp/gpt5-analysis.md
+          echo "" >> /tmp/gpt5-analysis.md
+          echo "${{ steps.gpt5-test-analysis.outputs.response }}" >> /tmp/gpt5-analysis.md
 
       - name: Create GPT-5 Analysis Report
         uses: actions/github-script@main
@@ -121,19 +156,24 @@ jobs:
           script: |
             const fs = require('fs');
             const analysis = fs.readFileSync('/tmp/gpt5-analysis.md', 'utf8');
+            const tokenExists = '${{ steps.check-token.outputs.token_exists }}' === 'true';
             
             const date = new Date().toISOString().split('T')[0];
-            const title = `GPT-5 Code Analysis Report - ${date}`;
+            const title = tokenExists 
+              ? `GPT-5 Code Analysis Report - ${date}`
+              : `GPT-5 Analysis - Configuration Required`;
             
-            const body = `# GPT-5 Advanced Code Analysis Report
+            let body;
+            if (!tokenExists) {
+              body = `# GPT-5 Code Analysis - Configuration Required
             
             ${analysis}
             
-            ## Analysis Overview
+            ## About GPT-5 Analysis
             
-            This report was generated using **GPT-5**, the latest model available in GitHub Copilot, which provides:
+            This workflow can provide comprehensive code analysis using GitHub Copilot's GPT-5 models, but it requires proper configuration.
             
-            ### Advanced Capabilities Used
+            ### GPT-5 Capabilities (When Enabled)
             
             1. **Deep Code Understanding**
                - Semantic analysis of code structure and patterns
@@ -162,15 +202,25 @@ jobs:
             
             ## Available GPT-5 Models in GitHub Copilot
             
-            The following GPT-5 variants are available:
-            - **GPT-5**: Standard model (multiplier: 1)
-            - **GPT-5 mini**: Faster, lightweight version (multiplier: 0)
-            - **GPT-5-Codex**: Specialized for code generation (multiplier: 1)
-            - **GPT-5.1**: Enhanced reasoning model (multiplier: 1)
-            - **GPT-5.1-Codex**: Advanced code-focused model (multiplier: 1)
-            - **GPT-5.1-Codex-Mini**: Efficient code model (multiplier: 0.33)
-            - **GPT-5.1-Codex-Max**: Maximum capability code model (multiplier: 1)
-            - **GPT-5.2**: Latest generation model (multiplier: 1)
+            When configured, the following GPT-5 variants are available:
+            - **GPT-5**: Standard model for general analysis
+            - **GPT-5 mini**: Faster, lightweight version
+            - **GPT-5-Codex**: Specialized for code generation
+            - **GPT-5.1**: Enhanced reasoning model
+            - **GPT-5.1-Codex**: Advanced code-focused model
+            - **GPT-5.1-Codex-Mini**: Efficient code model
+            - **GPT-5.1-Codex-Max**: Maximum capability code model
+            - **GPT-5.2**: Latest generation model
+            
+            ---
+            *This report was automatically generated. GPT-5 analysis is currently disabled.*
+            
+            For more information about GPT-5 models, see [Supported AI Models](https://docs.github.com/en/copilot/reference/ai-models/supported-models).
+            `;
+            } else {
+              body = `# GPT-5 Advanced Code Analysis Report
+            
+            ${analysis}
             
             ## Action Items
             
@@ -188,10 +238,13 @@ jobs:
             
             For more information about GPT-5 models, see [Supported AI Models](https://docs.github.com/en/copilot/reference/ai-models/supported-models).
             `;
+            }
             
-            // Only create issue if in PR or on main branch
-            if (context.eventName === 'pull_request' || context.ref === 'refs/heads/main' || context.ref === 'refs/heads/master') {
-              // Check for existing issues
+            // Only create issue if manually triggered
+            if (context.eventName === 'workflow_dispatch') {
+              console.log('Creating GPT-5 analysis issue/comment');
+              
+              // Check for existing configuration issues
               const issues = await github.rest.issues.listForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -203,7 +256,7 @@ jobs:
               const recentIssue = issues.data.find(issue => {
                 const createdAt = new Date(issue.created_at);
                 const daysSinceCreation = (Date.now() - createdAt) / (1000 * 60 * 60 * 24);
-                return daysSinceCreation < 7;
+                return daysSinceCreation < 30;
               });
               
               if (recentIssue) {
@@ -212,7 +265,7 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: recentIssue.number,
-                  body: `## Updated GPT-5 Analysis (${date})\n\n${analysis}\n\n---\n\n*Analysis performed using GPT-5 model via GitHub Copilot.*`
+                  body: `## Updated Analysis (${date})\n\n${analysis}\n\n---\n\n*Analysis performed ${tokenExists ? 'using GPT-5 model via GitHub Copilot' : 'without GPT-5 (token not configured)'}.*`
                 });
               } else {
                 await github.rest.issues.create({
@@ -220,8 +273,10 @@ jobs:
                   repo: context.repo.repo,
                   title: title,
                   body: body,
-                  labels: ['gpt5', 'code-analysis', 'automated', 'copilot']
+                  labels: tokenExists ? ['gpt5', 'code-analysis', 'automated', 'copilot'] : ['gpt5', 'configuration', 'automated']
                 });
               }
+            } else {
+              console.log('Skipping issue creation - not manually triggered');
             }
         continue-on-error: true

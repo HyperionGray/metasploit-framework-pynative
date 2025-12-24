@@ -211,22 +211,14 @@ jobs:
           
           cat /tmp/doc-analysis.md
 
-      - name: GitHub Copilot Documentation Review
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Review the documentation for this repository:
-            1. Check README.md completeness and quality
-            2. Verify all features and functionality are documented
-            3. Check for installation and usage instructions
-            4. Identify missing or outdated documentation
-            5. Suggest improvements for clarity and completeness
-            6. Verify code comments and inline documentation
-            7. Check for API documentation if applicable
-            8. Ensure contributing guidelines are present
-            
-            Provide specific recommendations with file names and sections.
+      # GitHub Copilot Documentation Review step temporarily disabled
+      # The austenstone/copilot-cli-action@v2 action is not available
+      # TODO: Replace with a working Copilot integration when available
+      - name: GitHub Copilot Documentation Review (Disabled)
+        run: |
+          echo "GitHub Copilot Documentation Review step is temporarily disabled"
+          echo "The austenstone/copilot-cli-action@v2 action is not available"
+          echo "Manual documentation review is recommended"
         continue-on-error: true
 
       - name: Create Documentation Review Report

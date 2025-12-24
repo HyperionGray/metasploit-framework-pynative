@@ -78,20 +78,14 @@ jobs:
           
           cat /tmp/analysis.md
 
-      - name: GitHub Copilot Code Review
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Review the codebase for code cleanliness issues:
-            1. Identify files that are too large (>500 lines) and suggest how to split them into smaller, focused modules
-            2. Look for code duplication and suggest refactoring opportunities
-            3. Check for consistent code style and formatting
-            4. Identify complex functions that could be simplified
-            5. Suggest improvements for code organization and structure
-            6. Check for proper separation of concerns
-            
-            Provide actionable recommendations with specific file names and line numbers.
+      # GitHub Copilot Code Review step temporarily disabled
+      # The austenstone/copilot-cli-action@v2 action is not available
+      # TODO: Replace with a working Copilot integration when available
+      - name: GitHub Copilot Code Review (Disabled)
+        run: |
+          echo "GitHub Copilot Code Review step is temporarily disabled"
+          echo "The austenstone/copilot-cli-action@v2 action is not available"
+          echo "Manual code review is recommended"
         continue-on-error: true
 
       - name: Create Issue for Code Cleanliness Review
