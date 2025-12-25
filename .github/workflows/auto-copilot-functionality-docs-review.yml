@@ -154,14 +154,31 @@ jobs:
           echo "" >> /tmp/doc-analysis.md
           echo "### Additional Documentation:" >> /tmp/doc-analysis.md
           
-          # Find all markdown files
-          find . -name "*.md" \
+          # Find markdown files (limit to first 50 to prevent issue body overflow)
+          md_files=$(find . -name "*.md" \
             ! -path "*/node_modules/*" \
             ! -path "*/.venv/*" \
             ! -path "*/vendor/*" \
-            -type f | while read -r file; do
-            echo "- $file" >> /tmp/doc-analysis.md
-          done || echo "No additional markdown files found" >> /tmp/doc-analysis.md
+            -type f | head -50)
+          
+          if [ -n "$md_files" ]; then
+            echo "$md_files" | while read -r file; do
+              echo "- $file" >> /tmp/doc-analysis.md
+            done
+            
+            # Check if there are more files
+            total_md_files=$(find . -name "*.md" \
+              ! -path "*/node_modules/*" \
+              ! -path "*/.venv/*" \
+              ! -path "*/vendor/*" \
+              -type f | wc -l)
+            
+            if [ "$total_md_files" -gt 50 ]; then
+              echo "- ... and $((total_md_files - 50)) more markdown files" >> /tmp/doc-analysis.md
+            fi
+          else
+            echo "No additional markdown files found" >> /tmp/doc-analysis.md
+          fi
           
           echo "" >> /tmp/doc-analysis.md
           echo "### Code with Missing Documentation:" >> /tmp/doc-analysis.md
@@ -171,6 +188,11 @@ jobs:
           if find . -name "*.py" ! -path "*/.venv/*" ! -path "*/node_modules/*" | grep -q .; then
             echo "" >> /tmp/doc-analysis.md
             echo "#### Python files:" >> /tmp/doc-analysis.md
+            
+            # Create temporary file to store undocumented files
+            temp_py_files="/tmp/undocumented_py.txt"
+            > "$temp_py_files"
+            
             find . -name "*.py" \
               ! -path "*/.venv/*" \
               ! -path "*/node_modules/*" \
@@ -187,17 +209,42 @@ jobs:
               class_count=${class_count:-0}
               docstring_count=${docstring_count:-0}
               
+              # Ensure variables are clean integers
+              func_count=$(echo "$func_count" | tr -d '\n' | grep -o '[0-9]*' | head -1)
+              class_count=$(echo "$class_count" | tr -d '\n' | grep -o '[0-9]*' | head -1)
+              docstring_count=$(echo "$docstring_count" | tr -d '\n' | grep -o '[0-9]*' | head -1)
+              
+              # Set defaults if empty
+              func_count=${func_count:-0}
+              class_count=${class_count:-0}
+              docstring_count=${docstring_count:-0}
+              
               total=$((func_count + class_count))
               if [ "$total" -gt 0 ] && [ "$docstring_count" -eq 0 ]; then
                 echo "⚠️ $file: $total definitions, no docstrings" >> /tmp/doc-analysis.md
               fi
             done
+            
+            # Show first 20 files and count total
+            if [ -s "$temp_py_files" ]; then
+              head -20 "$temp_py_files" >> /tmp/doc-analysis.md
+              total_undocumented=$(wc -l < "$temp_py_files")
+              if [ "$total_undocumented" -gt 20 ]; then
+                echo "⚠️ ... and $((total_undocumented - 20)) more Python files with missing documentation" >> /tmp/doc-analysis.md
+              fi
+            fi
+            rm -f "$temp_py_files"
           fi
           
           # JavaScript/TypeScript
           if find . \( -name "*.js" -o -name "*.ts" \) ! -path "*/node_modules/*" ! -path "*/dist/*" | grep -q .; then
             echo "" >> /tmp/doc-analysis.md
             echo "#### JavaScript/TypeScript files:" >> /tmp/doc-analysis.md
+            
+            # Create temporary file to store undocumented files
+            temp_js_files="/tmp/undocumented_js.txt"
+            > "$temp_js_files"
+            
             find . \( -name "*.js" -o -name "*.ts" \) \
               ! -path "*/node_modules/*" \
               ! -path "*/dist/*" \
@@ -213,11 +260,31 @@ jobs:
               class_count=${class_count:-0}
               jsdoc_count=${jsdoc_count:-0}
               
+              # Ensure variables are clean integers
+              func_count=$(echo "$func_count" | tr -d '\n' | grep -o '[0-9]*' | head -1)
+              class_count=$(echo "$class_count" | tr -d '\n' | grep -o '[0-9]*' | head -1)
+              jsdoc_count=$(echo "$jsdoc_count" | tr -d '\n' | grep -o '[0-9]*' | head -1)
+              
+              # Set defaults if empty
+              func_count=${func_count:-0}
+              class_count=${class_count:-0}
+              jsdoc_count=${jsdoc_count:-0}
+              
               total=$((func_count + class_count))
               if [ "$total" -gt 5 ] && [ "$jsdoc_count" -eq 0 ]; then
                 echo "⚠️ $file: ~$total definitions, no JSDoc comments" >> /tmp/doc-analysis.md
               fi
             done
+            
+            # Show first 20 files and count total
+            if [ -s "$temp_js_files" ]; then
+              head -20 "$temp_js_files" >> /tmp/doc-analysis.md
+              total_undocumented=$(wc -l < "$temp_js_files")
+              if [ "$total_undocumented" -gt 20 ]; then
+                echo "⚠️ ... and $((total_undocumented - 20)) more JS/TS files with missing documentation" >> /tmp/doc-analysis.md
+              fi
+            fi
+            rm -f "$temp_js_files"
           fi
           
           cat /tmp/doc-analysis.md
@@ -293,6 +360,13 @@ jobs:
             *This issue was automatically generated by the Functionality & Documentation Review workflow.*
             `;
             
+            // Truncate body if it exceeds GitHub's limit (65536 characters)
+            let finalBody = body;
+            if (body.length > 65000) {
+              const truncateMessage = '\n\n---\n**Note: Report was truncated due to length. Full analysis available in workflow logs.**';
+              finalBody = body.substring(0, 65000 - truncateMessage.length) + truncateMessage;
+            }
+            
             // Check for existing issues
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -310,18 +384,26 @@ jobs:
             
             if (recentIssue) {
               console.log(`Recent issue found: #${recentIssue.number}, updating`);
+              
+              // Truncate comment if needed
+              let commentBody = `## Updated Analysis (${date})\n\nBuild Status: ${buildEmoji} ${buildStatus}\n\n${analysis}`;
+              if (commentBody.length > 65000) {
+                const truncateMessage = '\n\n---\n**Note: Comment was truncated due to length. Full analysis available in workflow logs.**';
+                commentBody = commentBody.substring(0, 65000 - truncateMessage.length) + truncateMessage;
+              }
+              
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: recentIssue.number,
-                body: `## Updated Analysis (${date})\n\nBuild Status: ${buildEmoji} ${buildStatus}\n\n${analysis}`
+                body: commentBody
               });
             } else {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: title,
-                body: body,
+                body: finalBody,
                 labels: ['documentation', 'functionality', 'automated', 'needs-review']
               });
             }

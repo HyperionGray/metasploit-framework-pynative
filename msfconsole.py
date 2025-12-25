@@ -12,6 +12,7 @@ Converted from Ruby msfconsole script - Ruby will be deleted soon.
 
 import sys
 import os
+import argparse
 from pathlib import Path
 
 

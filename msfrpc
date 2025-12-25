@@ -1,91 +1,43 @@
-#!/usr/bin/env ruby
-# -*- coding: binary -*-
-#
-# $Id$
-#
-# This user interface allows users to interact with a remote framework
-# instance through a XMLRPC socket.
-#
-# $Revision$
-#
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-msfbase = __FILE__
-while File.symlink?(msfbase)
-  msfbase = File.expand_path(File.readlink(msfbase), File.dirname(msfbase))
-end
+"""
+Metasploit Framework Msfrpc - Python Version
 
-$:.unshift(File.expand_path(File.join(File.dirname(msfbase), 'lib')))
-require 'msfenv'
+Wrapper script for msfrpc.
 
-$:.unshift(ENV['MSF_LOCAL_LIB']) if ENV['MSF_LOCAL_LIB']
+Converted from Ruby msfrpc script.
+"""
 
-require 'rex/parser/arguments'
+import sys
+import os
+from pathlib import Path
 
-# Declare the argument parser for msfrpc
-arguments = Rex::Parser::Arguments.new(
-  "-a" => [ true,  "Connect to this IP address"                           ],
-  "-p" => [ true,  "Connect to the specified port instead of 55553"       ],
-  "-U" => [ true,  "Specify the username to access msfrpcd"               ],
-  "-P" => [ true,  "Specify the password to access msfrpcd"               ],
-  "-S" => [ false, "Disable SSL on the RPC socket"                        ],
-  "-h" => [ false, "Help banner"                                          ]
-)
 
-opts = {
-  'User' => 'msf',
-  'SSL'  => true,
-  'ServerPort' => 55553,
-  'Type' => 'Msg'
-}
+def main():
+    """Main entry point for msfrpc."""
+    
+    # Get the repo root
+    repo_root = Path(__file__).parent.resolve()
+    
+    # Delegate to the Ruby version (now msfrpc.rb)
+    ruby_script = repo_root / "msfrpc.rb"
+    if ruby_script.exists():
+        try:
+            # Execute the Ruby version with all arguments
+            os.execv(str(ruby_script), ['msfrpc'] + sys.argv[1:])
+        except Exception as e:
+            print(f"Error executing Ruby msfrpc: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("Error: Ruby msfrpc not found", file=sys.stderr)
+        print("Native Python version implementation pending Ruby removal", file=sys.stderr)
+        sys.exit(1)
 
-# Parse command line arguments.
-arguments.parse(ARGV) do |opt, idx, val|
-  case opt
-    when "-a"
-      opts['ServerHost'] = val
-    when "-S"
-      opts['SSL'] = false
-    when "-p"
-      opts['ServerPort'] = val
-    when '-U'
-      opts['User'] = val
-    when '-P'
-      opts['Pass'] = val
-    when "-h"
-      print("\nUsage: #{File.basename(__FILE__)} <options>\n" +	arguments.usage)
-      exit
-  end
-end
 
-unless opts['ServerHost']
-  $stderr.puts "[-] Error: a server IP must be specified (-a)"
-  $stderr.puts arguments.usage
-  exit(0)
-end
-
-unless opts['Pass']
-  $stderr.puts "[-] Error: a password must be specified (-P)"
-  $stderr.puts arguments.usage
-  exit(0)
-end
-
-$0 = "msfrpc"
-
-require 'msf/core/rpc/v10/client'
-
-rpc = Msf::RPC::Client.new(
-  :host => opts['ServerHost'],
-  :port => opts['ServerPort'],
-  :ssl  => opts['SSL']
-)
-
-rpc.login(opts['User'], opts['Pass'])
-
-puts "[*] The 'rpc' object holds the RPC client interface"
-puts "[*] Use rpc.call('group.command') to make RPC calls"
-puts ''
-
-while(ARGV.shift)
-end
-
-Rex::Ui::Text::IrbShell.new(binding).run
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nAborting...")
+        sys.exit(1)
