@@ -19,20 +19,20 @@ The following files were converted from Ruby to Python in this update:
 
 | Ruby File | Python File | Description |
 |-----------|-------------|-------------|
-| `msfconsole` | `msfconsole.py` | Main console interface for Metasploit Framework |
-| `msfd` | `msfd.py` | Metasploit Framework daemon |
-| `msfdb` | `msfdb.py` | Database initialization and management |
-| `msfrpc` | `msfrpc.py` | RPC client interface |
-| `msfrpcd` | `msfrpcd.py` | RPC daemon/server |
-| `msfupdate` | `msfupdate.py` | Framework update utility |
-| `msfvenom` | `msfvenom.py` | ✓ Already existed |
+| `msfconsole.rb` | `msfconsole` | Main console interface for Metasploit Framework |
+| `msfd.rb` | `msfd` | Metasploit Framework daemon |
+| `msfdb.rb` | `msfdb` | Database initialization and management |
+| `msfrpc.rb` | `msfrpc` | RPC client interface |
+| `msfrpcd.rb` | `msfrpcd` | RPC daemon/server |
+| `msfupdate.rb` | `msfupdate` | Framework update utility |
+| `msfvenom.rb` | `msfvenom` | Payload generation tool |
 
 ### 2. Development Tools
 
 | Ruby File | Python File | Description |
 |-----------|-------------|-------------|
-| `script/rails` | `script/rails.py` | Rails script wrapper |
-| `tools/dev/msfdb_ws` | `tools/dev/msfdb_ws.py` | Database web service tool |
+| `script/rails.rb` | `script/rails` | Rails script wrapper |
+| `tools/dev/msfdb_ws.rb` | `tools/dev/msfdb_ws` | Database web service tool |
 
 ## Previously Converted Files
 
