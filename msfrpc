@@ -14,8 +14,37 @@ import os
 from pathlib import Path
 
 
+def show_msfrc_guidance():
+    """Show guidance about using msfrc environment"""
+    msf_env_active = os.environ.get('MSF_PYTHON_MODE') == '1'
+    
+    if not msf_env_active:
+        print("\n" + "="*70)
+        print("  🐍 Enhanced MSF Experience Available!")
+        print("="*70)
+        print("  You're running msfrpc directly. For the best experience,")
+        print("  consider using our enhanced shell environment:")
+        print("")
+        print("  🚀 RECOMMENDED: Activate MSF Environment")
+        print("     source msfrc")
+        print("     msf_rpc        # Enhanced RPC client management")
+        print("     msf_info       # See all available MSF commands")
+        print("")
+        print("  Benefits:")
+        print("  ✅ All MSF tools available in your shell")
+        print("  ✅ Environment variables auto-configured")
+        print("  ✅ Better integration with other MSF tools")
+        print("")
+        print("  Continuing with direct msfrpc (delegating to Ruby)...")
+        print("="*70 + "\n")
+
+
 def main():
     """Main entry point for msfrpc."""
+    
+    # Show msfrc guidance if not in MSF environment
+    if not os.environ.get('MSF_QUIET') and '-q' not in sys.argv and '--quiet' not in sys.argv:
+        show_msfrc_guidance()
     
     # Get the repo root
     repo_root = Path(__file__).parent.resolve()
@@ -28,10 +57,16 @@ def main():
             os.execv(str(ruby_script), ['msfrpc'] + sys.argv[1:])
         except Exception as e:
             print(f"Error executing Ruby msfrpc: {e}", file=sys.stderr)
+            print("\n💡 TIP: For better MSF experience, try:")
+            print("   source msfrc")
+            print("   msf_rpc")
             sys.exit(1)
     else:
         print("Error: Ruby msfrpc not found", file=sys.stderr)
         print("Native Python version implementation pending Ruby removal", file=sys.stderr)
+        print("\n💡 TIP: For MSF environment setup, try:")
+        print("   source msfrc")
+        print("   msf_info")
         sys.exit(1)
 
 

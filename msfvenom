@@ -246,5 +246,113 @@ class MsfVenom:
         
         output = "\n    Framework Executable Formats [--format <value>]\n"
         output += "    " + "=" * 50 + "\n\n"
+        
+        for fmt in sorted(executable_formats):
+            output += f"    {fmt}\n"
+            
+        output += "\n    Framework Transform Formats [--format <value>]\n"
+        output += "    " + "=" * 50 + "\n\n"
+        
+        for fmt in sorted(transform_formats):
+            output += f"    {fmt}\n"
+        output += "\n"
+        return output
+        
+    def run(self, args):
+        """Run MsfVenom with given arguments"""
+        try:
+            opts = self.parse_args(args)
+            
+            # Handle list options
+            if opts.list is not None:
+                if not opts.list or 'all' in opts.list:
+                    # Show all lists
+                    print(self.dump_platforms())
+                    print(self.dump_archs())
+                    print(self.dump_formats())
+                    print(self.dump_encrypt())
+                    return 0
+                    
+                for list_type in opts.list:
+                    if list_type == 'platforms':
+                        print(self.dump_platforms())
+                    elif list_type == 'archs':
+                        print(self.dump_archs())
+                    elif list_type == 'formats':
+                        print(self.dump_formats())
+                    elif list_type == 'encrypt':
+                        print(self.dump_encrypt())
+                    elif list_type == 'payloads':
+                        print("\n    Framework Payloads (--payload <value>)\n")
+                        print("    " + "=" * 50)
+                        print("    Payload listing functionality coming soon!")
+                        print("    Use 'find modules/payloads -name \"*.py\"' for now\n")
+                    elif list_type == 'encoders':
+                        print("\n    Framework Encoders (--encoder <value>)\n")
+                        print("    " + "=" * 50)
+                        print("    Encoder listing functionality coming soon!")
+                        print("    Use 'find modules/encoders -name \"*.py\"' for now\n")
+                    elif list_type == 'nops':
+                        print("\n    Framework NOP Generators (--nop <value>)\n")
+                        print("    " + "=" * 50)
+                        print("    NOP generator listing functionality coming soon!")
+                        print("    Use 'find modules/nops -name \"*.py\"' for now\n")
+                return 0
+                
+            # TODO: Implement payload generation
+            print("🐍 MsfVenom - Python Payload Generator")
+            print("Payload generation functionality coming soon!")
+            print("This is the Python-native implementation.")
+            
+            return 0
+            
+        except (HelpError, UsageError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+        except Exception as e:
+            print(f"Unexpected error: {e}", file=sys.stderr)
+            return 1
 
 
+def show_msfrc_guidance():
+    """Show guidance about using msfrc environment"""
+    msf_env_active = os.environ.get('MSF_PYTHON_MODE') == '1'
+    
+    if not msf_env_active:
+        print("\n" + "="*70)
+        print("  🐍 Enhanced MSF Experience Available!")
+        print("="*70)
+        print("  You're running msfvenom directly. For the best experience,")
+        print("  consider using our enhanced shell environment:")
+        print("")
+        print("  🚀 RECOMMENDED: Activate MSF Environment")
+        print("     source msfrc")
+        print("     msf_venom      # Enhanced venom with better integration")
+        print("     msf_info       # See all available MSF commands")
+        print("")
+        print("  Benefits:")
+        print("  ✅ All MSF tools available in your shell")
+        print("  ✅ Environment variables auto-configured")
+        print("  ✅ Better integration with other MSF tools")
+        print("")
+        print("  Continuing with direct msfvenom...")
+        print("="*70 + "\n")
+
+
+def main():
+    """Main entry point for msfvenom"""
+    # Show msfrc guidance if not in MSF environment
+    if not os.environ.get('MSF_QUIET') and '-q' not in sys.argv and '--quiet' not in sys.argv:
+        show_msfrc_guidance()
+    
+    # Create and run MsfVenom instance
+    venom = MsfVenom()
+    return venom.run(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("\nAborting...")
+        sys.exit(1)
