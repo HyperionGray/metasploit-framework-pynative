@@ -214,6 +214,11 @@ msf_deactivate() {
     echo "MSF environment deactivated"
 }
 
+# Load bish-please if available
+if [ -f "$MSF_ROOT/tools/bish-please/bish.sh" ]; then
+    source "$MSF_ROOT/tools/bish-please/bish.sh" 2>/dev/null
+fi
+
 # Show activation message
 echo "🐍 Metasploit Framework Environment Activated!"
 echo ""
@@ -223,5 +228,9 @@ echo ""
 echo "Traditional MSF commands (msfconsole, msfvenom, etc.) are still available"
 echo "and will show guidance toward the Python-enhanced versions."
 echo ""
+if [ -f "$MSF_ROOT/tools/bish-please/bish.sh" ]; then
+    echo "🚀 Bish-please navigation is available. Type 'bish' for quick navigation."
+    echo ""
+fi
 echo "To deactivate: msf_deactivate"
 echo ""
