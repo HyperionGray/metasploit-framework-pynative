@@ -10,17 +10,27 @@ on:
 jobs:
   label:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Add labels
         uses: actions/github-script@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Add or tweak your labels here
-            const labels = ["triage", "copilot"]; // <-- TUNE ME!
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              labels
-            });
+            try {
+              // Add or tweak your labels here
+              const labels = ["triage", "copilot"]; // <-- TUNE ME!
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels
+              });
+              console.log(`Added labels ${labels.join(", ")} to issue #${context.issue.number}`);
+            } catch (error) {
+              console.log(`Failed to add labels to issue #${context.issue.number}: ${error.message}`);
+              console.log('This is not a critical error - continuing...');
+              // Don't fail the workflow for labeling issues
+            }

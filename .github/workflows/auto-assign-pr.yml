@@ -10,24 +10,33 @@ on:
 jobs:
   auto-assign:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Assign Copilot (or others) to new PRs
         uses: actions/github-script@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Assign PRs to Copilot or other users
-            const copilotUsername = "copilot"; // <-- TUNE ME!
-            const assignees = [copilotUsername]; // Or: ["copilot","anotheruser"]
-            const currentAssignees = context.payload.pull_request.assignees.map(u => u.login);
-            if (!assignees.every(a => currentAssignees.includes(a))) {
-              await github.rest.issues.addAssignees({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                assignees
-              });
-              console.log(`Assigned ${assignees.join(", ")} to PR #${context.payload.pull_request.number}`);
-            } else {
-              console.log(`Already assigned: ${assignees.join(", ")} on PR #${context.payload.pull_request.number}`);
+            try {
+              // Assign PRs to Copilot or other users
+              const copilotUsername = "copilot"; // <-- TUNE ME!
+              const assignees = [copilotUsername]; // Or: ["copilot","anotheruser"]
+              const currentAssignees = context.payload.pull_request.assignees.map(u => u.login);
+              if (!assignees.every(a => currentAssignees.includes(a))) {
+                await github.rest.issues.addAssignees({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  assignees
+                });
+                console.log(`Assigned ${assignees.join(", ")} to PR #${context.payload.pull_request.number}`);
+              } else {
+                console.log(`Already assigned: ${assignees.join(", ")} on PR #${context.payload.pull_request.number}`);
+              }
+            } catch (error) {
+              console.log(`Failed to assign users to PR #${context.payload.pull_request.number}: ${error.message}`);
+              console.log('This is not a critical error - continuing...');
+              // Don't fail the workflow for assignment issues
             }
