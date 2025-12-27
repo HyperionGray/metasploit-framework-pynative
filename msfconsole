@@ -18,23 +18,37 @@ from pathlib import Path
 def main():
     """Main entry point for msfconsole."""
     
-    # Show PyNative message
-    if not os.environ.get('MSF_QUIET') and '-q' not in sys.argv and '--quiet' not in sys.argv:
+    # Check if MSF environment is active
+    msf_env_active = os.environ.get('MSF_PYTHON_MODE') == '1'
+    
+    if not msf_env_active and not os.environ.get('MSF_QUIET') and '-q' not in sys.argv and '--quiet' not in sys.argv:
         print("\n" + "="*70)
-        print("  🐍 Metasploit Framework - PyNative Console")
+        print("  🐍 Metasploit Framework - Enhanced Experience Available!")
         print("="*70)
-        print("  This is the Python-native Metasploit Framework!")
-        print("  Ruby has been converted to Python - no more TODOs!")
+        print("  You're running msfconsole directly, but we recommend our")
+        print("  enhanced shell environment for the best MSF experience!")
         print("")
-        print("  For module usage:")
-        print("    python3 modules/exploits/path/to/exploit.py --help")
+        print("  🚀 RECOMMENDED: Activate MSF Environment")
+        print("     source msfrc")
+        print("     msf_console    # Enhanced Python console")
+        print("     msf_info       # See all available commands")
+        print("")
+        print("  Benefits of 'source msfrc':")
+        print("  ✅ All MSF commands in your regular shell")
+        print("  ✅ Python-enhanced console experience")
+        print("  ✅ Environment variables auto-configured")
+        print("  ✅ Easy access to all MSF tools")
+        print("")
+        print("  Continuing with direct console...")
         print("="*70 + "\n")
     
-    # PyNative Metasploit Framework - No Ruby delegation needed
-    print("🐍 PyNative Metasploit Framework Console")
-    print("Ruby-to-Python conversion complete!")
-    print("This is now a Python-native implementation.")
-    print("Use --help for available options")
+    # Show PyNative message
+    if not os.environ.get('MSF_QUIET') and '-q' not in sys.argv and '--quiet' not in sys.argv:
+        if msf_env_active:
+            print("🐍 MSF Environment Active - Python Console")
+        else:
+            print("🐍 PyNative Metasploit Framework Console")
+            print("(Consider 'source msfrc' for enhanced experience)")
     
     # TODO: Implement full Python console functionality
     # For now, show that we're PyNative and exit gracefully
@@ -42,6 +56,11 @@ def main():
     print("Ruby files have been renamed to .rb extension")
     print("Python files are now the primary executables")
     print("No more Ruby delegation - this is pure Python!")
+    
+    if not msf_env_active:
+        print("\n💡 TIP: For the full MSF experience, try:")
+        print("   source msfrc")
+        print("   msf_console")
 
 
 if __name__ == "__main__":

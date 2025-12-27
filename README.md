@@ -126,26 +126,20 @@ For a manual setup, consult the [Dev Environment Setup](https://docs.metasploit.
 
 ## Using Metasploit
 
-### Classic Console Experience
+### 🚀 RECOMMENDED: Enhanced Shell Environment
 
-To get started with the traditional Metasploit console:
-
-1. **Start `msfconsole`:** This is the primary interface for interacting with Metasploit.
-2. **Explore Resources:** 
-   - Visit the [Using Metasploit](https://docs.metasploit.com/docs/using-metasploit/getting-started/index.html) section of the documentation.
-
-### Python-Native Experience (Recommended)
-
-For a more modern, Python-native workflow with virtualenv-like activation:
+For the best Metasploit experience, we recommend using our enhanced shell environment that works like Python's virtualenv:
 
 ```bash
 # Activate Metasploit environment (similar to Python virtualenv)
 source msfrc
 
-# Now MSF commands are available in your shell
-msfconsole    # Classic console
-msfvenom      # Payload generator
-msfd          # MSF daemon
+# Now MSF commands are available in your shell with enhanced features
+msf_console    # Enhanced Python console with better integration
+msf_venom      # Enhanced payload generator
+msf_db         # Enhanced database management
+msf_rpc        # Enhanced RPC server management
+msf_info       # See all available commands and environment info
 
 # Run Python exploit modules directly
 python3 modules/exploits/linux/http/example.py --help
@@ -155,15 +149,52 @@ python3 transpilers/ruby2py/converter.py old_module.rb
 python3 transpilers/py2ruby/transpiler.py new_module.py -o output.rb
 
 # Deactivate when done
-deactivate-msf
+msf_deactivate
 ```
 
-**Benefits of msfrc activation:**
+**Benefits of 'source msfrc':**
 - ✅ All MSF commands available in your regular shell (no need to enter msfconsole)
-- ✅ Python-native module execution
-- ✅ Easy access to transpiler tools
+- ✅ Python-enhanced console experience with better error handling
 - ✅ Environment variables automatically configured
+- ✅ Easy access to transpiler tools
+- ✅ Better integration between MSF tools
 - ✅ Similar workflow to Python virtualenv
+
+### Classic Console Experience
+
+If you prefer the traditional approach, you can still use individual MSF tools directly:
+
+```bash
+# Traditional MSF commands (will show guidance toward enhanced experience)
+msfconsole    # Classic console (shows msfrc recommendation)
+msfvenom      # Payload generator (shows msfrc recommendation)
+msfdb         # Database management (shows msfrc recommendation)
+msfd          # MSF daemon (shows msfrc recommendation)
+```
+
+**Note:** When you run MSF tools directly, they will show helpful guidance about the enhanced `source msfrc` experience, but will continue to work normally.
+
+### Getting Started
+
+1. **For New Users:** Start with `source msfrc` for the best experience
+2. **For Existing Users:** Your current workflows will continue to work, with helpful tips about the enhanced experience
+3. **For Automation/Scripts:** Use `MSF_QUIET=1` environment variable to suppress guidance messages
+
+### Quick Start Examples
+
+```bash
+# Method 1: Enhanced Experience (Recommended)
+source msfrc
+msf_console
+# or
+msf_info  # See all available commands
+
+# Method 2: Traditional (Still Supported)
+./msfconsole  # Will show msfrc guidance but continue normally
+
+# Method 3: Quiet Mode (For Scripts)
+MSF_QUIET=1 ./msfconsole  # No guidance messages
+```
 
 ## PF Framework Integration
 
