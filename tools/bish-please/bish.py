@@ -20,8 +20,12 @@ class BishDB:
         """Initialize database connection"""
         if db_path is None:
             # Use .bish.sqlite in the metasploit root or home directory
-            msf_root = os.environ.get('MSF_ROOT', os.getcwd())
-            db_path = os.path.join(msf_root, '.bish.sqlite')
+            msf_root = os.environ.get('MSF_ROOT')
+            if msf_root:
+                db_path = os.path.join(msf_root, '.bish.sqlite')
+            else:
+                # Fallback to home directory for predictable location
+                db_path = os.path.join(os.path.expanduser('~'), '.bish.sqlite')
         
         self.db_path = db_path
         self.conn = None
@@ -167,6 +171,7 @@ class BishDB:
         """Record a directory visit for frecency calculation"""
         path = os.path.abspath(path)
         current_time = int(time.time())
+        is_directory = 1  # Mark as directory
         
         cursor = self.conn.cursor()
         
@@ -199,8 +204,8 @@ class BishDB:
                 cursor.execute('''
                     INSERT INTO indexed_entries 
                     (path, full_path, is_directory, is_hidden, size, mtime, indexed_time, visit_count, last_access, frecency_score)
-                    VALUES (?, ?, 1, ?, ?, ?, ?, 1, ?, 1.0)
-                ''', (os.path.basename(path), path, is_hidden, stat.st_size, int(stat.st_mtime), current_time, current_time))
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, 1.0)
+                ''', (os.path.basename(path), path, is_directory, is_hidden, stat.st_size, int(stat.st_mtime), current_time, current_time))
             except OSError:
                 pass  # Ignore errors for non-existent paths
         

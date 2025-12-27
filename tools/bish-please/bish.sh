@@ -164,12 +164,12 @@ _bish_track_pwd() {
 # Install directory tracking hook based on shell
 if [ "$BISH_SHELL" = "bash" ]; then
     # Bash: use PROMPT_COMMAND
-    if [[ ! "$PROMPT_COMMAND" =~ "_bish_track_pwd" ]]; then
+    if [[ ! "$PROMPT_COMMAND" =~ (^|[[:space:]])_bish_track_pwd($|[[:space:]]) ]]; then
         PROMPT_COMMAND="_bish_track_pwd${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
     fi
 elif [ "$BISH_SHELL" = "zsh" ]; then
     # Zsh: use chpwd hook
-    if [[ ! "${chpwd_functions[@]}" =~ "_bish_track_pwd" ]]; then
+    if [[ ! " ${chpwd_functions[*]} " =~ " _bish_track_pwd " ]]; then
         chpwd_functions+=(_bish_track_pwd)
     fi
 fi

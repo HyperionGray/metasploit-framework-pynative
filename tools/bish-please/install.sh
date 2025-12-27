@@ -169,7 +169,7 @@ setup_shell_profile() {
     # Ask user if they want to modify shell profile
     print_info "Shell profile detected: $shell_rc"
     
-    if [ "$AUTO_YES" = "yes" ]; then
+    if [ "$AUTO_YES" = "true" ]; then
         local response="y"
     else
         read -p "Add bish-please to $shell_rc? (y/n): " response
@@ -238,13 +238,13 @@ main() {
     print_banner
     
     # Parse arguments
-    AUTO_YES="no"
+    AUTO_YES="false"
     INSTALL_SYSTEM_WIDE="no"
     
     while [[ $# -gt 0 ]]; do
         case $1 in
             -y|--yes)
-                AUTO_YES="yes"
+                AUTO_YES="true"
                 shift
                 ;;
             --system)
