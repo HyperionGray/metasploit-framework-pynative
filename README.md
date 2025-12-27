@@ -18,7 +18,9 @@ msf_console   # Start console
 msf_exploit   # Launch exploits
 ```
 
-See the [Quick Start Guide](QUICKSTART.md) for complete installation and usage instructions.
+**See also:**
+- [Quick Start Guide](QUICKSTART.md) - Complete installation and usage instructions
+- [Startup Methods Visual Guide](STARTUP_METHODS.md) - Detailed comparison of startup methods
 
 ## Latest Version
 Access the latest version of Metasploit from the [Nightly Installers](https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html) page.
