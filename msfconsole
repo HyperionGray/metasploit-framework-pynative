@@ -50,17 +50,29 @@ def main():
             print("🐍 PyNative Metasploit Framework Console")
             print("(Consider 'source msfrc' for enhanced experience)")
     
-    # TODO: Implement full Python console functionality
-    # For now, show that we're PyNative and exit gracefully
-    print("\nPyNative conversion successful!")
-    print("Ruby files have been renamed to .rb extension")
-    print("Python files are now the primary executables")
-    print("No more Ruby delegation - this is pure Python!")
+    # Get the repo root
+    repo_root = Path(__file__).parent.resolve()
     
-    if not msf_env_active:
-        print("\n💡 TIP: For the full MSF experience, try:")
-        print("   source msfrc")
-        print("   msf_console")
+    # Delegate to Ruby version for now (until full Python implementation is ready)
+    ruby_script = repo_root / "msfconsole.rb"
+    if ruby_script.exists():
+        try:
+            os.execv(str(ruby_script), ['msfconsole'] + sys.argv[1:])
+        except Exception as e:
+            print(f"Error executing Ruby msfconsole: {e}", file=sys.stderr)
+            if not msf_env_active:
+                print("\n💡 TIP: For better MSF experience, try:")
+                print("   source msfrc")
+                print("   msf_console")
+            sys.exit(1)
+    else:
+        print("Error: Ruby msfconsole not found", file=sys.stderr)
+        print("Native Python console implementation pending Ruby removal", file=sys.stderr)
+        if not msf_env_active:
+            print("\n💡 TIP: For MSF environment setup, try:")
+            print("   source msfrc")
+            print("   msf_info")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
