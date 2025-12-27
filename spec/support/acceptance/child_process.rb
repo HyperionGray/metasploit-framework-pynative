@@ -527,7 +527,8 @@ module Acceptance
       @debug = true
       @env = {
         'BUNDLE_GEMFILE' => File.join(framework_root, 'Gemfile'),
-        'PATH' => "#{framework_root.shellescape}:#{ENV['PATH']}"
+        'PATH' => "#{framework_root.shellescape}:#{ENV['PATH']}",
+        'MSF_QUIET' => '1'
       }
       @cmd = [
         'bundle', 'exec', 'ruby', 'msfconsole',
