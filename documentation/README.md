@@ -55,22 +55,27 @@ This fork has been enhanced with Python-native capabilities:
 ### Quick Start Commands
 
 ```bash
-# Activate MSF environment (like Python virtualenv)
+# Activate MSF environment (like Python virtualenv) - RECOMMENDED
 source msfrc
+
+# Use MSF commands from your shell
+msf_console    # Python-enhanced console
+msf_venom      # Payload generator
+msf_exploit    # Quick exploit launcher
+msf_search     # Search modules
+msf_info       # Show environment info
 
 # Run a Python exploit module
 python3 modules/exploits/linux/http/example.py --help
 
 # Convert Ruby module to Python
-python3 transpilers/ruby2py/converter.py old_module.rb
+python3 ruby2py/convert.py old_module.rb
 
 # Convert Python module to Ruby
-python3 transpilers/py2ruby/transpiler.py new_module.py -o output.rb
+python3 ruby2py/py2ruby/transpiler.py new_module.py -o output.rb
 
-# Traditional MSF commands still work
-msfconsole    # Classic console experience
-msfvenom      # Payload generator
-msfd          # MSF daemon
+# Deactivate when done
+msf_deactivate
 ```
 
 ## Writing Exploits
