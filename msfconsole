@@ -18,30 +18,48 @@ from pathlib import Path
 def main():
     """Main entry point for msfconsole."""
     
-    # Show PyNative message
+    # Check if user is in MSF environment
+    in_msf_env = os.environ.get('MSF_PYTHON_MODE') == '1'
+    
+    # Show guidance message
     if not os.environ.get('MSF_QUIET') and '-q' not in sys.argv and '--quiet' not in sys.argv:
         print("\n" + "="*70)
-        print("  🐍 Metasploit Framework - PyNative Console")
+        print("  🐍 Metasploit Framework - PyNative")
         print("="*70)
-        print("  This is the Python-native Metasploit Framework!")
-        print("  Ruby has been converted to Python - no more TODOs!")
-        print("")
-        print("  For module usage:")
-        print("    python3 modules/exploits/path/to/exploit.py --help")
-        print("="*70 + "\n")
-    
-    # PyNative Metasploit Framework - No Ruby delegation needed
-    print("🐍 PyNative Metasploit Framework Console")
-    print("Ruby-to-Python conversion complete!")
-    print("This is now a Python-native implementation.")
-    print("Use --help for available options")
+        
+        if not in_msf_env:
+            print("\n  ⚠️  RECOMMENDED: Use the MSF environment activation method")
+            print("\n  For the best experience, activate the MSF environment first:")
+            print("\n    $ source msfrc")
+            print("\n  This gives you a virtualenv-like experience with:")
+            print("    ✅ All MSF commands available in your shell")
+            print("    ✅ Python-native module execution")
+            print("    ✅ Easy access to transpiler tools")
+            print("    ✅ Proper environment variables configured")
+            print("\n  Then use these commands:")
+            print("    msf_console    - Start Python-enhanced console")
+            print("    msf_venom      - Payload generator")
+            print("    msf_exploit    - Quick exploit launcher")
+            print("    msf_search     - Search modules")
+            print("    msf_info       - Show environment info")
+            print("\n  To deactivate: msf_deactivate")
+            print("\n" + "="*70)
+            print("\n  Traditional msfconsole is being phased out.")
+            print("  Use 'source msfrc' for the modern Python-native experience!")
+            print("\n" + "="*70 + "\n")
+            sys.exit(0)
+        else:
+            print("  Running from MSF environment (activated via 'source msfrc')")
+            print("  This is the Python-native Metasploit Framework!")
+            print("")
+            print("  For module usage:")
+            print("    python3 modules/exploits/path/to/exploit.py --help")
+            print("="*70 + "\n")
     
     # TODO: Implement full Python console functionality
-    # For now, show that we're PyNative and exit gracefully
-    print("\nPyNative conversion successful!")
-    print("Ruby files have been renamed to .rb extension")
-    print("Python files are now the primary executables")
-    print("No more Ruby delegation - this is pure Python!")
+    print("🐍 PyNative Metasploit Framework Console")
+    print("Console implementation in progress...")
+    print("Use msf_console (from 'source msfrc') for enhanced features.")
 
 
 if __name__ == "__main__":

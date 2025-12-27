@@ -1,10 +1,12 @@
 # Metasploit Framework Usage Guide
 
-This guide explains how to use the Metasploit Framework with both the classic Ruby experience and the modern Python-native approach.
+This guide explains how to use the Metasploit Framework. **The recommended method for this fork is to use `source msfrc`** which provides a Python virtualenv-like experience.
 
 ## Quick Start
 
-### Option 1: Python-Native Experience (Recommended)
+### ✅ Recommended: Python-Native Experience with `source msfrc`
+
+**This is the preferred and recommended way to use this fork of Metasploit Framework.**
 
 Activate the Metasploit environment in your shell (similar to Python virtualenv):
 
@@ -12,36 +14,47 @@ Activate the Metasploit environment in your shell (similar to Python virtualenv)
 # Activate MSF environment
 source msfrc
 
-# Now all MSF commands are available
-msfconsole    # Classic console
-msfvenom      # Payload generator
-msfd          # MSF daemon
+# Now all MSF commands are available in your shell
+msf_console    # Python-enhanced console
+msf_venom      # Payload generator
+msf_exploit    # Quick exploit launcher
+msf_search     # Search modules
+msf_info       # Show environment info
+msf_db         # Database management
+msf_rpc        # RPC server
 
 # Run Python exploit modules directly
 python3 modules/exploits/linux/http/example.py --help
 
 # Use transpiler tools
-python3 transpilers/ruby2py/converter.py old_module.rb
-python3 transpilers/py2ruby/transpiler.py new_module.py -o output.rb
+python3 ruby2py/convert.py old_module.rb
+python3 ruby2py/py2ruby/transpiler.py new_module.py -o output.rb
 
 # Deactivate when done
-deactivate-msf
+msf_deactivate
 ```
 
-### Option 2: Classic Console Experience
+**Why this method is better:**
+- 🚀 Modern workflow similar to Python virtualenv
+- 🐍 Python-native with proper environment configuration
+- 💻 All commands available directly in your shell
+- 🔧 Easy access to tools and utilities
+- 📦 Automatic path and environment setup
+- 🧹 Clean deactivation restores your shell
 
-Use the traditional Metasploit console:
+### ⚠️ Legacy: Classic Console Experience
+
+If you try to run `msfconsole` directly, you will be guided to use the recommended `source msfrc` method instead.
+
+The classic console approach is being phased out in this fork. For traditional Metasploit usage:
 
 ```bash
-# Launch msfconsole
+# This will show you a message to use 'source msfrc' instead
 ./msfconsole
-
-# Inside msfconsole
-msf6 > use exploit/multi/handler
-msf6 > set PAYLOAD windows/meterpreter/reverse_tcp
-msf6 > set LHOST 192.168.1.100
-msf6 > exploit
 ```
+
+For documentation on the original Metasploit console:
+- Visit the [Using Metasploit](https://docs.metasploit.com/docs/using-metasploit/getting-started/index.html) section
 
 ## Python-Native Workflow
 
