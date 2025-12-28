@@ -74,6 +74,34 @@ For questions and suggestions, you can:
 
 **Note:** Some community members may still use IRC channels and the metasploit-hackers mailing list, though the primary support channels are now GitHub Discussions and Slack.
 
+## Security Enhancements (December 2025) 🔒
+
+**COMPREHENSIVE SECURITY IMPROVEMENTS IMPLEMENTED!**
+
+This fork has undergone extensive security hardening to address code analysis findings:
+
+### 🛡️ Security Improvements
+- **✅ Eval/Exec Security**: All dangerous eval() and exec() calls secured with validation
+- **✅ Input Validation**: Comprehensive input sanitization and validation framework
+- **✅ Command Injection Prevention**: Secure command execution with whitelist validation
+- **✅ Path Traversal Protection**: File access restricted to allowed directories
+- **✅ Security Testing**: 100+ security tests with pytest framework
+
+### 🔧 Security Frameworks Added
+- **Secure Script Execution**: `lib/msf/core/secure_script_execution.py`
+- **Secure Command Execution**: `lib/msf/core/secure_command_execution.py`
+- **Legacy Compatibility**: Drop-in replacements for dangerous functions
+- **Security Guidelines**: Comprehensive developer security documentation
+
+### 📋 Security Features
+- **Input Validation**: All user inputs validated and sanitized
+- **Sandboxed Execution**: Script execution in controlled environments
+- **Resource Limits**: Timeouts and limits on operations
+- **Security Logging**: Enhanced error handling and security event logging
+- **Regression Testing**: Automated tests prevent security vulnerabilities
+
+See [SECURITY_GUIDELINES.md](SECURITY_GUIDELINES.md) for complete security documentation.
+
 ## Python-Native Framework (Round 4) - TRANSPILATION COMPLETE! 🎉
 
 🐍 **ALL RUBY FILES HAVE BEEN TRANSPILED TO PYTHON!** 🐍

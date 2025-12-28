@@ -41,12 +41,69 @@ class Base
   def run(args=[])
     self.args = args = args.flatten
     begin
-      eval(::File.read(self.path, ::File.size(self.path)), binding )
+      # Security validation before execution
+      validate_script_file(self.path)
+      
+      # Read script content
+      script_content = ::File.read(self.path, ::File.size(self.path))
+      
+      # Validate script content for security issues
+      Rex::Script.validate_script_content(script_content)
+      
+      # Execute with source file tracking for better error reporting
+      eval(script_content, binding, self.path)
     rescue ::Interrupt
+      # User interrupted execution
     rescue ::Rex::Script::Completed
-    rescue ::Exception => e
+      # Normal script completion
+    rescue ::SecurityError => e
+      # Security validation failed
       self.error = e
+      output.print_error("SECURITY: Script execution blocked: #{e.message}")
       raise e
+    rescue ::Exception => e
+      # Other execution errors
+      self.error = e
+      output.print_error("Script execution failed: #{e.message}")
+      raise e
+    end
+  end
+
+  private
+
+  #
+  # Validates the script file before execution
+  #
+  def validate_script_file(file_path)
+    # Check file exists and is readable
+    unless ::File.exist?(file_path) && ::File.readable?(file_path)
+      raise SecurityError, "Script file not found or not readable: #{file_path}"
+    end
+    
+    # Check file size is reasonable (< 1MB)
+    file_size = ::File.size(file_path)
+    if file_size > 1024 * 1024
+      raise SecurityError, "Script file too large for safe execution: #{file_size} bytes"
+    end
+    
+    # Check file is within allowed directories
+    allowed_script_dirs = [
+      ::File.join(framework.root, 'scripts'),
+      ::File.join(framework.root, 'modules'),
+      ::File.join(framework.root, 'plugins'),
+      '/tmp/msf_scripts'  # Temporary script directory
+    ]
+    
+    file_realpath = ::File.realpath(file_path)
+    unless allowed_script_dirs.any? { |dir| file_realpath.start_with?(::File.realpath(dir)) rescue false }
+      raise SecurityError, "Script file not in allowed directory: #{file_realpath}"
+    end
+    
+    # Check file extension
+    allowed_extensions = ['.rb', '.msf', '.rc']
+    file_ext = ::File.extname(file_path).downcase
+    unless allowed_extensions.include?(file_ext)
+      raise SecurityError, "Script file extension not allowed: #{file_ext}"
     end
   end
 
