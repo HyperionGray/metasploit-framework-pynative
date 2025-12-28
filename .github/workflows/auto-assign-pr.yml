@@ -10,6 +10,9 @@ on:
 jobs:
   auto-assign:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Assign Copilot (or others) to new PRs
         uses: actions/github-script@main
