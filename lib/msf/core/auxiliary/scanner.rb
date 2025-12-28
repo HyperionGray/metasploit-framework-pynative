@@ -54,6 +54,13 @@ def run
   @range_done    = 0
   @range_percent = 0
 
+  # Initialize enhanced logging for scanner operations
+  if respond_to?(:start_progress_tracking)
+    start_progress_tracking(@range_count, "Scanning hosts")
+  else
+    log_status("Starting scan of #{@range_count} hosts") if @range_count > 0
+  end
+
   threads_max = datastore['THREADS'].to_i
   @thread_list = []
   @scan_errors = []
@@ -66,26 +73,25 @@ def run
   #
 
   if datastore['CPORT'].to_i != 0 && threads_max > 1
-    print_error("Warning: A maximum of one thread is possible when a source port is set (CPORT)")
-    print_error("Thread count has been adjusted to 1")
+    log_warning("A maximum of one thread is possible when a source port is set (CPORT). Thread count adjusted to 1.")
     threads_max = 1
   end
 
   if(Rex::Compat.is_windows)
     if(threads_max > 16)
-      print_error("Warning: The Windows platform cannot reliably support more than 16 threads")
-      print_error("Thread count has been adjusted to 16")
+      log_warning("The Windows platform cannot reliably support more than 16 threads. Thread count adjusted to 16.")
       threads_max = 16
     end
   end
 
   if(Rex::Compat.is_cygwin)
     if(threads_max > 200)
-      print_error("Warning: The Cygwin platform cannot reliably support more than 200 threads")
-      print_error("Thread count has been adjusted to 200")
+      log_warning("The Cygwin platform cannot reliably support more than 200 threads. Thread count adjusted to 200.")
       threads_max = 200
     end
   end
+
+  scan_start_time = Time.now
 
   begin
 
@@ -119,13 +125,18 @@ def run
               @scan_errors << "The source IP (CHOST) value of #{datastore['CHOST']} was not usable"
             end
           rescue Msf::Auxiliary::Scanner::AttemptFailed => e
-            nmod.vprint_error("#{e}")
+            nmod.vlog_error("Scan attempt failed", target: targ, error: e) if nmod.respond_to?(:vlog_error)
+            nmod.vprint_error("#{e}") unless nmod.respond_to?(:vlog_error)
           rescue ::Rex::ConnectionError, ::Rex::ConnectionProxyError, ::Errno::ECONNRESET, ::Errno::EINTR, ::Rex::TimeoutError, ::Timeout::Error, ::EOFError
           rescue ::Interrupt,::NoMethodError, ::RuntimeError, ::ArgumentError, ::NameError
             raise $!
           rescue ::Exception => e
-            print_status("Error: #{targ}: #{e.class} #{e.message}")
-            elog("Error running against host #{targ}", error: e)
+            if nmod.respond_to?(:log_error)
+              nmod.log_error("Scan error", target: targ, error: e)
+            else
+              print_status("Error: #{targ}: #{e.class} #{e.message}")
+              elog("Error running against host #{targ}", error: e)
+            end
           ensure
             nmod.cleanup
           end
@@ -154,10 +165,32 @@ def run
       tlb = @thread_list.length
 
       @range_done += (tla - tlb)
-      scanner_show_progress() if @show_progress
+      
+      # Update progress using enhanced logging if available
+      if respond_to?(:update_progress)
+        update_progress(tla - tlb)
+      elsif @show_progress
+        scanner_show_progress()
+      end
     end
 
     scanner_handle_fatal_errors
+    
+    # Log completion and summary statistics
+    scan_duration = Time.now - scan_start_time
+    if respond_to?(:finish_progress_tracking)
+      finish_progress_tracking
+    end
+    
+    if respond_to?(:log_performance)
+      log_performance("Host scanning", scan_duration, 
+                     context: { hosts_scanned: @range_done, total_hosts: @range_count })
+    end
+    
+    if respond_to?(:log_operation_summary)
+      log_operation_summary
+    end
+    
     return results
   end
 
@@ -208,12 +241,20 @@ def run
                 @scan_errors << "The source IP (CHOST) value of #{datastore['CHOST']} was not usable"
               end
             rescue Msf::Auxiliary::Scanner::AttemptFailed => e
-              print_error("#{e}")
+              if respond_to?(:log_error)
+                log_error("Batch scan attempt failed", target: "#{mybatch[0]}-#{mybatch[-1]}", error: e)
+              else
+                print_error("#{e}")
+              end
             rescue ::Rex::ConnectionError, ::Rex::ConnectionProxyError, ::Errno::ECONNRESET, ::Errno::EINTR, ::Rex::TimeoutError, ::Timeout::Error
             rescue ::Interrupt,::NoMethodError, ::RuntimeError, ::ArgumentError, ::NameError
               raise $!
             rescue ::Exception => e
-              print_status("Error: #{mybatch[0]}-#{mybatch[-1]}: #{e}")
+              if respond_to?(:log_error)
+                log_error("Batch scan error", target: "#{mybatch[0]}-#{mybatch[-1]}", error: e)
+              else
+                print_status("Error: #{mybatch[0]}-#{mybatch[-1]}: #{e}")
+              end
             ensure
               nmod.cleanup
             end

@@ -18,8 +18,11 @@ class Auxiliary < Msf::Module
   class Failed < RuntimeError
   end
 
+  # Load auxiliary-specific logging capabilities
+  autoload :Logging, 'msf/core/auxiliary/logging'
 
   include HasActions
+  include Msf::Auxiliary::Logging
 
   #
   # Returns MODULE_AUX to indicate that this is an auxiliary module.
