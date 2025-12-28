@@ -184,6 +184,45 @@ class MsfVenom:
         opts.datastore = datastore
         return opts
         
+    def dump_payloads(self):
+        """List available payloads (placeholder)"""
+        output = "\n    Framework Payloads (--payload <value>)\n"
+        output += "    " + "=" * 50 + "\n\n"
+        output += "    Note: Full payload listing requires framework integration\n"
+        output += "    Common payloads:\n"
+        output += "      windows/meterpreter/reverse_tcp\n"
+        output += "      linux/x86/meterpreter/reverse_tcp\n"
+        output += "      python/meterpreter/reverse_tcp\n"
+        output += "      cmd/unix/reverse_bash\n"
+        output += "      cmd/windows/reverse_powershell\n"
+        output += "\n"
+        return output
+        
+    def dump_encoders(self):
+        """List available encoders (placeholder)"""
+        output = "\n    Framework Encoders (--encoder <value>)\n"
+        output += "    " + "=" * 50 + "\n\n"
+        output += "    Note: Full encoder listing requires framework integration\n"
+        output += "    Common encoders:\n"
+        output += "      x86/shikata_ga_nai\n"
+        output += "      x86/fnstenv_mov\n"
+        output += "      x64/xor\n"
+        output += "      cmd/generic_sh\n"
+        output += "\n"
+        return output
+        
+    def dump_nops(self):
+        """List available NOPs (placeholder)"""
+        output = "\n    Framework NOPs (--nopsled <value>)\n"
+        output += "    " + "=" * 50 + "\n\n"
+        output += "    Note: Full NOP listing requires framework integration\n"
+        output += "    Common NOPs:\n"
+        output += "      x86/single_byte\n"
+        output += "      x86/opty2\n"
+        output += "      x64/simple\n"
+        output += "\n"
+        return output
+        
     def dump_platforms(self):
         """List supported platforms"""
         platforms = [
@@ -246,5 +285,84 @@ class MsfVenom:
         
         output = "\n    Framework Executable Formats [--format <value>]\n"
         output += "    " + "=" * 50 + "\n\n"
+        for fmt in sorted(executable_formats):
+            output += f"    {fmt}\n"
+        
+        output += "\n    Framework Transform Formats [--format <value>]\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for fmt in sorted(transform_formats):
+            output += f"    {fmt}\n"
+        output += "\n"
+        return output
+        
+    def run(self, args):
+        """Run msfvenom with parsed arguments"""
+        opts = self.parse_args(args)
+        
+        # Handle list operations
+        if hasattr(opts, 'list') and opts.list is not None:
+            if len(opts.list) == 0 or 'all' in opts.list:
+                # List everything
+                print(self.dump_payloads())
+                print(self.dump_encoders())
+                print(self.dump_nops())
+                print(self.dump_platforms())
+                print(self.dump_archs())
+                print(self.dump_encrypt())
+                print(self.dump_formats())
+            else:
+                for list_type in opts.list:
+                    if list_type == 'payloads':
+                        print(self.dump_payloads())
+                    elif list_type == 'encoders':
+                        print(self.dump_encoders())
+                    elif list_type == 'nops':
+                        print(self.dump_nops())
+                    elif list_type == 'platforms':
+                        print(self.dump_platforms())
+                    elif list_type == 'archs':
+                        print(self.dump_archs())
+                    elif list_type == 'encrypt':
+                        print(self.dump_encrypt())
+                    elif list_type == 'formats':
+                        print(self.dump_formats())
+            return 0
+            
+        # Handle payload generation
+        if hasattr(opts, 'payload') and opts.payload:
+            print(f"[*] Generating payload: {opts.payload}")
+            print(f"[!] Payload generation not yet fully implemented in Python version")
+            print(f"[*] Format: {opts.format if hasattr(opts, 'format') and opts.format else 'raw'}")
+            print(f"[*] For full functionality, use: ./msfvenom.rb")
+            return 0
+            
+        # No valid options provided
+        print("Error: No payload specified. Use -p or --payload to specify a payload.")
+        print("Use --help for usage information")
+        return 1
 
+
+def main():
+    """Main entry point for msfvenom"""
+    venom = MsfVenom()
+    
+    try:
+        sys.exit(venom.run(sys.argv[1:]))
+    except KeyboardInterrupt:
+        print("\n[*] Aborted")
+        sys.exit(1)
+    except HelpError:
+        sys.exit(0)
+    except UsageError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"[!] Error: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
 
