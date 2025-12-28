@@ -21,6 +21,40 @@ Oh right, what is this then? It's metasploit, but first it's in a language peopl
 Thanks for reading.
 - Alex/_hyp3ri0n/P4X
 
+## Features
+
+This Python-native Metasploit Framework fork provides:
+
+### Core Framework Features
+- **🐍 Python-Native**: Complete transpilation from Ruby to Python for better performance and accessibility
+- **🔧 Modern Toolchain**: Python build system with pip, pytest, and modern linting tools
+- **📦 Modular Architecture**: Clean separation between legacy and modern modules
+- **🔄 Bi-directional Transpilation**: Ruby ↔ Python conversion tools for cross-compatibility
+
+### Advanced Security Tools Integration
+- **🔍 Binary Analysis**: Radare2 integration with GDB-like interface and LLDB support
+- **🐛 Fuzzing Capabilities**: AFL-style coverage tracking and in-memory fuzzing
+- **🛠️ Reverse Engineering**: Ghidra integration and advanced binary instrumentation
+- **🎯 Modern Exploitation**: Pwntools integration for streamlined exploit development
+
+### Professional C2 & Shell Management
+- **🌐 Modern C2 Frameworks**: Sliver and Havoc integration for team operations
+- **🐚 Advanced Shell Catchers**: pwncat-cs with automatic privilege escalation
+- **🔒 Secure Communications**: mTLS, WireGuard, HTTP(S), and DNS protocols
+- **👥 Team Collaboration**: Multi-user teamserver capabilities
+
+### Developer Experience
+- **⚡ Fast Startup**: Optimized initialization compared to traditional MSF
+- **🔧 Environment Activation**: Virtualenv-like `msfrc` activation system
+- **📚 Comprehensive Documentation**: Detailed guides for all major features
+- **🧪 Modern Testing**: pytest-based test suite with comprehensive coverage
+
+### Language & Platform Support
+- **🌍 Multi-Language**: Support for 15+ programming languages via PF framework
+- **🐧 Cross-Platform**: Linux, macOS, and Windows compatibility
+- **📱 Mobile Support**: Android and iOS exploitation capabilities
+- **☁️ Cloud Ready**: Docker and Kubernetes deployment configurations
+
 
 
 
