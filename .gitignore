@@ -98,6 +98,29 @@ docker-compose.local*
 
 # Ignore python bytecode
 *.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+
+# Python package build
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Python virtual environments
+venv/
+env/
+ENV/
+
 rspec.failures
 
 #Ignore any base disk store files
