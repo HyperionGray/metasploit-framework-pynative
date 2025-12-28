@@ -297,3 +297,5 @@ To contribute to Metasploit:
 - **[Code Quality Guidelines](CODE_QUALITY.md)** - Code quality standards and best practices
 - **[Contributing Guide](CONTRIBUTING.md)** - Complete contribution guidelines
 - **[Security Policy](.github/SECURITY.md)** - Security vulnerability reporting
+- **[CI/CD Review History](CICD_REVIEW_HISTORY.md)** - Automated review tracking and history
+- **[CI/CD Review Response](CICD_REVIEW_RESPONSE.md)** - Latest review findings and responses
