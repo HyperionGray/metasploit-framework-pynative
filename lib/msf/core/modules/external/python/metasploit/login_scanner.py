@@ -1,13 +1,53 @@
+"""
+Login scanner helper for Metasploit external Python modules.
+
+This module provides utilities for building password-spraying and
+brute-force authentication scanners that integrate with Metasploit.
+"""
+
 import time
 
 from metasploit import module
 
 
 def make_scanner(login_callback):
+    """
+    Create a scanner function from a login callback.
+
+    Args:
+        login_callback: Function that takes (rhost, rport, username, password)
+                        and returns True on successful authentication
+
+    Returns:
+        Scanner function that can be passed to module.run()
+
+    Example:
+        def try_login(host, port, user, password):
+            # Attempt authentication
+            return success
+
+        scanner = make_scanner(try_login)
+        module.run(metadata, scanner)
+    """
     return lambda args: run_scanner(args, login_callback)
 
 
 def run_scanner(args, login_callback):
+    """
+    Execute the login scanner with the provided credentials.
+
+    Iterates through username/password combinations, calling the login
+    callback for each attempt and reporting results to Metasploit.
+
+    Args:
+        args: Dictionary containing:
+            - userpass: List of username/password pairs or newline-separated string
+            - rhost: Target host
+            - rport: Target port
+            - sleep_interval: Optional delay between attempts
+        login_callback: Function that takes (rhost, rport, username, password)
+                        and returns True on successful authentication
+    """
     userpass = args['userpass'] or []
     rhost = args['rhost']
     rport = int(args['rport'])
