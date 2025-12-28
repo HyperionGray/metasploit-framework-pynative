@@ -13,8 +13,15 @@ import os
 import argparse
 import subprocess
 import time
-import yaml
+import shutil
 from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    print("Error: PyYAML is required for database configuration")
+    print("Install it with: pip install PyYAML")
+    sys.exit(1)
 
 
 class MsfDatabase:
@@ -32,7 +39,6 @@ class MsfDatabase:
     def _check_postgres_installed(self):
         """Check if PostgreSQL is installed"""
         try:
-            import shutil
             return shutil.which('psql') is not None
         except Exception:
             return False

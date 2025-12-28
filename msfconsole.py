@@ -12,7 +12,6 @@ import sys
 import os
 import argparse
 import cmd
-import glob
 from pathlib import Path
 
 
@@ -254,8 +253,4 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nAborting...")
-        sys.exit(1)
+    main()
