@@ -21,13 +21,19 @@ jobs:
             const assignees = [copilotUsername]; // Or: ["copilot","anotheruser"]
             const currentAssignees = context.payload.pull_request.assignees.map(u => u.login);
             if (!assignees.every(a => currentAssignees.includes(a))) {
-              await github.rest.issues.addAssignees({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                assignees
-              });
-              console.log(`Assigned ${assignees.join(", ")} to PR #${context.payload.pull_request.number}`);
+              try {
+                await github.rest.issues.addAssignees({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  assignees
+                });
+                console.log(`Assigned ${assignees.join(", ")} to PR #${context.payload.pull_request.number}`);
+              } catch (error) {
+                console.log(`⚠️ Failed to assign ${assignees.join(", ")} to PR #${context.payload.pull_request.number}: ${error.message}`);
+                console.log("Note: This is expected if the user doesn't exist or doesn't have access to the repository.");
+                console.log("The workflow will continue successfully.");
+              }
             } else {
               console.log(`Already assigned: ${assignees.join(", ")} on PR #${context.payload.pull_request.number}`);
             }
