@@ -52,15 +52,13 @@ jobs:
             -exec wc -l {} \; | \
             awk '$1 > 500 {print $1 " lines: " $2}' | \
             sort -rn > /tmp/all_large_files.txt
-          
-          # Filter out excluded files
+
+          # Filter out excluded files (use grep -F for literal string matching)
           if [ -s /tmp/exclusions.txt ]; then
-            while IFS= read -r file; do
-              grep -v "$file" /tmp/all_large_files.txt > /tmp/all_large_files.tmp || true
-              mv /tmp/all_large_files.tmp /tmp/all_large_files.txt
-            done < /tmp/exclusions.txt
+            grep -v -F -f /tmp/exclusions.txt /tmp/all_large_files.txt > /tmp/filtered_files.txt || true
+            mv /tmp/filtered_files.txt /tmp/all_large_files.txt
           fi
-          
+
           # Output results
           if [ -s /tmp/all_large_files.txt ]; then
             cat /tmp/all_large_files.txt >> /tmp/analysis.md
