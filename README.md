@@ -1,3 +1,50 @@
+## What Are We Doing Here?
+<sub>certainly not acid</sub>
+
+The goal here is most definitely not to be a dick to Rapid 7. They've provided us so much. When the metasploit project went under the wing of Rapid 7, I think prior to that a whitewater rafting company [citation needed], we all said it- "who owns it now? Oh ok." That was certainly a moment, not one we all remember, certainly not one that I remember, but almost entirely likely a possible reality.
+
+This is an effort to change that reality, a lot like doing acid, but with slightly more focus on computers and less on trees and flowers swaying in a colorful wind. This project aims to bring reverse engineering, fuzzing, and the latest 'sploits to the msf framework. I've already put in some personal exploits, some personal tools, some new tools, and even *some tools that work*.
+
+## What is this?
+
+We used to like msf, ya know, back in the day. But now msf express, which I tried like 15 years ago (actually wait..2010, sh** yeah actually 15 years ago), was not a fun experience. The sales guy was not very nice to me, I found it a weird and clunky web app wrapper around msf and I found myself going "wtf can i just go back to the terminal." I didn't buy it, it was like 2k back then, i don't know what it is now, but hopefully they have nicer sales people.
+
+Oh right, what is this then? It's metasploit, but first it's in a language people actually know. Second, it's an effort to bring together the best and 1337est actual security tools into one place, and it's an effort to use the open sourcety of msf as a little framework for exploits. Really, you gotta admit, whatever you might think about msf, it's easy to use, it lets you set the right fields you want, and sometimes, it might even work. That's pretty rad. But it's missing:
+
+- Real port scanning - nmap integration is clunky, db is clunky and IMO a bit too abstracted from the user
+- HOW IS STARTUP TIME LIKE 30 SECONDS?!!?!?!?! It's a CLI app!? And it's backed by a DATABASE for like what? A few thousand records of exploits and modules?? Who wrote that schema?! Normalize that shit pleaaaaseee. Or don't, now it doesn't matter, because we will. We'd contribute back, but all of our code is python. Sorry. 
+- Just kidding- if you are Rapid 7 reading this, our ruby transpiler we wrote also goes the other way- that's right we have a bispiler, and if you use pf which will be integrated in this soon, you can convert to any language, so really, not to put it in a bucket, it's a panspiler. 
+- What that means for you (everyone): write you're exploits in whatever you want. `pf` is a tool (seen in HyperionGray/pf-web-poly-compile-helper-runner) that does a little bit too much, but includes stuff like fuzzing, reverse engineering (with Ghidra and Radare2), debugging (lldb, gdb + pwndbg + pwntools + a handful of other helpers), exploit writing helpers like integration with pwndbg, heap spray helpers, ELF analyzers and stuff, x64dbg planned, and some educational material around all of that stuff. Why do you care? It also includes a ton of language conversion tools all under one hood.
+- Language conversion tools- pf supports: FORTRAN, Julia, ASM, C, C++, Java (both android and normal people Java), Kotlin, Python, Node, Go, Rust, CUDA, JS, TS, Swift, Objective-C, C#, bash, fish, zsh, and some others I forget. So really- write your exploits in whatever you want. Write your rad tools in whatever you want- we'd love to take a look at 'em and integrate them.
+- This is about community. Hacker community. Not the industry.
+
+Thanks for reading.
+- Alex/_hyp3ri0n/P4X
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+# Original MSF Readme Below
+
+
 # Metasploit Framework
 
 The Metasploit Framework is an open-source tool released under a BSD-style license. For detailed licensing information, refer to the `COPYING` file.
