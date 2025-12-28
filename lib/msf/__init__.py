@@ -8,5 +8,9 @@ Python-based Metasploit modules.
 
 from . import core
 from . import util
+from .core.framework import Framework, framework, create_framework
 
-__all__ = ['core', 'util']
+# Make framework available at package level for "from msf import framework"
+framework = framework
+
+__all__ = ['core', 'util', 'framework', 'Framework', 'create_framework']

@@ -10,5 +10,6 @@ from . import exploit
 from . import auxiliary
 from . import module
 from . import constants
+from .framework import Framework, framework, create_framework
 
-__all__ = ['exploit', 'auxiliary', 'module', 'constants']
+__all__ = ['exploit', 'auxiliary', 'module', 'constants', 'Framework', 'framework', 'create_framework']
