@@ -74,6 +74,50 @@ For questions and suggestions, you can:
 
 **Note:** Some community members may still use IRC channels and the metasploit-hackers mailing list, though the primary support channels are now GitHub Discussions and Slack.
 
+## Features
+
+### Core Capabilities
+- **🐍 Python-Native Architecture**: Complete transpilation of 7,456+ Ruby modules to Python for better performance and accessibility
+- **🎯 Comprehensive Exploit Database**: Extensive collection of exploit modules covering network services, web applications, and system vulnerabilities
+- **💉 Payload Generation**: Advanced payload creation and encoding with msfvenom
+- **🔍 Vulnerability Scanning**: Integrated auxiliary modules for reconnaissance and vulnerability assessment
+- **🌐 Multi-Protocol Support**: HTTP, HTTPS, SSH, FTP, SMB, RDP, and many other network protocols
+- **📊 Database Integration**: PostgreSQL support for tracking campaigns, hosts, services, and credentials
+
+### Advanced Security Testing
+- **🔬 Binary Analysis & Reverse Engineering**: Integrated Radare2 with GDB-like interface for advanced binary analysis
+- **🐛 Dynamic Debugging**: LLDB integration for runtime analysis and debugging
+- **⚡ Fuzzing Capabilities**: AFL-style coverage tracking and in-memory fuzzing for vulnerability discovery
+- **🎭 Evasion Techniques**: Multiple encoders and obfuscation methods to bypass security controls
+- **🔐 Post-Exploitation**: Comprehensive suite of post-exploitation modules for privilege escalation and persistence
+
+### Modern Exploitation Tools
+- **🛠️ PF Framework Integration**: Leverage modern tools like pwntools, GDB/GEF, pwndbg, and Ghidra
+- **🔗 C2 Framework Support**: Integration with Sliver and Havoc for professional command and control
+- **🎪 Advanced Shell Handlers**: pwncat-cs integration for automatic privilege escalation and post-exploitation
+- **🌐 Web Interface**: Villain integration for managing multiple shells at scale with modern UI
+- **🤖 Automation Support**: Python-native API for scripting and automation workflows
+
+### Developer-Friendly
+- **📦 Python Package Management**: Standard requirements.txt and pyproject.toml for dependency management
+- **🧪 Comprehensive Testing**: pytest-based testing infrastructure with unit, integration, and functional tests
+- **📝 Code Quality Tools**: Integrated linting with flake8, formatting with Black, and import sorting with isort
+- **🔄 Bidirectional Transpiler**: Convert between Ruby and Python to leverage both ecosystems
+- **📚 Extensive Documentation**: Complete API documentation and developer guides
+
+### Language & Platform Support
+- **🌍 Multi-Language Exploit Development**: Write exploits in Python, Ruby, or use the transpiler for other languages
+- **💻 Cross-Platform**: Support for Linux, macOS, and Windows targets
+- **🐳 Container Ready**: Docker and Kubernetes configurations for isolated testing environments
+- **☁️ Cloud Integration**: AWS, Azure, and GCP deployment support
+
+### Enterprise Features
+- **👥 Team Collaboration**: Multi-user support with role-based access control
+- **📋 Campaign Management**: Track and organize penetration testing engagements
+- **📊 Reporting**: Generate comprehensive test reports with findings and evidence
+- **🔒 Credential Management**: Secure storage and management of harvested credentials
+- **🎯 Targeted Scanning**: Smart targeting based on service detection and OS fingerprinting
+
 ## Python-Native Framework (Round 4) - TRANSPILATION COMPLETE! 🎉
 
 🐍 **ALL RUBY FILES HAVE BEEN TRANSPILED TO PYTHON!** 🐍
