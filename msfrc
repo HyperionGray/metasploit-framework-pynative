@@ -55,10 +55,18 @@ msf_console() {
         "$MSF_ROOT/msfconsole" "${@:2}"
     else
         echo "Starting Python-enhanced console..."
-        python3 -c "
+        MSF_ROOT="$MSF_ROOT" python3 -c "
 import sys
-sys.path.insert(0, '$MSF_ROOT/lib')
-sys.path.insert(0, '$MSF_ROOT')
+import os
+
+# Get MSF_ROOT from environment to avoid shell escape sequences
+msf_root = os.environ.get('MSF_ROOT', '')
+if not msf_root:
+    print('Error: MSF_ROOT environment variable not set')
+    sys.exit(1)
+
+sys.path.insert(0, os.path.join(msf_root, 'lib'))
+sys.path.insert(0, msf_root)
 
 try:
     from msf import framework
@@ -72,7 +80,8 @@ except ImportError as e:
     print(f'Error loading MSF Python framework: {e}')
     print('Falling back to Ruby console...')
     import subprocess
-    subprocess.run(['$MSF_ROOT/msfconsole'] + sys.argv[1:])
+    msfconsole_path = os.path.join(msf_root, 'msfconsole')
+    subprocess.run([msfconsole_path] + sys.argv[1:])
 " "$@"
     fi
 }
@@ -113,10 +122,14 @@ msf_exploit() {
         return 1
     fi
     
-    python3 -c "
+    MSF_ROOT="$MSF_ROOT" python3 -c "
 import sys
-sys.path.insert(0, '$MSF_ROOT/lib')
-sys.path.insert(0, '$MSF_ROOT')
+import os
+
+msf_root = os.environ.get('MSF_ROOT', '')
+if msf_root:
+    sys.path.insert(0, os.path.join(msf_root, 'lib'))
+    sys.path.insert(0, msf_root)
 
 try:
     from msf.core.exploit import Exploit
