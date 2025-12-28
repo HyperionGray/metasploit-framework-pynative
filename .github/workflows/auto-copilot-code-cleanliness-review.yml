@@ -70,20 +70,171 @@ jobs:
           
           cat /tmp/analysis.md
 
-      - name: GitHub Copilot Code Review
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Review the codebase for code cleanliness issues:
-            1. Identify files that are too large (>500 lines) and suggest how to split them into smaller, focused modules
-            2. Look for code duplication and suggest refactoring opportunities
-            3. Check for consistent code style and formatting
-            4. Identify complex functions that could be simplified
-            5. Suggest improvements for code organization and structure
-            6. Check for proper separation of concerns
-            
-            Provide actionable recommendations with specific file names and line numbers.
+      - name: Code Cleanliness Review
+        run: |
+          echo "🧹 Performing comprehensive code cleanliness review..."
+          echo "===================================================="
+          
+          # 1. Large Files Analysis
+          echo "📏 Large Files Analysis (>500 lines)"
+          echo "------------------------------------"
+          
+          echo "Files larger than 500 lines:"
+          find . -name "*.py" -type f -exec wc -l {} + | awk '$1 > 500 {print $1 " lines: " $2}' | sort -nr | head -20
+          
+          echo ""
+          echo "Recommendations for large files:"
+          echo "- Consider splitting files >1000 lines into smaller modules"
+          echo "- Extract utility functions into separate helper modules"
+          echo "- Use composition over inheritance for complex classes"
+          
+          # 2. Code Duplication Analysis
+          echo ""
+          echo "🔄 Code Duplication Analysis"
+          echo "----------------------------"
+          
+          # Simple duplication check using common patterns
+          echo "Checking for potential code duplication..."
+          
+          # Find similar function signatures
+          echo "Similar function definitions:"
+          grep -r "^def " python_framework/ lib/ --include="*.py" | cut -d: -f2 | sort | uniq -c | sort -nr | head -10 | awk '$1 > 1 {print "Potential duplicate: " $0}'
+          
+          # Find similar import patterns
+          echo ""
+          echo "Common import patterns (potential for consolidation):"
+          grep -r "^import\|^from" python_framework/ lib/ --include="*.py" | cut -d: -f2 | sort | uniq -c | sort -nr | head -10
+          
+          # 3. Code Style and Formatting
+          echo ""
+          echo "🎨 Code Style and Formatting"
+          echo "-----------------------------"
+          
+          # Check for consistent indentation
+          echo "Checking indentation consistency..."
+          mixed_indent=$(find python_framework/ lib/ -name "*.py" -exec grep -l $'\t' {} \; 2>/dev/null | wc -l)
+          echo "Files with mixed indentation (tabs found): $mixed_indent"
+          
+          # Check line length
+          echo "Checking line length (>120 characters):"
+          long_lines=$(find python_framework/ lib/ -name "*.py" -exec awk 'length > 120 {count++} END {print count+0}' {} + | awk '{sum += $1} END {print sum+0}')
+          echo "Lines longer than 120 characters: $long_lines"
+          
+          # Run flake8 if available
+          if command -v flake8 &> /dev/null; then
+            echo ""
+            echo "Running flake8 style checker..."
+            flake8 python_framework/ lib/ --count --max-line-length=120 --statistics || true
+          fi
+          
+          # 4. Complex Functions Analysis
+          echo ""
+          echo "🧠 Complex Functions Analysis"
+          echo "-----------------------------"
+          
+          echo "Functions with high complexity (>50 lines):"
+          python3 -c "
+          import ast
+          import os
+          
+          def analyze_complexity(filepath):
+              try:
+                  with open(filepath, 'r') as f:
+                      tree = ast.parse(f.read())
+                  
+                  complex_functions = []
+                  for node in ast.walk(tree):
+                      if isinstance(node, ast.FunctionDef):
+                          # Estimate complexity by counting lines
+                          if hasattr(node, 'end_lineno') and node.end_lineno:
+                              lines = node.end_lineno - node.lineno
+                              if lines > 50:
+                                  complex_functions.append((filepath, node.name, node.lineno, lines))
+                  return complex_functions
+              except:
+                  return []
+          
+          for root, dirs, files in os.walk('python_framework'):
+              for file in files:
+                  if file.endswith('.py'):
+                      filepath = os.path.join(root, file)
+                      complex_funcs = analyze_complexity(filepath)
+                      for func_info in complex_funcs[:5]:  # Limit output
+                          print(f'{func_info[0]}:{func_info[2]} - {func_info[1]} ({func_info[3]} lines)')
+          " || true
+          
+          # 5. Code Organization Analysis
+          echo ""
+          echo "📁 Code Organization Analysis"
+          echo "-----------------------------"
+          
+          # Check for proper module structure
+          echo "Module structure analysis:"
+          echo "Python packages (directories with __init__.py):"
+          find python_framework/ lib/ -name "__init__.py" | wc -l
+          
+          echo ""
+          echo "Modules without __init__.py (potential organization issue):"
+          find python_framework/ lib/ -type d -not -path "*/.*" -not -path "*/__pycache__" | while read dir; do
+            if [ ! -f "$dir/__init__.py" ] && [ "$(find "$dir" -maxdepth 1 -name "*.py" | wc -l)" -gt 0 ]; then
+              echo "  $dir"
+            fi
+          done | head -10
+          
+          # 6. Separation of Concerns
+          echo ""
+          echo "🎯 Separation of Concerns Analysis"
+          echo "----------------------------------"
+          
+          echo "Files mixing multiple concerns (containing both classes and functions):"
+          python3 -c "
+          import ast
+          import os
+          
+          def check_separation(filepath):
+              try:
+                  with open(filepath, 'r') as f:
+                      tree = ast.parse(f.read())
+                  
+                  has_classes = False
+                  has_functions = False
+                  
+                  for node in ast.walk(tree):
+                      if isinstance(node, ast.ClassDef):
+                          has_classes = True
+                      elif isinstance(node, ast.FunctionDef) and not any(isinstance(parent, ast.ClassDef) for parent in ast.walk(tree) if hasattr(parent, 'body') and node in getattr(parent, 'body', [])):
+                          has_functions = True
+                  
+                  return has_classes and has_functions
+              except:
+                  return False
+          
+          mixed_files = []
+          for root, dirs, files in os.walk('python_framework'):
+              for file in files:
+                  if file.endswith('.py') and not file.startswith('__'):
+                      filepath = os.path.join(root, file)
+                      if check_separation(filepath):
+                          mixed_files.append(filepath)
+          
+          for file in mixed_files[:10]:  # Limit output
+              print(f'Mixed concerns: {file}')
+          " || true
+          
+          echo ""
+          echo "📋 Code Cleanliness Recommendations:"
+          echo "-----------------------------------"
+          echo "1. Split large files (>1000 lines) into focused modules"
+          echo "2. Extract common functionality into utility modules"
+          echo "3. Use consistent code formatting (consider using black)"
+          echo "4. Break down complex functions into smaller, focused functions"
+          echo "5. Ensure proper module organization with __init__.py files"
+          echo "6. Separate classes and utility functions into different modules"
+          echo "7. Use type hints for better code documentation"
+          echo "8. Consider using dataclasses for simple data containers"
+          
+          echo ""
+          echo "✅ Code cleanliness review complete."
         continue-on-error: true
 
       - name: Create Issue for Code Cleanliness Review

@@ -77,56 +77,193 @@ jobs:
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
 =======
-      - name: GPT-5 Advanced Code Analysis
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Perform a comprehensive code analysis of this repository using GPT-5's advanced capabilities:
-            
-            1. **Code Quality & Architecture**
-               - Analyze overall code structure and organization
-               - Identify architectural patterns and anti-patterns
-               - Suggest improvements for maintainability and scalability
-            
-            2. **Security Analysis**
-               - Detect potential security vulnerabilities
-               - Identify unsafe coding patterns
-               - Recommend security best practices
-            
-            3. **Performance Optimization**
-               - Identify performance bottlenecks
-               - Suggest optimization opportunities
-               - Recommend efficient algorithms and data structures
-            
-            4. **Best Practices**
-               - Verify adherence to language-specific best practices
-               - Check for proper error handling
-               - Ensure code follows SOLID principles
-            
-            5. **Documentation & Maintainability**
-               - Assess code documentation quality
-               - Identify areas needing better comments
-               - Suggest improvements for code readability
-            
-            Provide specific, actionable recommendations with file names and line numbers where applicable.
+      - name: Advanced Code Analysis
+        run: |
+          echo "🔍 Performing comprehensive code analysis..."
+          echo "========================================"
+          
+          # 1. Code Quality & Architecture Analysis
+          echo "📊 Code Quality & Architecture Analysis"
+          echo "----------------------------------------"
+          
+          # Check Python code quality
+          if command -v flake8 &> /dev/null; then
+            echo "Running flake8 for Python code quality..."
+            flake8 --count --max-line-length=120 --statistics python_framework/ lib/ || true
+          fi
+          
+          if command -v pylint &> /dev/null; then
+            echo "Running pylint for code analysis..."
+            pylint python_framework/ --reports=y --score=y || true
+          fi
+          
+          # 2. Security Analysis
+          echo ""
+          echo "🔒 Security Analysis"
+          echo "--------------------"
+          
+          if command -v bandit &> /dev/null; then
+            echo "Running bandit for security analysis..."
+            bandit -r python_framework/ lib/ -f json -o security_report.json || true
+            bandit -r python_framework/ lib/ || true
+          fi
+          
+          if command -v safety &> /dev/null; then
+            echo "Checking for known security vulnerabilities..."
+            safety check --json || true
+          fi
+          
+          # 3. Performance & Best Practices
+          echo ""
+          echo "⚡ Performance & Best Practices"
+          echo "-------------------------------"
+          
+          # Check for large files that might impact performance
+          echo "Identifying large files (>1000 lines):"
+          find . -name "*.py" -type f -exec wc -l {} + | sort -nr | head -10 || true
+          
+          # Check for TODO/FIXME comments
+          echo ""
+          echo "Code maintenance items:"
+          grep -r "TODO\|FIXME\|XXX" --include="*.py" . | head -20 || true
+          
+          # 4. Documentation Analysis
+          echo ""
+          echo "📚 Documentation Analysis"
+          echo "-------------------------"
+          
+          # Check for missing docstrings
+          echo "Checking for missing docstrings..."
+          python3 -c "
+          import ast
+          import os
+          
+          def check_docstrings(filepath):
+              try:
+                  with open(filepath, 'r') as f:
+                      tree = ast.parse(f.read())
+                  
+                  missing = []
+                  for node in ast.walk(tree):
+                      if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                          if not ast.get_docstring(node):
+                              missing.append(f'{filepath}:{node.lineno} - {node.name}')
+                  return missing
+              except:
+                  return []
+          
+          for root, dirs, files in os.walk('python_framework'):
+              for file in files:
+                  if file.endswith('.py'):
+                      filepath = os.path.join(root, file)
+                      missing = check_docstrings(filepath)
+                      for item in missing[:5]:  # Limit output
+                          print(f'Missing docstring: {item}')
+          " || true
+          
+          echo ""
+          echo "✅ Code analysis complete. Review output above for recommendations."
         continue-on-error: true
 
-      - name: GPT-5 Test Coverage Analysis
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Analyze the test coverage and testing strategy:
-            
-            1. Identify files that lack adequate test coverage
-            2. Suggest missing test cases for critical functionality
-            3. Recommend improvements to existing tests
-            4. Identify edge cases that should be tested
-            5. Suggest integration and end-to-end test scenarios
-            
-            Focus on critical paths and business logic.
->>>>>>> main
+      - name: Test Coverage Analysis
+        run: |
+          echo "🧪 Analyzing test coverage and testing strategy..."
+          echo "================================================"
+          
+          # 1. Test Coverage Analysis
+          echo "📊 Test Coverage Analysis"
+          echo "-------------------------"
+          
+          # Install coverage if available
+          pip install coverage pytest-cov || true
+          
+          # Run tests with coverage if pytest is available
+          if command -v pytest &> /dev/null; then
+            echo "Running pytest with coverage analysis..."
+            pytest --cov=python_framework --cov=lib --cov-report=term-missing --cov-report=html || true
+          fi
+          
+          # 2. Test File Analysis
+          echo ""
+          echo "📁 Test File Analysis"
+          echo "---------------------"
+          
+          # Count test files
+          test_files=$(find . -name "test_*.py" -o -name "*_test.py" | wc -l)
+          echo "Total test files found: $test_files"
+          
+          # List test directories
+          echo "Test directories:"
+          find . -type d -name "*test*" | head -10 || true
+          
+          # 3. Missing Test Coverage Identification
+          echo ""
+          echo "🔍 Missing Test Coverage Analysis"
+          echo "---------------------------------"
+          
+          # Find Python files without corresponding tests
+          echo "Python files that may need tests:"
+          python3 -c "
+          import os
+          import glob
+          
+          # Find all Python files in main directories
+          py_files = []
+          for pattern in ['python_framework/**/*.py', 'lib/**/*.py', 'modules/**/*.py']:
+              py_files.extend(glob.glob(pattern, recursive=True))
+          
+          # Find all test files
+          test_files = []
+          for pattern in ['**/test_*.py', '**/*_test.py', 'test/**/*.py']:
+              test_files.extend(glob.glob(pattern, recursive=True))
+          
+          # Extract base names from test files
+          tested_modules = set()
+          for test_file in test_files:
+              base = os.path.basename(test_file)
+              if base.startswith('test_'):
+                  tested_modules.add(base[5:].replace('.py', ''))
+              elif base.endswith('_test.py'):
+                  tested_modules.add(base[:-8])
+          
+          # Check for untested modules
+          untested = []
+          for py_file in py_files[:20]:  # Limit output
+              base = os.path.basename(py_file).replace('.py', '')
+              if base not in tested_modules and not base.startswith('__'):
+                  untested.append(py_file)
+          
+          for file in untested[:10]:  # Show first 10
+              print(f'Potentially untested: {file}')
+          " || true
+          
+          # 4. Test Quality Analysis
+          echo ""
+          echo "🎯 Test Quality Analysis"
+          echo "------------------------"
+          
+          # Check for test assertions
+          echo "Test files with assertion patterns:"
+          grep -r "assert\|assertEqual\|assertTrue\|assertFalse" test/ --include="*.py" | wc -l || echo "0"
+          
+          # Check for mock usage
+          echo "Test files using mocks:"
+          grep -r "mock\|Mock\|patch" test/ --include="*.py" | wc -l || echo "0"
+          
+          # 5. Integration Test Recommendations
+          echo ""
+          echo "🔗 Integration Test Recommendations"
+          echo "-----------------------------------"
+          
+          echo "Critical paths that should have integration tests:"
+          echo "- HTTP client functionality (python_framework/helpers/http_client.py)"
+          echo "- SSH client operations (python_framework/helpers/ssh_client.py)"
+          echo "- Exploit framework core (python_framework/core/exploit.py)"
+          echo "- Database connections (lib/msf/core/db.py)"
+          echo "- Payload generation and handling"
+          
+          echo ""
+          echo "✅ Test coverage analysis complete."
         continue-on-error: true
 
       - name: Advanced Code Analysis with CodeQL

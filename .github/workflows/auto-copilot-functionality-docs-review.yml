@@ -317,24 +317,159 @@ jobs:
           echo "- Include changelog or release notes" >> /tmp/doc-analysis.md
           
           cat /tmp/doc-analysis.md
-=======
-      - name: GitHub Copilot Documentation Review
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Review the documentation for this repository:
-            1. Check README.md completeness and quality
-            2. Verify all features and functionality are documented
-            3. Check for installation and usage instructions
-            4. Identify missing or outdated documentation
-            5. Suggest improvements for clarity and completeness
-            6. Verify code comments and inline documentation
-            7. Check for API documentation if applicable
-            8. Ensure contributing guidelines are present
+      - name: Documentation Review
+        run: |
+          echo "📚 Performing comprehensive documentation review..."
+          echo "================================================="
+          
+          # 1. README.md Analysis
+          echo "📖 README.md Analysis"
+          echo "---------------------"
+          
+          if [ -f "README.md" ]; then
+            word_count=$(wc -w < README.md)
+            line_count=$(wc -l < README.md)
+            echo "README.md exists: $word_count words, $line_count lines"
             
-            Provide specific recommendations with file names and sections.
->>>>>>> main
+            # Check for essential sections
+            echo "Checking for essential sections:"
+            sections=("Installation" "Usage" "Features" "Contributing" "License" "Documentation" "Examples" "API")
+            for section in "${sections[@]}"; do
+              if grep -qi "$section" README.md; then
+                echo "✅ $section section found"
+              else
+                echo "❌ $section section missing"
+              fi
+            done
+          else
+            echo "❌ README.md is missing"
+          fi
+          
+          # 2. Documentation Files Check
+          echo ""
+          echo "📄 Documentation Files Check"
+          echo "-----------------------------"
+          
+          docs=("CONTRIBUTING.md" "LICENSE.md" "CHANGELOG.md" "SECURITY.md" "CODE_OF_CONDUCT.md")
+          for doc in "${docs[@]}"; do
+            if [ -f "$doc" ]; then
+              word_count=$(wc -w < "$doc")
+              echo "✅ $doc exists ($word_count words)"
+            else
+              echo "❌ $doc is missing"
+            fi
+          done
+          
+          # 3. Code Documentation Analysis
+          echo ""
+          echo "💻 Code Documentation Analysis"
+          echo "-------------------------------"
+          
+          # Check for docstrings in Python files
+          echo "Analyzing Python docstring coverage..."
+          python3 -c "
+          import ast
+          import os
+          import glob
+          
+          def analyze_file(filepath):
+              try:
+                  with open(filepath, 'r', encoding='utf-8') as f:
+                      tree = ast.parse(f.read())
+                  
+                  total_items = 0
+                  documented_items = 0
+                  
+                  for node in ast.walk(tree):
+                      if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef)):
+                          total_items += 1
+                          if ast.get_docstring(node):
+                              documented_items += 1
+                  
+                  return total_items, documented_items
+              except:
+                  return 0, 0
+          
+          total_funcs = 0
+          documented_funcs = 0
+          
+          for pattern in ['python_framework/**/*.py', 'lib/**/*.py']:
+              for filepath in glob.glob(pattern, recursive=True):
+                  if '__pycache__' not in filepath:
+                      t, d = analyze_file(filepath)
+                      total_funcs += t
+                      documented_funcs += d
+          
+          if total_funcs > 0:
+              coverage = (documented_funcs / total_funcs) * 100
+              print(f'Docstring coverage: {documented_funcs}/{total_funcs} ({coverage:.1f}%)')
+          else:
+              print('No Python functions/classes found for analysis')
+          " || true
+          
+          # 4. API Documentation Check
+          echo ""
+          echo "🔌 API Documentation Check"
+          echo "--------------------------"
+          
+          # Check for API documentation files
+          api_docs_found=false
+          for pattern in "docs/api" "doc/api" "api" "docs" "documentation"; do
+            if [ -d "$pattern" ]; then
+              echo "✅ API documentation directory found: $pattern"
+              api_docs_found=true
+              file_count=$(find "$pattern" -name "*.md" -o -name "*.rst" -o -name "*.html" | wc -l)
+              echo "   Documentation files: $file_count"
+            fi
+          done
+          
+          if [ "$api_docs_found" = false ]; then
+            echo "❌ No API documentation directory found"
+          fi
+          
+          # 5. Installation and Usage Instructions
+          echo ""
+          echo "⚙️ Installation and Usage Instructions"
+          echo "--------------------------------------"
+          
+          if [ -f "README.md" ]; then
+            if grep -qi "install\|setup" README.md; then
+              echo "✅ Installation instructions found in README.md"
+            else
+              echo "❌ Installation instructions missing from README.md"
+            fi
+            
+            if grep -qi "usage\|example\|getting started" README.md; then
+              echo "✅ Usage instructions found in README.md"
+            else
+              echo "❌ Usage instructions missing from README.md"
+            fi
+          fi
+          
+          # Check for setup files
+          setup_files=("setup.py" "pyproject.toml" "requirements.txt" "Makefile")
+          for file in "${setup_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "✅ Setup file found: $file"
+            fi
+          done
+          
+          # 6. Code Comments Analysis
+          echo ""
+          echo "💬 Code Comments Analysis"
+          echo "-------------------------"
+          
+          # Count comments in Python files
+          comment_lines=$(find python_framework lib -name "*.py" -exec grep -c "^[[:space:]]*#" {} + 2>/dev/null | awk '{sum += $1} END {print sum}' || echo "0")
+          total_lines=$(find python_framework lib -name "*.py" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}' || echo "1")
+          
+          if [ "$total_lines" -gt 0 ]; then
+            comment_ratio=$(echo "scale=1; $comment_lines * 100 / $total_lines" | bc -l 2>/dev/null || echo "0")
+            echo "Comment ratio: $comment_lines/$total_lines lines ($comment_ratio%)"
+          fi
+          
+          echo ""
+          echo "✅ Documentation review complete."
         continue-on-error: true
 
       - name: Create Documentation Review Report

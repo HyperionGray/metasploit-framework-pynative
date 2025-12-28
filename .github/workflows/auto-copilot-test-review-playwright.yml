@@ -17,7 +17,6 @@ permissions:
   contents: write
   pull-requests: write
   checks: write
-  issues: write
 
 jobs:
   test-review-and-execution:
@@ -165,22 +164,198 @@ jobs:
           
           cat /tmp/test-analysis.md
 
-      - name: GitHub Copilot Test Review
-        uses: austenstone/copilot-cli-action@v2
-        with:
-          copilot-token: ${{ secrets.COPILOT_TOKEN }}
-          prompt: |
-            Review the test suite for this repository:
-            1. Verify all web-based functionality has Playwright tests (both headed and headless)
-            2. Identify missing test coverage for critical functionality
-            3. Check test quality and maintainability
-            4. Suggest improvements for test organization
-            5. Verify tests follow best practices (isolation, clarity, proper assertions)
-            6. Check for flaky tests or tests with timing issues
-            7. Ensure tests are running in CI/CD pipeline
-            
-            For any web tests not using Playwright, recommend migration.
-            Provide specific, actionable recommendations with file names.
+      - name: Test Review with Analysis Tools
+        run: |
+          echo "🧪 Performing comprehensive test suite review..."
+          echo "==============================================="
+          
+          # 1. Playwright Test Analysis
+          echo "🎭 Playwright Test Analysis"
+          echo "---------------------------"
+          
+          # Check for Playwright tests
+          playwright_tests=$(find . -name "*.spec.js" -o -name "*.spec.ts" -o -name "*playwright*" | wc -l)
+          echo "Playwright test files found: $playwright_tests"
+          
+          if [ "$playwright_tests" -gt 0 ]; then
+            echo "Playwright test files:"
+            find . -name "*.spec.js" -o -name "*.spec.ts" -o -name "*playwright*" | head -10
+          else
+            echo "⚠️ No Playwright tests found"
+          fi
+          
+          # Check for Playwright configuration
+          if [ -f "playwright.config.js" ] || [ -f "playwright.config.ts" ]; then
+            echo "✅ Playwright configuration found"
+          else
+            echo "❌ Playwright configuration missing"
+          fi
+          
+          # 2. Web-based Functionality Coverage
+          echo ""
+          echo "🌐 Web-based Functionality Coverage"
+          echo "-----------------------------------"
+          
+          # Check for web-related code that should have tests
+          echo "Web endpoints and routes:"
+          web_routes=$(grep -r "@app\.route\|@route\|app\.get\|app\.post" --include="*.py" . | wc -l)
+          echo "Web routes found: $web_routes"
+          
+          # Check for frontend components
+          frontend_files=$(find . -name "*.html" -o -name "*.js" -o -name "*.ts" -o -name "*.vue" -o -name "*.react" | wc -l)
+          echo "Frontend files found: $frontend_files"
+          
+          if [ "$web_routes" -gt 0 ] && [ "$playwright_tests" -eq 0 ]; then
+            echo "⚠️ Web routes found but no Playwright tests - consider adding E2E tests"
+          fi
+          
+          # 3. Test Coverage Analysis
+          echo ""
+          echo "📊 Test Coverage Analysis"
+          echo "-------------------------"
+          
+          # Count all test files
+          python_tests=$(find . -name "test_*.py" -o -name "*_test.py" | wc -l)
+          js_tests=$(find . -name "*.test.js" -o -name "*.spec.js" | wc -l)
+          ts_tests=$(find . -name "*.test.ts" -o -name "*.spec.ts" | wc -l)
+          
+          echo "Python test files: $python_tests"
+          echo "JavaScript test files: $js_tests"
+          echo "TypeScript test files: $ts_tests"
+          echo "Total test files: $((python_tests + js_tests + ts_tests))"
+          
+          # Run test coverage if pytest is available
+          if command -v pytest &> /dev/null; then
+            echo ""
+            echo "Running Python test coverage analysis..."
+            pytest --cov=python_framework --cov=lib --cov-report=term-missing --tb=no -q || echo "Test coverage analysis completed with warnings"
+          fi
+          
+          # 4. Test Quality and Maintainability
+          echo ""
+          echo "🔍 Test Quality and Maintainability"
+          echo "-----------------------------------"
+          
+          # Check for test organization
+          echo "Test organization:"
+          test_dirs=$(find . -type d -name "*test*" | wc -l)
+          echo "Test directories: $test_dirs"
+          
+          # Check for proper test structure
+          echo ""
+          echo "Test structure analysis:"
+          if [ -d "test" ] || [ -d "tests" ]; then
+            echo "✅ Dedicated test directory found"
+          else
+            echo "⚠️ No dedicated test directory found"
+          fi
+          
+          # Check for test utilities
+          test_utils=$(find . -name "conftest.py" -o -name "test_utils.py" -o -name "fixtures.py" | wc -l)
+          echo "Test utility files: $test_utils"
+          
+          # 5. Test Best Practices
+          echo ""
+          echo "✨ Test Best Practices Analysis"
+          echo "------------------------------"
+          
+          # Check for proper assertions
+          echo "Assertion patterns:"
+          assert_count=$(grep -r "assert\|assertEqual\|assertTrue\|expect(" --include="*.py" --include="*.js" --include="*.ts" test/ 2>/dev/null | wc -l || echo "0")
+          echo "Assertion statements found: $assert_count"
+          
+          # Check for test isolation (setup/teardown)
+          echo ""
+          echo "Test isolation patterns:"
+          setup_count=$(grep -r "setUp\|tearDown\|beforeEach\|afterEach\|fixture" --include="*.py" --include="*.js" --include="*.ts" test/ 2>/dev/null | wc -l || echo "0")
+          echo "Setup/teardown patterns: $setup_count"
+          
+          # Check for mocking
+          echo ""
+          echo "Mocking patterns:"
+          mock_count=$(grep -r "mock\|Mock\|stub\|spy" --include="*.py" --include="*.js" --include="*.ts" test/ 2>/dev/null | wc -l || echo "0")
+          echo "Mock/stub usage: $mock_count"
+          
+          # 6. Flaky Test Detection
+          echo ""
+          echo "🔄 Flaky Test Detection"
+          echo "----------------------"
+          
+          # Check for timing-related issues
+          echo "Potential timing issues:"
+          timing_issues=$(grep -r "sleep\|wait\|timeout\|delay" --include="*.py" --include="*.js" --include="*.ts" test/ 2>/dev/null | wc -l || echo "0")
+          echo "Timing-related code in tests: $timing_issues"
+          
+          # Check for hardcoded waits
+          hardcoded_waits=$(grep -r "time\.sleep\|setTimeout\|Thread\.sleep" --include="*.py" --include="*.js" --include="*.ts" test/ 2>/dev/null | wc -l || echo "0")
+          echo "Hardcoded waits (potential flakiness): $hardcoded_waits"
+          
+          # 7. CI/CD Pipeline Integration
+          echo ""
+          echo "🚀 CI/CD Pipeline Integration"
+          echo "-----------------------------"
+          
+          # Check for test execution in workflows
+          echo "Test execution in CI/CD:"
+          if grep -r "pytest\|npm test\|yarn test" .github/workflows/ 2>/dev/null; then
+            echo "✅ Tests are integrated in CI/CD pipeline"
+          else
+            echo "⚠️ No test execution found in CI/CD workflows"
+          fi
+          
+          # Check for Playwright in CI
+          if grep -r "playwright" .github/workflows/ 2>/dev/null; then
+            echo "✅ Playwright tests integrated in CI/CD"
+          else
+            echo "❌ Playwright tests not integrated in CI/CD"
+          fi
+          
+          echo ""
+          echo "📋 Test Review Recommendations:"
+          echo "------------------------------"
+          echo "1. Web Functionality Testing:"
+          if [ "$web_routes" -gt 0 ] && [ "$playwright_tests" -eq 0 ]; then
+            echo "   - Add Playwright tests for web routes and UI components"
+            echo "   - Implement both headed and headless test modes"
+          else
+            echo "   - ✅ Web testing strategy appears adequate"
+          fi
+          
+          echo ""
+          echo "2. Test Coverage:"
+          echo "   - Aim for >80% code coverage on critical paths"
+          echo "   - Add integration tests for API endpoints"
+          echo "   - Include edge case testing"
+          
+          echo ""
+          echo "3. Test Quality:"
+          echo "   - Ensure tests are isolated and independent"
+          echo "   - Use descriptive test names and clear assertions"
+          echo "   - Implement proper setup/teardown procedures"
+          
+          echo ""
+          echo "4. Flaky Test Prevention:"
+          echo "   - Replace hardcoded waits with proper wait conditions"
+          echo "   - Use Playwright's built-in waiting mechanisms"
+          echo "   - Implement retry logic for network-dependent tests"
+          
+          echo ""
+          echo "5. CI/CD Integration:"
+          echo "   - Ensure all tests run in CI/CD pipeline"
+          echo "   - Add test result reporting and coverage metrics"
+          echo "   - Configure parallel test execution for faster feedback"
+          
+          echo ""
+          echo "🎯 Migration Recommendations:"
+          echo "----------------------------"
+          if [ "$frontend_files" -gt 0 ] && [ "$playwright_tests" -eq 0 ]; then
+            echo "- Migrate existing web tests to Playwright for better reliability"
+            echo "- Implement visual regression testing with Playwright"
+            echo "- Add cross-browser testing capabilities"
+          fi
+          
+          echo ""
+          echo "✅ Test review complete."
         continue-on-error: true
 
       - name: Create or Update Test Review Issue
