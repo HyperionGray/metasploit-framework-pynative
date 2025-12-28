@@ -2,9 +2,9 @@ name: MSF Python Framework Tests
 
 on:
   push:
-    branches: [ main, develop, master ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop, master ]
+    branches: [ main, develop ]
   schedule:
     # Run tests daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -60,7 +60,7 @@ jobs:
         safety check --json --output safety-results.json
         
     - name: Upload security results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-results
@@ -98,14 +98,14 @@ jobs:
         python run_tests.py --unit --verbose
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: unit-test-results
         path: test-results/unit-results.xml
         
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: unit-coverage
@@ -149,7 +149,7 @@ jobs:
         TEST_HTTP_SERVICE: http://localhost:8080
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: integration-test-results
@@ -185,7 +185,7 @@ jobs:
         python run_tests.py --security --verbose
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-test-results
@@ -221,7 +221,7 @@ jobs:
         python run_tests.py --performance --verbose
         
     - name: Upload benchmark results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: benchmark-results
@@ -257,7 +257,7 @@ jobs:
         python run_tests.py --modules --verbose
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: module-test-results
@@ -303,7 +303,7 @@ jobs:
         python run_tests.py --compatibility --verbose
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: compatibility-test-results
@@ -343,7 +343,7 @@ jobs:
         python run_tests.py --unit --skip-slow
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
@@ -391,7 +391,7 @@ jobs:
         name: codecov-umbrella
         
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: coverage-report

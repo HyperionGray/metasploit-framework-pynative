@@ -86,14 +86,14 @@ jobs:
       continue-on-error: true
     
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: comprehensive-test-results
         path: test-results/
     
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: coverage-report
@@ -184,7 +184,7 @@ jobs:
       continue-on-error: true
     
     - name: Upload mutation report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: mutation-report
