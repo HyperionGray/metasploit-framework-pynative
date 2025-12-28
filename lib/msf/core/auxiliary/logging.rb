@@ -22,6 +22,11 @@ module Msf::Auxiliary::Logging
       warning_count: 0
     }
     @progress_tracker = nil
+  rescue => e
+    # Don't let logging initialization break the module
+    @logging_context = {}
+    @operation_stats = {}
+    @progress_tracker = nil
   end
 
   #
@@ -31,10 +36,14 @@ module Msf::Auxiliary::Logging
   # @param target [String] Target identifier (host:port, URL, etc.)
   #
   def log_status(msg, context: {}, target: nil)
+    ensure_logging_initialized
     formatted_msg = build_contextual_message(msg, :status, context, target)
     print_status(formatted_msg)
     log_to_framework(:info, msg, context.merge(target: target))
-    @operation_stats[:operations_count] += 1
+    @operation_stats[:operations_count] += 1 if @operation_stats
+  rescue => e
+    # Fallback to basic logging if enhanced logging fails
+    print_status(msg)
   end
 
   #
@@ -45,6 +54,7 @@ module Msf::Auxiliary::Logging
   # @param data [Hash] Structured data to store in database
   #
   def log_success(msg, context: {}, target: nil, data: {})
+    ensure_logging_initialized
     formatted_msg = build_contextual_message(msg, :success, context, target)
     print_good(formatted_msg)
     log_to_framework(:info, msg, context.merge(target: target, result: 'success'))
@@ -54,8 +64,11 @@ module Msf::Auxiliary::Logging
       store_structured_result(:success, msg, target, data)
     end
     
-    @operation_stats[:success_count] += 1
-    @operation_stats[:operations_count] += 1
+    @operation_stats[:success_count] += 1 if @operation_stats
+    @operation_stats[:operations_count] += 1 if @operation_stats
+  rescue => e
+    # Fallback to basic logging if enhanced logging fails
+    print_good(msg)
   end
 
   #
@@ -66,6 +79,7 @@ module Msf::Auxiliary::Logging
   # @param error [Exception] Exception object if available
   #
   def log_error(msg, context: {}, target: nil, error: nil)
+    ensure_logging_initialized
     formatted_msg = build_contextual_message(msg, :error, context, target)
     print_error(formatted_msg)
     
@@ -79,8 +93,11 @@ module Msf::Auxiliary::Logging
     end
     
     log_to_framework(:error, msg, error_context)
-    @operation_stats[:failure_count] += 1
-    @operation_stats[:operations_count] += 1
+    @operation_stats[:failure_count] += 1 if @operation_stats
+    @operation_stats[:operations_count] += 1 if @operation_stats
+  rescue => e
+    # Fallback to basic logging if enhanced logging fails
+    print_error(msg)
   end
 
   #
@@ -90,11 +107,15 @@ module Msf::Auxiliary::Logging
   # @param target [String] Target identifier
   #
   def log_warning(msg, context: {}, target: nil)
+    ensure_logging_initialized
     formatted_msg = build_contextual_message(msg, :warning, context, target)
     print_warning(formatted_msg)
     log_to_framework(:warn, msg, context.merge(target: target, result: 'warning'))
-    @operation_stats[:warning_count] += 1
-    @operation_stats[:operations_count] += 1
+    @operation_stats[:warning_count] += 1 if @operation_stats
+    @operation_stats[:operations_count] += 1 if @operation_stats
+  rescue => e
+    # Fallback to basic logging if enhanced logging fails
+    print_warning(msg)
   end
 
   #
@@ -229,9 +250,10 @@ module Msf::Auxiliary::Logging
   # Log operation statistics summary
   #
   def log_operation_summary
-    return unless @operation_stats[:operations_count] > 0
+    return unless @operation_stats && @operation_stats[:operations_count] > 0
     
-    total_duration = Time.now - @logging_context[:start_time]
+    total_duration = @logging_context && @logging_context[:start_time] ? 
+                     Time.now - @logging_context[:start_time] : 0
     summary = [
       "Operations: #{@operation_stats[:operations_count]}",
       "Successes: #{@operation_stats[:success_count]}",
@@ -241,9 +263,19 @@ module Msf::Auxiliary::Logging
     ].join(", ")
     
     log_status("Summary - #{summary}")
+  rescue => e
+    # Don't let summary logging break the module
   end
 
   private
+
+  #
+  # Ensure logging context is initialized
+  #
+  def ensure_logging_initialized
+    return if @logging_context && @operation_stats
+    initialize_logging_context
+  end
 
   #
   # Build a contextual message with automatic metadata
@@ -257,7 +289,7 @@ module Msf::Auxiliary::Logging
     end
     
     # Add timing information if enabled
-    if timing_enabled?
+    if timing_enabled? && @logging_context && @logging_context[:start_time]
       elapsed = Time.now - @logging_context[:start_time]
       parts << "[#{format_duration(elapsed)}]"
     end
@@ -271,6 +303,9 @@ module Msf::Auxiliary::Logging
     # Combine parts with the message
     prefix = parts.empty? ? "" : "#{parts.join(" ")} "
     "#{prefix}#{msg}"
+  rescue => e
+    # If contextual message building fails, just return the original message
+    msg
   end
 
   #
@@ -279,19 +314,21 @@ module Msf::Auxiliary::Logging
   def log_to_framework(level, msg, context)
     return unless framework_logging_enabled?
     
-    log_context = @logging_context.merge(context)
-    source = "aux:#{self.refname}"
+    log_context = (@logging_context || {}).merge(context || {})
+    source = "aux:#{self.refname}" rescue "aux:unknown"
     
     case level
     when :debug
-      dlog(msg, source, 2)
+      dlog(msg, source, 2) if respond_to?(:dlog)
     when :info
-      ilog("#{msg} #{log_context}", source, 1)
+      ilog("#{msg} #{log_context}", source, 1) if respond_to?(:ilog)
     when :warn
-      wlog("#{msg} #{log_context}", source, 1)
+      wlog("#{msg} #{log_context}", source, 1) if respond_to?(:wlog)
     when :error
-      elog("#{msg} #{log_context}", source, 0)
+      elog("#{msg} #{log_context}", source, 0) if respond_to?(:elog)
     end
+  rescue => e
+    # Don't let framework logging failures break the module
   end
 
   #
@@ -346,28 +383,36 @@ module Msf::Auxiliary::Logging
   # Check if verbose logging is enabled
   #
   def verbose_logging_enabled?
-    datastore['VERBOSE'] || (framework && framework.datastore['VERBOSE'])
+    (datastore && datastore['VERBOSE']) || (framework && framework.datastore && framework.datastore['VERBOSE'])
+  rescue => e
+    false
   end
 
   #
   # Check if timing information should be included
   #
   def timing_enabled?
-    datastore['AUX_TIMING'] || (framework && framework.datastore['AUX_TIMING'])
+    (datastore && datastore['AUX_TIMING']) || (framework && framework.datastore && framework.datastore['AUX_TIMING'])
+  rescue => e
+    false
   end
 
   #
   # Check if performance logging is enabled
   #
   def performance_logging_enabled?
-    datastore['AUX_PERFORMANCE'] || (framework && framework.datastore['AUX_PERFORMANCE'])
+    (datastore && datastore['AUX_PERFORMANCE']) || (framework && framework.datastore && framework.datastore['AUX_PERFORMANCE'])
+  rescue => e
+    false
   end
 
   #
   # Check if framework logging is enabled
   #
   def framework_logging_enabled?
-    datastore['AUX_FRAMEWORK_LOG'] || (framework && framework.datastore['AUX_FRAMEWORK_LOG'])
+    (datastore && datastore['AUX_FRAMEWORK_LOG']) || (framework && framework.datastore && framework.datastore['AUX_FRAMEWORK_LOG'])
+  rescue => e
+    false
   end
 
   #
@@ -379,15 +424,24 @@ module Msf::Auxiliary::Logging
       
       def initialize(info = {})
         original_initialize(info)
-        initialize_logging_context
         
-        # Register new datastore options
-        register_advanced_options([
-          OptBool.new('AUX_TIMING', [false, 'Include timing information in auxiliary log messages', false]),
-          OptBool.new('AUX_PERFORMANCE', [false, 'Enable performance logging for auxiliary operations', false]),
-          OptBool.new('AUX_FRAMEWORK_LOG', [false, 'Enable framework-level logging for auxiliary operations', false])
-        ])
+        begin
+          initialize_logging_context
+          
+          # Register new datastore options if OptBool is available
+          if defined?(Msf::OptBool)
+            register_advanced_options([
+              Msf::OptBool.new('AUX_TIMING', [false, 'Include timing information in auxiliary log messages', false]),
+              Msf::OptBool.new('AUX_PERFORMANCE', [false, 'Enable performance logging for auxiliary operations', false]),
+              Msf::OptBool.new('AUX_FRAMEWORK_LOG', [false, 'Enable framework-level logging for auxiliary operations', false])
+            ])
+          end
+        rescue => e
+          # Don't let logging initialization break module loading
+        end
       end
     end
+  rescue => e
+    # Don't let the include process break if something goes wrong
   end
 end

@@ -56,9 +56,14 @@ def run
 
   # Initialize enhanced logging for scanner operations
   if respond_to?(:start_progress_tracking)
-    start_progress_tracking(@range_count, "Scanning hosts")
+    begin
+      start_progress_tracking(@range_count, "Scanning hosts")
+    rescue => e
+      # Fallback if enhanced logging fails
+      print_status("Starting scan of #{@range_count} hosts") if @range_count > 0
+    end
   else
-    log_status("Starting scan of #{@range_count} hosts") if @range_count > 0
+    print_status("Starting scan of #{@range_count} hosts") if @range_count > 0
   end
 
   threads_max = datastore['THREADS'].to_i
@@ -73,20 +78,50 @@ def run
   #
 
   if datastore['CPORT'].to_i != 0 && threads_max > 1
-    log_warning("A maximum of one thread is possible when a source port is set (CPORT). Thread count adjusted to 1.")
+    if respond_to?(:log_warning)
+      begin
+        log_warning("A maximum of one thread is possible when a source port is set (CPORT). Thread count adjusted to 1.")
+      rescue => e
+        print_error("Warning: A maximum of one thread is possible when a source port is set (CPORT)")
+        print_error("Thread count has been adjusted to 1")
+      end
+    else
+      print_error("Warning: A maximum of one thread is possible when a source port is set (CPORT)")
+      print_error("Thread count has been adjusted to 1")
+    end
     threads_max = 1
   end
 
   if(Rex::Compat.is_windows)
     if(threads_max > 16)
-      log_warning("The Windows platform cannot reliably support more than 16 threads. Thread count adjusted to 16.")
+      if respond_to?(:log_warning)
+        begin
+          log_warning("The Windows platform cannot reliably support more than 16 threads. Thread count adjusted to 16.")
+        rescue => e
+          print_error("Warning: The Windows platform cannot reliably support more than 16 threads")
+          print_error("Thread count has been adjusted to 16")
+        end
+      else
+        print_error("Warning: The Windows platform cannot reliably support more than 16 threads")
+        print_error("Thread count has been adjusted to 16")
+      end
       threads_max = 16
     end
   end
 
   if(Rex::Compat.is_cygwin)
     if(threads_max > 200)
-      log_warning("The Cygwin platform cannot reliably support more than 200 threads. Thread count adjusted to 200.")
+      if respond_to?(:log_warning)
+        begin
+          log_warning("The Cygwin platform cannot reliably support more than 200 threads. Thread count adjusted to 200.")
+        rescue => e
+          print_error("Warning: The Cygwin platform cannot reliably support more than 200 threads")
+          print_error("Thread count has been adjusted to 200")
+        end
+      else
+        print_error("Warning: The Cygwin platform cannot reliably support more than 200 threads")
+        print_error("Thread count has been adjusted to 200")
+      end
       threads_max = 200
     end
   end
@@ -168,7 +203,12 @@ def run
       
       # Update progress using enhanced logging if available
       if respond_to?(:update_progress)
-        update_progress(tla - tlb)
+        begin
+          update_progress(tla - tlb)
+        rescue => e
+          # Fallback to original progress tracking
+          scanner_show_progress() if @show_progress
+        end
       elsif @show_progress
         scanner_show_progress()
       end
@@ -179,16 +219,28 @@ def run
     # Log completion and summary statistics
     scan_duration = Time.now - scan_start_time
     if respond_to?(:finish_progress_tracking)
-      finish_progress_tracking
+      begin
+        finish_progress_tracking
+      rescue => e
+        # Ignore errors in progress tracking cleanup
+      end
     end
     
     if respond_to?(:log_performance)
-      log_performance("Host scanning", scan_duration, 
-                     context: { hosts_scanned: @range_done, total_hosts: @range_count })
+      begin
+        log_performance("Host scanning", scan_duration, 
+                       context: { hosts_scanned: @range_done, total_hosts: @range_count })
+      rescue => e
+        # Ignore errors in performance logging
+      end
     end
     
     if respond_to?(:log_operation_summary)
-      log_operation_summary
+      begin
+        log_operation_summary
+      rescue => e
+        # Ignore errors in operation summary
+      end
     end
     
     return results
