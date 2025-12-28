@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Example Metasploit auxiliary module in Python.
+
+This module demonstrates how to write external Metasploit auxiliary modules
+in Python. It shows the structure, metadata definition, and basic HTTP
+request handling with the requests library.
+"""
+
 # standard modules
 import logging
 
@@ -37,6 +45,23 @@ metadata = {
 
 
 def run(args):
+    """
+    Execute the auxiliary module.
+
+    This function is called by the Metasploit framework when the module is run.
+    It demonstrates basic HTTP request handling and response logging.
+
+    Args:
+        args: Dictionary containing module options (rhost, targeturi)
+
+    Returns:
+        None
+
+    Example module structure:
+        1. Check dependencies
+        2. Make HTTP request
+        3. Log results
+    """
     module.LogHandler.setup(msg_prefix='{} - '.format(args['rhost']))
     if dependencies_missing:
         logging.error('Module dependency (requests) is missing, cannot continue')

