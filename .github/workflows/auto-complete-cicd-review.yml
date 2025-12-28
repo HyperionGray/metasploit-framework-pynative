@@ -28,7 +28,7 @@ permissions:
   pull-requests: write
   issues: write
   checks: write
-  actions: read
+  actions: write
 
 jobs:
   # Step 1: Code Cleanliness Review
