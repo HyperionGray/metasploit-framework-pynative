@@ -74,6 +74,31 @@ For questions and suggestions, you can:
 
 **Note:** Some community members may still use IRC channels and the metasploit-hackers mailing list, though the primary support channels are now GitHub Discussions and Slack.
 
+## Features
+
+🚀 **Core Features:**
+- **Python-Native Framework**: Complete transpilation from Ruby to Python for modern development
+- **Advanced Binary Analysis**: Integrated Radare2, LLDB, and GDB support for reverse engineering
+- **Modern C2 Integration**: Built-in support for Sliver, Havoc, and other professional C2 frameworks
+- **Enhanced Shell Handling**: pwncat-cs integration for automatic privilege escalation and persistence
+- **Multi-Language Support**: Write exploits in Python, Ruby, or any language via PF framework integration
+- **Comprehensive Fuzzing**: AFL++, libFuzzer integration with coverage-guided testing
+- **Professional Debugging**: GEF, pwndbg, and pwntools integration for exploit development
+
+🔧 **Development Tools:**
+- **Bidirectional Transpiler**: Ruby ↔ Python conversion tools for seamless migration
+- **Modern Build System**: Python packaging with requirements.txt, pyproject.toml, and tasks.py
+- **Code Quality**: Integrated linting with flake8, Black, and isort
+- **Comprehensive Testing**: pytest-based testing infrastructure
+- **Documentation**: Extensive guides for exploit development and framework usage
+
+🎯 **Exploitation Capabilities:**
+- **7,456+ Python Modules**: Complete module library with modern Python implementations
+- **Legacy Compatibility**: Pre-2020 Ruby modules maintained for backward compatibility
+- **Modern Payloads**: Enhanced payload generation with msfvenom Python integration
+- **Database Integration**: Improved database performance and normalization
+- **Fast Startup**: Optimized initialization compared to traditional Ruby implementation
+
 ## Python-Native Framework (Round 4) - TRANSPILATION COMPLETE! 🎉
 
 🐍 **ALL RUBY FILES HAVE BEEN TRANSPILED TO PYTHON!** 🐍
