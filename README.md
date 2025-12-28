@@ -1,9 +1,212 @@
+# Metasploit Framework - Python Native
+
+[![Build Status](https://github.com/P4X-ng/metasploit-framework-pynative/workflows/Complete%20CI%2FCD%20Agent%20Review%20Pipeline/badge.svg)](https://github.com/P4X-ng/metasploit-framework-pynative/actions)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](LICENSE.md)
+
 ## What Are We Doing Here?
 <sub>certainly not acid</sub>
 
 The goal here is most definitely not to be a dick to Rapid 7. They've provided us so much. When the metasploit project went under the wing of Rapid 7, I think prior to that a whitewater rafting company [citation needed], we all said it- "who owns it now? Oh ok." That was certainly a moment, not one we all remember, certainly not one that I remember, but almost entirely likely a possible reality.
 
 This is an effort to change that reality, a lot like doing acid, but with slightly more focus on computers and less on trees and flowers swaying in a colorful wind. This project aims to bring reverse engineering, fuzzing, and the latest 'sploits to the msf framework. I've already put in some personal exploits, some personal tools, some new tools, and even *some tools that work*.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Examples](#examples)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+- [Documentation](#documentation)
+- [License](#license)
+
+## Installation
+
+### Prerequisites
+
+- Python 3.8 or higher
+- pip (Python package installer)
+- Git
+
+### Quick Install
+
+```bash
+# Clone the repository
+git clone https://github.com/P4X-ng/metasploit-framework-pynative.git
+cd metasploit-framework-pynative
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run build validation
+python build_validator.py
+
+# Quick test
+make quick-validate
+```
+
+### Development Installation
+
+```bash
+# Install development dependencies
+make dev-setup
+
+# Run comprehensive validation
+make validate
+
+# Generate CI/CD report
+make report
+```
+
+## Usage
+
+### Basic Usage
+
+```bash
+# Start the Python-native Metasploit console
+python msfconsole.py
+
+# Run a specific exploit module
+python modules/exploits/multi/http/generic_rce_example_2024.py
+
+# Use the framework programmatically
+python -c "from python_framework.core.exploit import Exploit; print('Framework loaded')"
+```
+
+### Build and Testing
+
+```bash
+# Run all tests
+make test
+
+# Run linting
+make lint
+
+# Format code
+make format
+
+# Full validation
+make all
+```
+
+### CI/CD Integration
+
+```bash
+# Generate comprehensive status report
+python cicd_report_generator.py
+
+# Run build validation with detailed output
+python build_validator.py
+```
+
+## Features
+
+### Core Framework Features
+
+- **Python-Native Implementation**: Complete transpilation from Ruby to Python
+- **Modern Architecture**: Clean, maintainable Python codebase
+- **Comprehensive Testing**: Full test suite with pytest integration
+- **Advanced Binary Analysis**: Radare2 and LLDB integration
+- **Fuzzing Capabilities**: Built-in fuzzing tools and frameworks
+- **Modern Exploits**: Latest vulnerability research and exploits
+
+### Python Framework Components
+
+- **Core Exploit Classes**: Base classes for all exploit types
+- **HTTP Client**: Advanced HTTP client with modern features
+- **SSH Client**: Secure shell client for remote operations
+- **PostgreSQL Client**: Database interaction capabilities
+- **Malware Simulation**: Rootkit and malware testing tools
+
+### Development Tools
+
+- **Build Validation**: Comprehensive build checking with detailed reports
+- **CI/CD Integration**: GitHub Actions workflows for automated testing
+- **Code Quality**: Linting, formatting, and type checking
+- **Documentation**: Sphinx-based documentation generation
+
+## Examples
+
+### Basic Exploit Usage
+
+```python
+from python_framework.core.exploit import RemoteExploit, ExploitRank, Platform
+
+class MyExploit(RemoteExploit):
+    def __init__(self):
+        super().__init__()
+        self.name = "My Custom Exploit"
+        self.description = "Example exploit implementation"
+        self.rank = ExploitRank.EXCELLENT
+        self.platform = Platform.LINUX
+        
+    def check(self):
+        # Implement vulnerability check
+        return True
+        
+    def exploit(self):
+        # Implement exploitation logic
+        print("Exploit executed successfully!")
+
+# Use the exploit
+exploit = MyExploit()
+if exploit.check():
+    exploit.exploit()
+```
+
+### HTTP Client Usage
+
+```python
+from python_framework.helpers.http_client import HTTPClient
+
+client = HTTPClient()
+response = client.get("https://example.com")
+print(f"Status: {response.status_code}")
+```
+
+### Framework Integration
+
+```python
+# Import framework components
+from python_framework.core.exploit import Exploit
+from python_framework.helpers.http_client import HTTPClient
+from python_framework.helpers.ssh_client import SSHClient
+
+# Use in your security tools
+class SecurityTool:
+    def __init__(self):
+        self.http = HTTPClient()
+        self.ssh = SSHClient()
+        
+    def scan_target(self, target):
+        # Implement scanning logic
+        pass
+```
+
+## API Documentation
+
+### Core Classes
+
+- **`Exploit`**: Base class for all exploits
+- **`RemoteExploit`**: Base class for remote exploits
+- **`LocalExploit`**: Base class for local exploits
+- **`HTTPClient`**: Advanced HTTP client
+- **`SSHClient`**: SSH connection handler
+
+### Framework Modules
+
+- **`python_framework.core`**: Core framework components
+- **`python_framework.helpers`**: Utility classes and helpers
+- **`python_framework.net`**: Network-related functionality
+- **`python_framework.plugins`**: Plugin system
+
+For complete API documentation, see [docs/api/](docs/api/) or generate with:
+
+```bash
+make docs
+```
 
 ## What is this?
 
@@ -20,6 +223,83 @@ Oh right, what is this then? It's metasploit, but first it's in a language peopl
 
 Thanks for reading.
 - Alex/_hyp3ri0n/P4X
+
+## Contributing
+
+We welcome contributions from the security community! This project is about bringing together the best security tools and research.
+
+### How to Contribute
+
+1. **Fork the Repository**: Create your own fork of the project
+2. **Create a Feature Branch**: `git checkout -b feature/amazing-exploit`
+3. **Make Your Changes**: Add your exploits, tools, or improvements
+4. **Test Your Changes**: Run `make validate` to ensure everything works
+5. **Submit a Pull Request**: Describe your changes and their impact
+
+### Contribution Guidelines
+
+- **Code Quality**: All code must pass linting and formatting checks
+- **Testing**: Include tests for new functionality
+- **Documentation**: Update documentation for new features
+- **Security**: Follow responsible disclosure for new vulnerabilities
+
+### Types of Contributions
+
+- **New Exploits**: Latest vulnerability research and proof-of-concepts
+- **Security Tools**: Fuzzing, reverse engineering, and analysis tools
+- **Framework Improvements**: Core framework enhancements
+- **Documentation**: Guides, tutorials, and API documentation
+- **Bug Fixes**: Issues and improvements to existing code
+
+For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Documentation
+
+### Available Documentation
+
+- **[API Documentation](docs/api/)**: Complete framework API reference
+- **[User Guide](docs/user-guide/)**: Getting started and usage examples
+- **[Developer Guide](docs/developer-guide/)**: Framework development and extension
+- **[Transpilation Guide](docs/ruby2py/)**: Ruby to Python conversion documentation
+- **[Security Guide](SECURITY.md)**: Security policy and vulnerability reporting
+
+### Building Documentation
+
+```bash
+# Install documentation dependencies
+pip install sphinx sphinx-rtd-theme
+
+# Build HTML documentation
+make docs
+
+# View documentation
+open docs/_build/html/index.html
+```
+
+### Online Documentation
+
+- **Framework Docs**: [https://docs.metasploit.com/](https://docs.metasploit.com/)
+- **Python API**: [API Reference](docs/api/)
+- **GitHub Wiki**: [Project Wiki](https://github.com/P4X-ng/metasploit-framework-pynative/wiki)
+
+## License
+
+This project is licensed under the BSD 3-Clause License - see the [LICENSE.md](LICENSE.md) file for details.
+
+### Third-Party Components
+
+This project includes components from various sources:
+
+- **Original Metasploit Framework**: BSD 3-Clause License
+- **Python Dependencies**: Various open-source licenses (see requirements.txt)
+- **Binary Analysis Tools**: Radare2 (LGPL), Capstone (BSD)
+
+For complete licensing information, see:
+- [LICENSE.md](LICENSE.md) - Main project license
+- [LICENSE](LICENSE) - Original Metasploit license
+- [LICENSE_GEMS](LICENSE_GEMS) - Ruby gem licenses
+
+---
 
 
 

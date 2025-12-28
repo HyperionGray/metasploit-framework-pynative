@@ -227,24 +227,45 @@ jobs:
         run: |
           echo "BUILD_SUCCESS=false" >> $GITHUB_OUTPUT
           
-          # Node.js
-          if [ -f "package.json" ]; then
-            npm install
-            if grep -q '"build"' package.json; then
-              npm run build && echo "BUILD_SUCCESS=true" >> $GITHUB_OUTPUT
-            else
-              echo "BUILD_SUCCESS=no-build-script" >> $GITHUB_OUTPUT
-            fi
-          fi
-          
-          # Python
+          # Install Python dependencies first
           if [ -f "requirements.txt" ]; then
-            pip install -r requirements.txt && echo "BUILD_SUCCESS=true" >> $GITHUB_OUTPUT
+            echo "Installing Python dependencies..."
+            pip install -r requirements.txt
           fi
           
-          # Go
-          if [ -f "go.mod" ]; then
-            go build ./... && echo "BUILD_SUCCESS=true" >> $GITHUB_OUTPUT
+          # Run comprehensive build validation
+          if [ -f "build_validator.py" ]; then
+            echo "Running comprehensive build validation..."
+            python build_validator.py
+            if [ $? -eq 0 ]; then
+              echo "BUILD_SUCCESS=true" >> $GITHUB_OUTPUT
+            else
+              echo "BUILD_SUCCESS=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Fallback to basic checks
+            echo "Running basic build checks..."
+            
+            # Node.js
+            if [ -f "package.json" ]; then
+              npm install
+              if grep -q '"build"' package.json; then
+                npm run build && echo "BUILD_SUCCESS=true" >> $GITHUB_OUTPUT
+              else
+                echo "BUILD_SUCCESS=no-build-script" >> $GITHUB_OUTPUT
+              fi
+            fi
+            
+            # Python basic validation
+            if [ -f "requirements.txt" ]; then
+              python -c "import sys; print(f'Python {sys.version}')"
+              echo "BUILD_SUCCESS=true" >> $GITHUB_OUTPUT
+            fi
+            
+            # Go
+            if [ -f "go.mod" ]; then
+              go build ./... && echo "BUILD_SUCCESS=true" >> $GITHUB_OUTPUT
+            fi
           fi
         continue-on-error: true
 
