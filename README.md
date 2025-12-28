@@ -77,8 +77,8 @@ For questions and suggestions, you can:
 ## Features
 
 ### Core Capabilities
-- **🐍 Python-Native Architecture**: Complete transpilation of 7,456+ Ruby modules to Python for better performance and accessibility
-- **🎯 Comprehensive Exploit Database**: Extensive collection of exploit modules covering network services, web applications, and system vulnerabilities
+- **🐍 Python-Native Architecture**: Complete transpilation of thousands of Ruby modules to Python for better performance and accessibility
+- **🎯 Comprehensive Exploit Database**: Extensive collection of 4,900+ exploit modules covering network services, web applications, and system vulnerabilities
 - **💉 Payload Generation**: Advanced payload creation and encoding with msfvenom
 - **🔍 Vulnerability Scanning**: Integrated auxiliary modules for reconnaissance and vulnerability assessment
 - **🌐 Multi-Protocol Support**: HTTP, HTTPS, SSH, FTP, SMB, RDP, and many other network protocols
