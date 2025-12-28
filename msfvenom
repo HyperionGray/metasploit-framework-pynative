@@ -246,5 +246,279 @@ class MsfVenom:
         
         output = "\n    Framework Executable Formats [--format <value>]\n"
         output += "    " + "=" * 50 + "\n\n"
+        
+        for fmt in sorted(executable_formats):
+            output += f"    {fmt}\n"
+        
+        output += "\n    Framework Transform Formats [--format <value>]\n"
+        output += "    " + "=" * 50 + "\n\n"
+        
+        for fmt in sorted(transform_formats):
+            output += f"    {fmt}\n"
+        output += "\n"
+        return output
+        
+    def dump_payloads(self):
+        """List available payloads"""
+        # Sample payloads for demonstration
+        payloads = [
+            'android/meterpreter/reverse_http',
+            'android/meterpreter/reverse_https',
+            'android/meterpreter/reverse_tcp',
+            'cmd/unix/bind_netcat',
+            'cmd/unix/bind_perl',
+            'cmd/unix/reverse_bash',
+            'cmd/unix/reverse_netcat',
+            'cmd/unix/reverse_perl',
+            'cmd/windows/adduser',
+            'cmd/windows/bind_perl',
+            'cmd/windows/download_exec',
+            'cmd/windows/powershell_bind_tcp',
+            'cmd/windows/powershell_reverse_tcp',
+            'generic/custom',
+            'generic/shell_bind_tcp',
+            'generic/shell_reverse_tcp',
+            'linux/x64/exec',
+            'linux/x64/meterpreter/bind_tcp',
+            'linux/x64/meterpreter/reverse_tcp',
+            'linux/x64/shell/bind_tcp',
+            'linux/x64/shell/reverse_tcp',
+            'linux/x86/exec',
+            'linux/x86/meterpreter/bind_tcp',
+            'linux/x86/meterpreter/reverse_tcp',
+            'linux/x86/shell/bind_tcp',
+            'linux/x86/shell/reverse_tcp',
+            'osx/x64/exec',
+            'osx/x64/meterpreter/bind_tcp',
+            'osx/x64/meterpreter/reverse_tcp',
+            'osx/x64/shell_bind_tcp',
+            'osx/x64/shell_reverse_tcp',
+            'windows/x64/exec',
+            'windows/x64/meterpreter/bind_tcp',
+            'windows/x64/meterpreter/reverse_http',
+            'windows/x64/meterpreter/reverse_https',
+            'windows/x64/meterpreter/reverse_tcp',
+            'windows/x64/shell/bind_tcp',
+            'windows/x64/shell/reverse_tcp',
+            'windows/meterpreter/bind_tcp',
+            'windows/meterpreter/reverse_http',
+            'windows/meterpreter/reverse_https',
+            'windows/meterpreter/reverse_tcp',
+            'windows/shell/bind_tcp',
+            'windows/shell/reverse_tcp'
+        ]
+        
+        output = "\n    Framework Payloads (--payload <value>)\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for payload in sorted(payloads):
+            output += f"    {payload}\n"
+        output += "\n"
+        return output
+        
+    def dump_encoders(self):
+        """List available encoders"""
+        encoders = [
+            'cmd/echo',
+            'cmd/ifs',
+            'cmd/perl',
+            'cmd/powershell_base64',
+            'cmd/printf_php_mq',
+            'generic/eicar',
+            'generic/none',
+            'mipsbe/byte_xori',
+            'mipsbe/longxor',
+            'mipsle/byte_xori',
+            'mipsle/longxor',
+            'php/base64',
+            'ppc/longxor',
+            'ppc/longxor_tag',
+            'sparc/longxor_tag',
+            'x64/xor',
+            'x64/xor_dynamic',
+            'x86/add_sub',
+            'x86/alpha_mixed',
+            'x86/alpha_upper',
+            'x86/avoid_underscore_tolower',
+            'x86/avoid_utf8_tolower',
+            'x86/bloxor',
+            'x86/bmp_polyglot',
+            'x86/call4_dword_xor',
+            'x86/context_cpuid',
+            'x86/context_stat',
+            'x86/context_time',
+            'x86/countdown',
+            'x86/fnstenv_mov',
+            'x86/jmp_call_additive',
+            'x86/nonalpha',
+            'x86/nonupper',
+            'x86/opt_sub',
+            'x86/service',
+            'x86/shikata_ga_nai',
+            'x86/single_static_bit',
+            'x86/unicode_mixed',
+            'x86/unicode_upper'
+        ]
+        
+        output = "\n    Framework Encoders (--encoder <value>)\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for encoder in sorted(encoders):
+            output += f"    {encoder}\n"
+        output += "\n"
+        return output
+        
+    def dump_nops(self):
+        """List available NOPs"""
+        nops = [
+            'aarch64/simple',
+            'armle/simple',
+            'mipsbe/better',
+            'php/generic',
+            'ppc/simple',
+            'sparc/random',
+            'tty/generic',
+            'x64/simple',
+            'x86/opty2',
+            'x86/single_byte'
+        ]
+        
+        output = "\n    Framework NOPs (--nopsled <length>)\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for nop in sorted(nops):
+            output += f"    {nop}\n"
+        output += "\n"
+        return output
+        
+    def dump_all(self):
+        """List all available modules"""
+        output = self.dump_payloads()
+        output += self.dump_encoders()
+        output += self.dump_nops()
+        output += self.dump_platforms()
+        output += self.dump_archs()
+        output += self.dump_formats()
+        output += self.dump_encrypt()
+        return output
+        
+    def list_modules(self, module_types):
+        """List modules based on type"""
+        if not module_types:
+            return self.dump_all()
+            
+        output = ""
+        for module_type in module_types:
+            if module_type.lower() in ['payloads', 'payload']:
+                output += self.dump_payloads()
+            elif module_type.lower() in ['encoders', 'encoder']:
+                output += self.dump_encoders()
+            elif module_type.lower() in ['nops', 'nop']:
+                output += self.dump_nops()
+            elif module_type.lower() in ['platforms', 'platform']:
+                output += self.dump_platforms()
+            elif module_type.lower() in ['archs', 'arch']:
+                output += self.dump_archs()
+            elif module_type.lower() in ['formats', 'format']:
+                output += self.dump_formats()
+            elif module_type.lower() in ['encrypt', 'encryption']:
+                output += self.dump_encrypt()
+            elif module_type.lower() == 'all':
+                output += self.dump_all()
+            else:
+                output += f"\nUnknown module type: {module_type}\n"
+                output += "Valid types: payloads, encoders, nops, platforms, archs, formats, encrypt, all\n"
+        
+        return output
+        
+    def generate_payload(self, opts):
+        """Generate payload (placeholder implementation)"""
+        if not opts.payload or opts.payload == 'stdin':
+            return b"# Placeholder payload - framework not fully implemented\n"
+            
+        # Basic payload generation simulation
+        payload_data = f"# Generated payload: {opts.payload}\n"
+        
+        if opts.datastore:
+            payload_data += "# Configuration:\n"
+            for key, value in opts.datastore.items():
+                payload_data += f"# {key} = {value}\n"
+                
+        if opts.format:
+            payload_data += f"# Format: {opts.format}\n"
+            
+        if opts.encoder:
+            payload_data += f"# Encoder: {opts.encoder}\n"
+            
+        payload_data += "# This is a placeholder - full implementation pending\n"
+        payload_data += "print('Hello from MSF PyNative payload!')\n"
+        
+        return payload_data.encode('utf-8')
+        
+    def run(self, args=None):
+        """Main execution method"""
+        if args is None:
+            args = sys.argv[1:]
+            
+        try:
+            opts = self.parse_args(args)
+            
+            # Handle list operations
+            if opts.list is not None:
+                output = self.list_modules(opts.list)
+                print(output)
+                return 0
+                
+            # Handle list-options
+            if opts.list_options:
+                if not opts.payload:
+                    print("Error: --list-options requires --payload to be specified")
+                    return 1
+                print(f"\nOptions for payload {opts.payload}:")
+                print("=" * 50)
+                print("Standard options:")
+                print("  LHOST  <string>  The listen address")
+                print("  LPORT  <int>     The listen port")
+                print("\nAdvanced options:")
+                print("  PrependMigrate  <bool>  Spawns and runs shellcode in new process")
+                print("  VERBOSE         <bool>  Enable detailed status messages")
+                print("\nEvasion options:")
+                print("  RC4PASSWORD     <string>  Password to derive RC4 key from")
+                print("  ITERATIONS      <int>     Number of iterations for encoding")
+                print()
+                return 0
+                
+            # Generate payload
+            payload = self.generate_payload(opts)
+            
+            # Output payload
+            if opts.out:
+                with open(opts.out, 'wb') as f:
+                    f.write(payload)
+                print(f"Payload written to {opts.out}")
+            else:
+                if isinstance(payload, bytes):
+                    sys.stdout.buffer.write(payload)
+                else:
+                    print(payload)
+                    
+            return 0
+            
+        except (HelpError, UsageError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+        except KeyboardInterrupt:
+            print("\nAborted by user", file=sys.stderr)
+            return 1
+        except Exception as e:
+            print(f"Unexpected error: {e}", file=sys.stderr)
+            return 1
+
+
+def main():
+    """Main entry point"""
+    venom = MsfVenom()
+    return venom.run()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
 
 
