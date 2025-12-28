@@ -1,13 +1,45 @@
+"""
+Login scanner utilities for Metasploit external Python modules.
+
+This module provides functionality for creating login scanners that can
+systematically test username/password combinations against network services.
+"""
+
 import time
 
 from metasploit import module
 
 
 def make_scanner(login_callback):
+    """
+    Create a scanner function that uses the provided login callback.
+    
+    Args:
+        login_callback (callable): Function that attempts login with signature
+                                  (host, port, username, password) -> bool
+                                  
+    Returns:
+        callable: Scanner function that can be used as a module callback
+    """
     return lambda args: run_scanner(args, login_callback)
 
 
 def run_scanner(args, login_callback):
+    """
+    Run a login scanner with the provided arguments and login callback.
+    
+    This function iterates through username/password combinations and calls
+    the login callback for each attempt, reporting results back to the framework.
+    
+    Args:
+        args (dict): Module arguments containing:
+                    - userpass: List of username/password combinations
+                    - rhost: Target host IP address
+                    - rport: Target port number
+                    - sleep_interval: Delay between login attempts
+        login_callback (callable): Function that attempts login with signature
+                                  (host, port, username, password) -> bool
+    """
     userpass = args['userpass'] or []
     rhost = args['rhost']
     rport = int(args['rport'])

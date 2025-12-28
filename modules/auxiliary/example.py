@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Example Metasploit Python Module
+
+This is an example module demonstrating how to create external Python modules
+for the Metasploit Framework. It shows basic HTTP request functionality and
+proper integration with the framework's logging and reporting systems.
+"""
+
 # standard modules
 import logging
 
@@ -37,6 +45,16 @@ metadata = {
 
 
 def run(args):
+    """
+    Main module execution function.
+    
+    This function demonstrates basic HTTP request functionality and shows
+    how to properly handle dependencies, logging, and error handling in
+    a Metasploit Python module.
+    
+    Args:
+        args (dict): Module arguments containing rhost, targeturi, etc.
+    """
     module.LogHandler.setup(msg_prefix='{} - '.format(args['rhost']))
     if dependencies_missing:
         logging.error('Module dependency (requests) is missing, cannot continue')

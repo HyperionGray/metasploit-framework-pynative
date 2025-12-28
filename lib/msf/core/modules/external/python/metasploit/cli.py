@@ -1,3 +1,10 @@
+"""
+Command Line Interface utilities for Metasploit external Python modules.
+
+This module provides CLI functionality for external Python modules when they
+are run in standalone mode outside of the Metasploit framework.
+"""
+
 from __future__ import print_function
 
 import argparse
@@ -7,10 +14,25 @@ import sys
 
 
 def eprint(*args, **kwargs):
+    """
+    Print to stderr.
+    
+    Args:
+        *args: Arguments to print
+        **kwargs: Keyword arguments passed to print()
+    """
     print(*args, file=sys.stderr, **kwargs)
 
 
 def log(message, level='info'):
+    """
+    Log a message to stderr with appropriate formatting.
+    
+    Args:
+        message (str): The message to log
+        level (str, optional): Log level ('info', 'warning', 'error', 'good').
+                              Defaults to 'info'.
+    """
     # logging goes to stderr
     sigil = '*'
     if level == 'warning' or level == 'error':
@@ -21,15 +43,37 @@ def log(message, level='info'):
 
 
 def report(kind, data):
+    """
+    Print a report to stdout.
+    
+    Args:
+        kind (str): Type of report ('host', 'service', 'vuln', etc.)
+        data (dict): Report data
+    """
     # actual results go to stdout
     print("[+] Found {}: {}".format(kind, json.dumps(data, separators=(',', ':'))))
 
 
 def ret(result):
+    """
+    Print a result to stdout.
+    
+    Args:
+        result: The result to print
+    """
     print(result)
 
 
 def parse(meta):
+    """
+    Parse command line arguments based on module metadata.
+    
+    Args:
+        meta (dict): Module metadata containing description, options, and capabilities
+        
+    Returns:
+        dict: Parsed arguments in JSON-RPC format with id, params, and method
+    """
     parser = argparse.ArgumentParser(description=meta['description'])
     actions = ['run'] + meta['capabilities']
     parser.add_argument(
@@ -66,6 +110,15 @@ def parse(meta):
 
 
 def choose_type(t):
+    """
+    Choose the appropriate Python type for a Metasploit option type.
+    
+    Args:
+        t (str): Metasploit option type string
+        
+    Returns:
+        type: Python type function (int, float, str, or comma_list)
+    """
     if t == 'int' or t == 'port':
         return int
     elif t == 'float':
@@ -77,4 +130,13 @@ def choose_type(t):
 
 
 def comma_list(v):
+    """
+    Convert a comma-separated string to a list.
+    
+    Args:
+        v (str): Comma-separated string
+        
+    Returns:
+        list: List of string values
+    """
     return v.split(',')
