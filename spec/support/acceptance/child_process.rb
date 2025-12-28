@@ -151,6 +151,10 @@ module Acceptance
           retry_count += 1
           retry if retry_count == 1
         end
+      rescue EOFError
+        # Process has terminated, return nil to indicate no more data
+        log("[read] EOFError - process terminated")
+        result = nil
       end
 
       result
