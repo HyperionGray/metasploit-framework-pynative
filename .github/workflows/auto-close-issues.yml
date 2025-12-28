@@ -2,6 +2,12 @@ name: "Close stale issues and PRs once a week"
 on:
   schedule:
     - cron: '0 0 * * 0'
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
 jobs:
   close_stale:
     runs-on: ubuntu-latest
