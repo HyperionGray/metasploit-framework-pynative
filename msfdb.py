@@ -5,17 +5,15 @@
 Metasploit Framework Database Manager - Python Native Version
 
 This script manages the Metasploit Framework database using native Python
-implementation.
-
-This is the primary database management interface for the Metasploit Framework.
+implementation with PostgreSQL.
 """
 
 import sys
 import os
 import argparse
 import subprocess
-import json
 import time
+import yaml
 from pathlib import Path
 
 
@@ -25,117 +23,247 @@ class MsfDatabase:
     def __init__(self):
         self.db_name = 'msf'
         self.db_user = 'msf'
+        self.db_password = 'msf'
         self.db_host = '127.0.0.1'
-        self.db_port = 5433
+        self.db_port = 5432
         self.config_dir = Path.home() / '.msf4'
         self.db_config = self.config_dir / 'database.yml'
         
-    def status(self):
-        """Check database status"""
-        print("Checking database status...")
-        
-        if not self.db_config.exists():
-            print("Database configuration not found")
+    def _check_postgres_installed(self):
+        """Check if PostgreSQL is installed"""
+        try:
+            result = subprocess.run(['which', 'psql'], 
+                                   capture_output=True, 
+                                   text=True,
+                                   timeout=5)
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, FileNotFoundError):
             return False
             
-        # TODO: Implement actual database connection check
-        print("Database status check not yet fully implemented in Python version.")
-        print("For full functionality, use: ruby msfdb.rb status")
-        return True
+    def _check_postgres_running(self):
+        """Check if PostgreSQL server is running"""
+        try:
+            result = subprocess.run(['pg_isready', '-h', self.db_host, '-p', str(self.db_port)],
+                                   capture_output=True,
+                                   text=True,
+                                   timeout=5)
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return False
+            
+    def _check_database_exists(self):
+        """Check if MSF database exists"""
+        try:
+            result = subprocess.run(['psql', '-h', self.db_host, '-p', str(self.db_port),
+                                   '-U', self.db_user, '-lqt'],
+                                   capture_output=True,
+                                   text=True,
+                                   env={**os.environ, 'PGPASSWORD': self.db_password},
+                                   timeout=5)
+            return self.db_name in result.stdout
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return False
+            
+    def _create_config(self):
+        """Create database configuration file"""
+        self.config_dir.mkdir(exist_ok=True, parents=True)
+        
+        config = {
+            'development': {
+                'adapter': 'postgresql',
+                'database': self.db_name,
+                'username': self.db_user,
+                'password': self.db_password,
+                'host': self.db_host,
+                'port': self.db_port,
+                'pool': 200,
+            },
+            'production': {
+                'adapter': 'postgresql',
+                'database': self.db_name,
+                'username': self.db_user,
+                'password': self.db_password,
+                'host': self.db_host,
+                'port': self.db_port,
+                'pool': 200,
+            },
+            'test': {
+                'adapter': 'postgresql',
+                'database': 'msftest',
+                'username': 'msftest',
+                'password': 'msftest',
+                'host': self.db_host,
+                'port': self.db_port,
+                'pool': 200,
+            }
+        }
+        
+        with open(self.db_config, 'w') as f:
+            yaml.dump(config, f, default_flow_style=False)
+            
+        print(f"[+] Database configuration written to {self.db_config}")
+        
+    def status(self):
+        """Check database status"""
+        print("[*] Checking database status...")
+        
+        if not self._check_postgres_installed():
+            print("[-] PostgreSQL is not installed")
+            print("[*] Install PostgreSQL first:")
+            print("    Ubuntu/Debian: sudo apt-get install postgresql")
+            print("    CentOS/RHEL:   sudo yum install postgresql-server")
+            print("    macOS:         brew install postgresql")
+            return False
+        
+        print("[+] PostgreSQL is installed")
+        
+        if not self._check_postgres_running():
+            print("[-] PostgreSQL server is not running")
+            print("[*] Start PostgreSQL with: sudo systemctl start postgresql")
+            return False
+            
+        print("[+] PostgreSQL server is running")
+        
+        if not self.db_config.exists():
+            print("[-] Database configuration not found")
+            print("[*] Initialize database with: ./msfdb.py init")
+            return False
+            
+        print("[+] Database configuration exists")
+        
+        if self._check_database_exists():
+            print("[+] MSF database exists and is accessible")
+            print(f"[*] Database: {self.db_name}")
+            print(f"[*] User: {self.db_user}")
+            print(f"[*] Host: {self.db_host}:{self.db_port}")
+            return True
+        else:
+            print("[-] MSF database does not exist or is not accessible")
+            print("[*] Initialize database with: ./msfdb.py init")
+            return False
         
     def init(self):
         """Initialize database"""
-        print("Initializing Metasploit Framework database...")
+        print("[*] Initializing Metasploit Framework database...")
         
-        # Create config directory if it doesn't exist
-        self.config_dir.mkdir(exist_ok=True)
-        
-        # TODO: Implement database initialization
-        print("Database initialization not yet fully implemented in Python version.")
-        print("For full functionality, use: ruby msfdb.rb init")
-        
-        # Create a basic config file
-        config_content = f"""
-development: &pgsql
-  adapter: postgresql
-  database: {self.db_name}
-  username: {self.db_user}
-  password: changeme
-  host: {self.db_host}
-  port: {self.db_port}
-  pool: 200
-
-production: &production
-  <<: *pgsql
-
-test:
-  <<: *pgsql
-  database: msftest
-  username: msftest
-  password: changeme
-"""
-        
-        with open(self.db_config, 'w') as f:
-            f.write(config_content.strip())
+        if not self._check_postgres_installed():
+            print("[-] PostgreSQL is not installed")
+            print("[*] Install PostgreSQL first")
+            return False
             
-        print(f"Basic database configuration written to {self.db_config}")
-        print("Note: This is a minimal implementation.")
+        if not self._check_postgres_running():
+            print("[-] PostgreSQL server is not running")
+            print("[*] Start PostgreSQL service first")
+            return False
+        
+        # Create configuration
+        self._create_config()
+        
+        # Note: Actual database creation would require superuser privileges
+        print("[*] Database configuration created")
+        print("[!] Note: Database user and database creation requires PostgreSQL superuser")
+        print("[*] To complete setup, run as postgres user:")
+        print(f"    sudo -u postgres createuser {self.db_user}")
+        print(f"    sudo -u postgres createdb -O {self.db_user} {self.db_name}")
+        print(f"    sudo -u postgres psql -c \"ALTER USER {self.db_user} WITH PASSWORD '{self.db_password}'\"")
+        
+        return True
         
     def start(self):
         """Start database"""
-        print("Starting database...")
-        print("Database start not yet fully implemented in Python version.")
-        print("For full functionality, use: ruby msfdb.rb start")
+        print("[*] Starting PostgreSQL...")
+        
+        # Try systemd
+        try:
+            result = subprocess.run(['sudo', 'systemctl', 'start', 'postgresql'],
+                                   capture_output=True,
+                                   timeout=10)
+            if result.returncode == 0:
+                print("[+] PostgreSQL started successfully")
+                return True
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+        
+        # Try service command
+        try:
+            result = subprocess.run(['sudo', 'service', 'postgresql', 'start'],
+                                   capture_output=True,
+                                   timeout=10)
+            if result.returncode == 0:
+                print("[+] PostgreSQL started successfully")
+                return True
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+            
+        print("[-] Could not start PostgreSQL automatically")
+        print("[*] Please start PostgreSQL manually for your system")
+        return False
         
     def stop(self):
         """Stop database"""
-        print("Stopping database...")
-        print("Database stop not yet fully implemented in Python version.")
-        print("For full functionality, use: ruby msfdb.rb stop")
+        print("[*] Stopping PostgreSQL...")
+        
+        # Try systemd
+        try:
+            result = subprocess.run(['sudo', 'systemctl', 'stop', 'postgresql'],
+                                   capture_output=True,
+                                   timeout=10)
+            if result.returncode == 0:
+                print("[+] PostgreSQL stopped successfully")
+                return True
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+        
+        print("[-] Could not stop PostgreSQL automatically")
+        print("[*] Please stop PostgreSQL manually for your system")
+        return False
         
     def restart(self):
         """Restart database"""
-        print("Restarting database...")
+        print("[*] Restarting PostgreSQL...")
         self.stop()
         time.sleep(2)
         self.start()
         
     def delete(self):
-        """Delete database"""
-        print("Deleting database...")
-        print("Database deletion not yet fully implemented in Python version.")
-        print("For full functionality, use: ruby msfdb.rb delete")
+        """Delete database configuration and data"""
+        print("[*] Deleting Metasploit database...")
         
         # Remove config file
         if self.db_config.exists():
             self.db_config.unlink()
-            print(f"Removed database configuration: {self.db_config}")
+            print(f"[+] Removed database configuration: {self.db_config}")
+        
+        print("[!] Note: This only removes the configuration file")
+        print("[*] To remove the database itself, run:")
+        print(f"    sudo -u postgres dropdb {self.db_name}")
+        print(f"    sudo -u postgres dropuser {self.db_user}")
 
 
 def main():
     """Main entry point for msfdb."""
     
     parser = argparse.ArgumentParser(
-        description='Metasploit Framework Database Manager - Python Native Version'
+        description='Metasploit Framework Database Manager - Python Native'
     )
-    parser.add_argument('command', choices=['init', 'start', 'stop', 'restart', 'status', 'delete'],
+    parser.add_argument('command', 
+                       choices=['init', 'start', 'stop', 'restart', 'status', 'delete'],
                        help='Database command to execute')
-    parser.add_argument('--component', choices=['database', 'webservice', 'all'], default='database',
-                       help='Component to manage')
-    parser.add_argument('-d', '--debug', action='store_true',
-                       help='Enable debug output')
-    parser.add_argument('--use-defaults', action='store_true',
-                       help='Use default values without prompting')
+    parser.add_argument('--component', 
+                       choices=['database', 'webservice', 'all'], 
+                       default='database',
+                       help='Component to manage (currently only database supported)')
+    parser.add_argument('-q', '--quiet', 
+                       action='store_true',
+                       help='Suppress banner')
     
     args = parser.parse_args()
     
-    # Show informational message
-    if not args.debug:
+    # Show banner
+    if not args.quiet:
         print("\n" + "="*70)
-        print("  Metasploit Framework Database Manager - Python Native Version")
-        print("="*70)
-        print("  This is the primary Python-native database manager.")
-        print("  Legacy Ruby version available as: ruby msfdb.rb")
+        print("  Metasploit Framework Database Manager")
+        print("  Python Native Implementation")
         print("="*70 + "\n")
     
     # Create database manager
@@ -161,6 +289,8 @@ def main():
         sys.exit(1)
     except Exception as e:
         print(f"[!] Error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 
@@ -168,5 +298,5 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\nAborting...")
+        print("\n[*] Aborted")
         sys.exit(1)
