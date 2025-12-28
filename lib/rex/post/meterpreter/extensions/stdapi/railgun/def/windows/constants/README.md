@@ -1,0 +1,1 @@
+# This directory will contain categorized Windows API constants
