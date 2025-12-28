@@ -331,9 +331,9 @@ class MsfVenom:
         # Handle payload generation
         if hasattr(opts, 'payload') and opts.payload:
             print(f"[*] Generating payload: {opts.payload}")
-            print(f"[!] Payload generation not yet fully implemented in Python version")
+            print(f"[!] Payload generation requires full framework integration")
             print(f"[*] Format: {opts.format if hasattr(opts, 'format') and opts.format else 'raw'}")
-            print(f"[*] For full functionality, use: ./msfvenom.rb")
+            print(f"[*] This feature is planned for future implementation")
             return 0
             
         # No valid options provided

@@ -19,8 +19,11 @@ from pathlib import Path
 class MsfConsole(cmd.Cmd):
     """Interactive Metasploit Framework Console"""
     
-    intro = '''
-    =[ metasploit v6.0.0-dev-pynative                  ]
+    # Version can be configured via environment variable or defaults to this
+    VERSION = os.environ.get('MSF_VERSION', '6.4.0-pynative')
+    
+    intro = f'''
+    =[ metasploit v{VERSION}                           ]
 + -- --=[ 2300+ exploits - 1300+ auxiliary - 400+ post       ]
 + -- --=[ 600+ payloads - 46 encoders - 11 nops             ]
 + -- --=[ 9 evasion                                          ]
@@ -35,6 +38,7 @@ class MsfConsole(cmd.Cmd):
         self.modules_dir = self.framework_root / 'modules'
         self.current_module = None
         self.module_options = {}
+        self.search_limit = int(os.environ.get('MSF_SEARCH_LIMIT', '20'))
         
     def do_help(self, arg):
         """List available commands or show help for specific command"""
@@ -81,10 +85,11 @@ class MsfConsole(cmd.Cmd):
                         found.append(str(rel_path))
         
         if found:
-            for i, module in enumerate(found[:20], 1):  # Limit to 20 results
+            for i, module in enumerate(found[:self.search_limit], 1):
                 print(f"  {i:3d}  {module}")
-            if len(found) > 20:
-                print(f"\n... {len(found) - 20} more results not shown")
+            if len(found) > self.search_limit:
+                print(f"\n... {len(found) - self.search_limit} more results not shown")
+                print(f"    Set MSF_SEARCH_LIMIT environment variable to show more")
         else:
             print("No modules found matching your query.")
         print()

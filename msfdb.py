@@ -32,12 +32,9 @@ class MsfDatabase:
     def _check_postgres_installed(self):
         """Check if PostgreSQL is installed"""
         try:
-            result = subprocess.run(['which', 'psql'], 
-                                   capture_output=True, 
-                                   text=True,
-                                   timeout=5)
-            return result.returncode == 0
-        except (subprocess.TimeoutExpired, FileNotFoundError):
+            import shutil
+            return shutil.which('psql') is not None
+        except Exception:
             return False
             
     def _check_postgres_running(self):
@@ -172,50 +169,21 @@ class MsfDatabase:
     def start(self):
         """Start database"""
         print("[*] Starting PostgreSQL...")
-        
-        # Try systemd
-        try:
-            result = subprocess.run(['sudo', 'systemctl', 'start', 'postgresql'],
-                                   capture_output=True,
-                                   timeout=10)
-            if result.returncode == 0:
-                print("[+] PostgreSQL started successfully")
-                return True
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            pass
-        
-        # Try service command
-        try:
-            result = subprocess.run(['sudo', 'service', 'postgresql', 'start'],
-                                   capture_output=True,
-                                   timeout=10)
-            if result.returncode == 0:
-                print("[+] PostgreSQL started successfully")
-                return True
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            pass
-            
-        print("[-] Could not start PostgreSQL automatically")
-        print("[*] Please start PostgreSQL manually for your system")
+        print("[!] Note: Starting PostgreSQL requires appropriate system permissions")
+        print("[*] Please start PostgreSQL manually using one of these commands:")
+        print("    sudo systemctl start postgresql   # For systemd-based systems")
+        print("    sudo service postgresql start     # For SysV-based systems")
+        print("    brew services start postgresql    # For macOS with Homebrew")
         return False
         
     def stop(self):
         """Stop database"""
         print("[*] Stopping PostgreSQL...")
-        
-        # Try systemd
-        try:
-            result = subprocess.run(['sudo', 'systemctl', 'stop', 'postgresql'],
-                                   capture_output=True,
-                                   timeout=10)
-            if result.returncode == 0:
-                print("[+] PostgreSQL stopped successfully")
-                return True
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            pass
-        
-        print("[-] Could not stop PostgreSQL automatically")
-        print("[*] Please stop PostgreSQL manually for your system")
+        print("[!] Note: Stopping PostgreSQL requires appropriate system permissions")
+        print("[*] Please stop PostgreSQL manually using one of these commands:")
+        print("    sudo systemctl stop postgresql   # For systemd-based systems")
+        print("    sudo service postgresql stop     # For SysV-based systems")
+        print("    brew services stop postgresql    # For macOS with Homebrew")
         return False
         
     def restart(self):
