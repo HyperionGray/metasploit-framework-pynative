@@ -195,9 +195,12 @@ class MsfDatabase:
     def restart(self):
         """Restart database"""
         print("[*] Restarting PostgreSQL...")
-        self.stop()
-        time.sleep(2)
-        self.start()
+        print("[!] Note: Restarting PostgreSQL requires appropriate system permissions")
+        print("[*] Please restart PostgreSQL manually using one of these commands:")
+        print("    sudo systemctl restart postgresql   # For systemd-based systems")
+        print("    sudo service postgresql restart     # For SysV-based systems")
+        print("    brew services restart postgresql    # For macOS with Homebrew")
+        return False
         
     def delete(self):
         """Delete database configuration and data"""
