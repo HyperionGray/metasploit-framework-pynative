@@ -175,7 +175,7 @@ The Amazon Q review workflow (`.github/workflows/auto-amazonq-review.yml`) is:
 - [Amazon Q Review Response](../AMAZON_Q_REVIEW_RESPONSE.md) - Detailed findings
 - [Action Items Tracker](.github/AMAZON_Q_ACTION_ITEMS.md) - Progress tracking
 - [Code Quality Guidelines](../CODE_QUALITY.md) - Quality standards
-- [Security Policy](../.github/SECURITY.md) - Security procedures
+- [Security Policy](../SECURITY.md) - Security procedures
 - [Contributing Guidelines](../CONTRIBUTING.md) - Development guidelines
 
 ## Conclusion

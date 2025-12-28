@@ -57,8 +57,7 @@ Keeping the following in mind gives your contribution the best chance of landing
 #### <u>New Modules</u>
 * **Do** check the issue tracker to see if there is a `suggestion-module` issue for the module you want to write, and assign yourself to it if there is.
 * **Do** license your code as BSD 3-clause, BSD 2-clause, or MIT.
-* **Do** stick to the [Ruby style guide] and use [Rubocop] to find common style issues.
-* **Do** follow [PEP 8] for Python code and use [flake8] for linting.
+* **Do** stick to the [Ruby style guide] and use [Rubocop] to find common style issues (for Ruby modules).
 * **Do** set up `msftidy` to fix any errors or warnings that come up as a [pre-commit hook].
 * **Do** use the many module mixin [API]s.
 * **Do** include instructions on how to setup the vulnerable environment or software.

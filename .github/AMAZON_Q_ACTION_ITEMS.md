@@ -244,7 +244,7 @@ The following items are blocked pending AWS credential configuration:
 ### Documentation
 - [Amazon Q Review Response](../AMAZON_Q_REVIEW_RESPONSE.md)
 - [Code Quality Guidelines](../CODE_QUALITY.md)
-- [Security Policy](../.github/SECURITY.md)
+- [Security Policy](../SECURITY.md)
 - [Contributing Guidelines](../CONTRIBUTING.md)
 
 ### External Resources

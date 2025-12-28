@@ -170,17 +170,28 @@ def execute_module(module_name: str, params: dict):
 def run_command(cmd: str):
     os.system(cmd)
 
-# ✅ GOOD: Validated input
-def run_command(cmd: str):
+# ✅ GOOD: Validated input with safe execution
+def run_command(cmd: str, args: list[str] = None):
     """Run a validated command safely."""
-    allowed_commands = ['ls', 'pwd', 'whoami']
+    allowed_commands = {
+        'ls': ['-l', '-a', '-h'],
+        'pwd': [],
+        'whoami': []
+    }
     
-    cmd_name = cmd.split()[0]
-    if cmd_name not in allowed_commands:
-        raise ValueError(f"Command not allowed: {cmd_name}")
+    if cmd not in allowed_commands:
+        raise ValueError(f"Command not allowed: {cmd}")
     
-    # Use subprocess with list for safety
-    subprocess.run(cmd.split(), check=True, capture_output=True)
+    # Validate arguments if provided
+    if args:
+        allowed_args = allowed_commands[cmd]
+        for arg in args:
+            if arg not in allowed_args and not arg.startswith('/safe/path/'):
+                raise ValueError(f"Argument not allowed: {arg}")
+    
+    # Use subprocess with list for safety (no shell injection)
+    cmd_list = [cmd] + (args or [])
+    subprocess.run(cmd_list, check=True, capture_output=True)
 ```
 
 ### Type Hints
