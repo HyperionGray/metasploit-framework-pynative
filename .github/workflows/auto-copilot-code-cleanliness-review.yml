@@ -55,9 +55,15 @@ jobs:
             sort -rn > /tmp/all_large_files.txt
 
           # Filter out excluded files (use grep -F for literal string matching)
-          if [ -s /tmp/exclusions.txt ]; then
-            grep -v -F -f /tmp/exclusions.txt /tmp/all_large_files.txt > /tmp/filtered_files.txt || true
-            mv /tmp/filtered_files.txt /tmp/all_large_files.txt
+          if [ -s /tmp/exclusions.txt ] && [ -s /tmp/all_large_files.txt ]; then
+            # grep -v returns non-zero if all lines match (i.e., all files excluded)
+            # Use explicit handling instead of || true
+            if grep -v -F -f /tmp/exclusions.txt /tmp/all_large_files.txt > /tmp/filtered_files.txt; then
+              mv /tmp/filtered_files.txt /tmp/all_large_files.txt
+            else
+              # All files were excluded
+              : > /tmp/all_large_files.txt
+            fi
           fi
 
           # Output results
