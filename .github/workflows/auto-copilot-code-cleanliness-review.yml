@@ -36,8 +36,9 @@ jobs:
           # Parse the exclusions file and create a list of paths to exclude
           if [ -f .github/code-cleanliness-exclusions.yml ]; then
             echo "Loading exclusions from .github/code-cleanliness-exclusions.yml" >&2
-            # Extract file paths (lines starting with "  - ./") and strip comments
-            grep "^  - \./" .github/code-cleanliness-exclusions.yml | sed 's/^  - //' | sed 's/ *#.*//' > /tmp/exclusions.txt
+            # Extract file paths (lines with "- ./") and strip comments
+            # Use flexible pattern to handle varying indentation
+            grep "^[[:space:]]*- \./" .github/code-cleanliness-exclusions.yml | sed 's/^[[:space:]]*- //' | sed 's/ *#.*//' > /tmp/exclusions.txt
           else
             touch /tmp/exclusions.txt
           fi
