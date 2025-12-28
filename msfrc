@@ -126,10 +126,14 @@ msf_exploit() {
 import sys
 import os
 
+# Get MSF_ROOT from environment to avoid shell escape sequences
 msf_root = os.environ.get('MSF_ROOT', '')
-if msf_root:
-    sys.path.insert(0, os.path.join(msf_root, 'lib'))
-    sys.path.insert(0, msf_root)
+if not msf_root:
+    print('Error: MSF_ROOT environment variable not set')
+    sys.exit(1)
+
+sys.path.insert(0, os.path.join(msf_root, 'lib'))
+sys.path.insert(0, msf_root)
 
 try:
     from msf.core.exploit import Exploit
