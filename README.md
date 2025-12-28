@@ -74,6 +74,49 @@ For questions and suggestions, you can:
 
 **Note:** Some community members may still use IRC channels and the metasploit-hackers mailing list, though the primary support channels are now GitHub Discussions and Slack.
 
+## Features
+
+This Python-native Metasploit Framework fork provides:
+
+### 🐍 **Complete Python Transpilation**
+- **7,456+ Python modules** converted from Ruby
+- **Native Python execution** - no Ruby dependencies required
+- **Bidirectional transpiler** - Python ↔ Ruby conversion tools
+- **Modern Python tooling** - pytest, black, flake8, isort
+
+### 🔧 **Advanced Binary Analysis & Reverse Engineering**
+- **Radare2 integration** with GDB-like command interface
+- **LLDB dynamic debugging** for runtime analysis
+- **Binary instrumentation** with AFL-style coverage tracking
+- **In-memory fuzzing** capabilities with stack manipulation
+- **Ghidra integration** for advanced static analysis
+
+### 🎯 **Modern Exploitation Tools**
+- **Pwntools integration** - industry-standard exploitation library
+- **PF Framework support** - write exploits in any language
+- **Multi-language transpiler** - supports 15+ programming languages
+- **Advanced shell catchers** - pwncat-cs with auto privilege escalation
+- **Professional C2 frameworks** - Sliver and Havoc integration
+
+### 🚀 **Enhanced User Experience**
+- **Fast startup time** - optimized Python implementation
+- **Shell-native activation** - virtualenv-like `source msfrc` workflow
+- **Direct module execution** - run Python exploits without msfconsole
+- **Environment variable configuration** - simpler than MSF's 'set' commands
+- **Modern development tools** - comprehensive testing and linting
+
+### 🔒 **Security & Compliance**
+- **Comprehensive security policy** with responsible disclosure
+- **BSD 3-Clause license** maintained from original framework
+- **Community-driven development** focused on hacker community
+- **Legacy compatibility** - pre-2020 modules preserved in Ruby
+
+### 📚 **Extensive Documentation**
+- **Complete API documentation** for module development
+- **Comprehensive guides** for exploitation and binary analysis
+- **Developer resources** with quick start guides
+- **Integration documentation** for C2 frameworks and tools
+
 ## Python-Native Framework (Round 4) - TRANSPILATION COMPLETE! 🎉
 
 🐍 **ALL RUBY FILES HAVE BEEN TRANSPILED TO PYTHON!** 🐍
