@@ -210,9 +210,9 @@ The repository now has comprehensive documentation addressing all concerns raise
 ## Next Steps for Contributors
 
 Contributors should now:
-1. Read [docs/SECURITY_BEST_PRACTICES.md](docs/SECURITY_BEST_PRACTICES.md) before writing code
-2. Follow [docs/CODE_QUALITY_GUIDE.md](docs/CODE_QUALITY_GUIDE.md) for coding standards
-3. Use [docs/TEST_COVERAGE_GUIDE.md](docs/TEST_COVERAGE_GUIDE.md) for testing
+1. Read [docs/SECURITY_BEST_PRACTICES.md](SECURITY_BEST_PRACTICES.md) before writing code
+2. Follow [docs/CODE_QUALITY_GUIDE.md](CODE_QUALITY_GUIDE.md) for coding standards
+3. Use [docs/TEST_COVERAGE_GUIDE.md](TEST_COVERAGE_GUIDE.md) for testing
 4. Refer to [CONTRIBUTING.md](../CONTRIBUTING.md) for the contribution process
 
 ---
