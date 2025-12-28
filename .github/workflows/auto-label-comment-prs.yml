@@ -5,6 +5,9 @@ on:
 jobs:
   pr_label_comment:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions/github-script@main
         with:
