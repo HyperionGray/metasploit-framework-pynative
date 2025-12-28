@@ -530,7 +530,7 @@ module Acceptance
         'PATH' => "#{framework_root.shellescape}:#{ENV['PATH']}"
       }
       @cmd = [
-        'bundle', 'exec', 'ruby', 'msfconsole',
+        'bundle', 'exec', 'ruby', 'msfconsole.rb',
         '--no-readline',
         # '--logger', 'Stdout',
         '--quiet'
