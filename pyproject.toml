@@ -45,7 +45,7 @@ markers = [
     "functional: Functional tests for end-to-end workflows",
     "security: Security-focused tests for cryptographic and exploit functions",
     "performance: Performance and benchmark tests",
-    "network: Tests that require network access",
+    "network: Tests for network-dependent operations",
     "slow: Tests that take a long time to run",
     "exploit: Tests for exploit modules",
     "auxiliary: Tests for auxiliary modules",
@@ -56,7 +56,7 @@ markers = [
     "rex: Tests for Rex library components",
     "msf: Tests for MSF core components",
     "ruby_compat: Tests for Ruby compatibility",
-    "external_deps: Tests requiring external tools",
+    "external_deps: Tests for functionality requiring external tools",
     "binary_analysis: Tests for binary analysis tools (Radare2, LLDB)",
     "framework: Tests for core framework functionality"
 ]
