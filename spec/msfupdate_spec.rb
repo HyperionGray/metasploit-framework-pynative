@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-load Metasploit::Framework.root.join('msfupdate').to_path
+load Metasploit::Framework.root.join('msfupdate.rb').to_path
 
 RSpec.describe Msfupdate do
 
