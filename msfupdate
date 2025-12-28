@@ -1,43 +1,141 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/env ruby
+# -*- coding: binary -*-
+#
+# $Id$
+#
+# This keeps the framework up-to-date
+#
+# $Revision$
+#
 
-"""
-Metasploit Framework Msfupdate - Python Version
+# Show informational message about Python alternatives (unless quiet mode)
+unless ENV['MSF_QUIET'] || ARGV.include?('-q')
+  $stderr.puts "\n" + "="*70
+  $stderr.puts "  MsfUpdate - Framework Updater (Ruby Version)"
+  $stderr.puts "="*70
+  $stderr.puts "  NOTE: This is the Ruby version for compatibility."
+  $stderr.puts "  For the primary Python-native experience, use:"
+  $stderr.puts "    python3 msfupdate.py"
+  $stderr.puts "="*70 + "\n"
+end
 
-Wrapper script for msfupdate.
+msfbase = __FILE__
+while File.symlink?(msfbase)
+  msfbase = File.expand_path(File.readlink(msfbase), File.dirname(msfbase))
+end
 
-Converted from Ruby msfupdate script.
-"""
+class Msfupdate
+  attr_reader :stdin
+  attr_reader :stdout
+  attr_reader :stderr
 
-import sys
-import os
-from pathlib import Path
+  def initialize(msfbase_dir, stdin = $stdin, stdout = $stdout, stderr = $stderr)
+    @msfbase_dir = msfbase_dir
+    @stdin = stdin
+    @stdout = stdout
+    @stderr = stderr
+    @git_branch = nil
+    @git_remote = nil
+    @offline_file = nil
+    @actually_wait = nil
+  end
 
+  def parse_args(args)
+    args = args.dup
+    while args.length > 0
+      arg = args.shift
+      case arg
+      when '--help', '-h'
+        usage
+        exit(0)
+      when '--git-branch'
+        @git_branch = args.shift
+      when /--git-branch=(.*)/
+        @git_branch = $1
+      when '--git-remote'
+        @git_remote = args.shift
+      when /--git-remote=(.*)/
+        @git_remote = $1
+      when '--offline-file'
+        @offline_file = File.expand_path(args.shift)
+      when /--offline-file=(.*)/
+        @offline_file = File.expand_path($1)
+      when 'wait'
+        @actually_wait = true
+      when 'nowait'
+        @actually_wait = false
+      end
+    end
+  end
 
-def main():
-    """Main entry point for msfupdate."""
-    
-    # Get the repo root
-    repo_root = Path(__file__).parent.resolve()
-    
-    # Delegate to the Ruby version (now msfupdate.rb)
-    ruby_script = repo_root / "msfupdate.rb"
-    if ruby_script.exists():
-        try:
-            # Execute the Ruby version with all arguments
-            os.execv(str(ruby_script), ['msfupdate'] + sys.argv[1:])
-        except Exception as e:
-            print(f"Error executing Ruby msfupdate: {e}", file=sys.stderr)
-            sys.exit(1)
-    else:
-        print("Error: Ruby msfupdate not found", file=sys.stderr)
-        print("Native Python version implementation pending Ruby removal", file=sys.stderr)
-        sys.exit(1)
+  def validate_args
+    if apt?
+      return false if @git_branch || @git_remote || @offline_file
+    elsif binary_install?
+      return false if @git_branch || @git_remote
+    elsif git?
+      return false if @offline_file
+    end
+    true
+  end
 
+  def run!
+    return maybe_wait_and_exit(1) unless validate_args
 
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nAborting...")
-        sys.exit(1)
+    if binary_install?
+      update_binary_install!
+    elsif git?
+      update_git!
+    end
+  end
+
+  def apt?
+    File.exist?(File.join(@msfbase_dir, '.apt'))
+  end
+
+  def binary_install?
+    File.exist?(File.join(@msfbase_dir, '..', 'engine', 'update.rb'))
+  end
+
+  def git?
+    File.exist?(File.join(@msfbase_dir, '.git'))
+  end
+
+  def usage
+    @stdout.puts "Usage: #{$0} [options]"
+    @stdout.puts ""
+    @stdout.puts "Options:"
+    @stdout.puts "  --help, -h          Show this help message"
+    @stdout.puts "  --git-branch BRANCH Specify git branch to update to"
+    @stdout.puts "  --git-remote REMOTE Specify git remote to update from"
+    @stdout.puts "  --offline-file FILE Use offline update file"
+    @stdout.puts "  wait                Wait for user input before exiting"
+    @stdout.puts "  nowait              Don't wait for user input before exiting"
+  end
+
+  def update_binary_install!
+    # Stub implementation for binary install update
+    @stdout.puts "Binary install update not implemented"
+  end
+
+  def update_git!
+    # Stub implementation for git update
+    @stdout.puts "Git update not implemented"
+  end
+
+  def maybe_wait_and_exit(code = 0)
+    if @actually_wait
+      @stdout.puts "Press any key to continue..."
+      @stdin.gets
+    end
+    exit(code)
+  end
+end
+
+# If this file is executed directly, run the updater
+if __FILE__ == $0
+  msfbase = File.expand_path(File.dirname(__FILE__))
+  updater = Msfupdate.new(msfbase)
+  updater.parse_args(ARGV)
+  updater.run!
+end
