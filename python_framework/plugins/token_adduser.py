@@ -11,7 +11,7 @@ using all connected meterpreter sessions.
 Original Ruby version credit to jduck and jseely[at]relaysecurity.com
 Python conversion for Metasploit Framework Python migration.
 
-TODO: This should probably find new life as a post module.
+Note: Future enhancement - could be reimplemented as a post module.
 """
 
 import argparse

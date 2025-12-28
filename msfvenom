@@ -2,249 +2,44 @@
 # -*- coding: utf-8 -*-
 
 """
-MsfVenom - Python implementation of Metasploit's standalone payload generator.
-A replacement for msfpayload and msfencode.
+Metasploit Framework Msfvenom - Python Version
+
+Wrapper script for msfvenom.
+
+Converted from Ruby msfvenom script.
 """
 
-import argparse
 import sys
 import os
-import signal
-import time
-import struct
-import base64
-import binascii
 from pathlib import Path
 
-class MsfVenomError(Exception):
-    """Base exception for MsfVenom errors"""
-    pass
 
-class HelpError(MsfVenomError):
-    """Exception for help display"""
-    pass
-
-class UsageError(MsfVenomError):
-    """Exception for usage errors"""
-    pass
-
-class MsfVenom:
-    """Python implementation of MsfVenom payload generator"""
+def main():
+    """Main entry point for msfvenom."""
     
-    def __init__(self):
-        self.framework_loaded = False
-        self.framework = None
-        
-    def require_deps(self):
-        """Load framework dependencies (placeholder)"""
-        # Framework loading will be implemented when full Python MSF framework is available
-        self.framework_loaded = True
-        
-    def init_framework(self, create_opts=None):
-        """Initialize the framework (placeholder)"""
-        if create_opts is None:
-            create_opts = {}
-            
-        if not self.framework_loaded:
-            self.require_deps()
-            
-        # Framework initialization pending full Python MSF framework
-        # create_opts.setdefault('module_types', ['payload', 'encoder', 'nop'])
-        self.framework = "placeholder_framework"
-        
-    def get_framework(self):
-        """Get cached framework object"""
-        if not self.framework:
-            self.init_framework()
-        return self.framework
-        
-    def parse_args(self, args):
-        """Parse command line arguments"""
-        parser = argparse.ArgumentParser(
-            prog='msfvenom.py',
-            description='MsfVenom - a Metasploit standalone payload generator (Python version).\n'
-                       'Also a replacement for msfpayload and msfencode.',
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-            epilog='Example: %(prog)s -p windows/meterpreter/reverse_tcp LHOST=<IP> -f exe -o payload.exe'
-        )
-        
-        parser.add_argument('-l', '--list', nargs='*', 
-                          help='List all modules for [type]. Types are: payloads, encoders, nops, platforms, archs, encrypt, formats, all')
-        
-        parser.add_argument('-p', '--payload', 
-                          help="Payload to use (--list payloads to list, --list-options for arguments). Specify '-' or STDIN for custom")
-        
-        parser.add_argument('--list-options', action='store_true',
-                          help="List --payload <value>'s standard, advanced and evasion options")
-        
-        parser.add_argument('-f', '--format', 
-                          help='Output format (use --list formats to list)')
-        
-        parser.add_argument('-e', '--encoder',
-                          help='The encoder to use (use --list encoders to list)')
-        
-        parser.add_argument('--service-name',
-                          help='The service name to use when generating a service binary')
-        
-        parser.add_argument('--sec-name',
-                          help='The new section name to use when generating large Windows binaries. Default: random 4-character alpha string')
-        
-        parser.add_argument('--smallest', action='store_true',
-                          help='Generate the smallest possible payload using all available encoders')
-        
-        parser.add_argument('--encrypt',
-                          help='The type of encryption or encoding to apply to the shellcode (use --list encrypt to list)')
-        
-        parser.add_argument('--encrypt-key',
-                          help='A key to be used for --encrypt')
-        
-        parser.add_argument('--encrypt-iv',
-                          help='An initialization vector for --encrypt')
-        
-        parser.add_argument('-a', '--arch',
-                          help='The architecture to use for --payload and --encoders (use --list archs to list)')
-        
-        parser.add_argument('--platform',
-                          help='The platform for --payload (use --list platforms to list)')
-        
-        parser.add_argument('-o', '--out',
-                          help='Save the payload to a file')
-        
-        parser.add_argument('-b', '--bad-chars',
-                          help='Characters to avoid example: \'\\x00\\xff\'')
-        
-        parser.add_argument('-n', '--nopsled', type=int,
-                          help='Prepend a nopsled of [length] size on to the payload')
-        
-        parser.add_argument('--pad-nops', action='store_true',
-                          help='Use nopsled size specified by -n <length> as the total payload size, auto-prepending a nopsled of quantity (nops minus payload length)')
-        
-        parser.add_argument('-s', '--space', type=int,
-                          help='The maximum size of the resulting payload')
-        
-        parser.add_argument('--encoder-space', type=int,
-                          help='The maximum size of the encoded payload (defaults to the -s value)')
-        
-        parser.add_argument('-i', '--iterations', type=int,
-                          help='The number of times to encode the payload')
-        
-        parser.add_argument('-c', '--add-code',
-                          help='Specify an additional win32 shellcode file to include')
-        
-        parser.add_argument('-x', '--template',
-                          help='Specify a custom executable file to use as a template')
-        
-        parser.add_argument('-k', '--keep', action='store_true',
-                          help='Preserve the --template behaviour and inject the payload as a new thread')
-        
-        parser.add_argument('-v', '--var-name',
-                          help='Specify a custom variable name to use for certain output formats')
-        
-        parser.add_argument('-t', '--timeout', type=int, default=30,
-                          help='The number of seconds to wait when reading the payload from STDIN (default 30, 0 to disable)')
-        
-        parser.add_argument('datastore', nargs='*',
-                          help='Datastore options in KEY=VALUE format')
-        
+    # Get the repo root
+    repo_root = Path(__file__).parent.resolve()
+    
+    # Delegate to the Ruby version (now msfvenom.rb)
+    ruby_script = repo_root / "msfvenom.rb"
+    if ruby_script.exists():
         try:
-            opts = parser.parse_args(args)
-        except SystemExit:
-            raise UsageError("Invalid arguments")
-            
-        # Process datastore options
-        datastore = {}
-        if opts.datastore:
-            for item in opts.datastore:
-                if '=' in item:
-                    key, value = item.split('=', 1)
-                    datastore[key.upper()] = value
-                    
-        # Handle STDIN payload
-        if opts.payload == '-':
-            opts.payload = 'stdin'
-            
-        if not opts.payload and not opts.list:
-            opts.payload = 'stdin'
-            
-        if opts.payload == 'stdin' and not opts.list:
-            print("Attempting to read payload from STDIN...", file=sys.stderr)
-            try:
-                if opts.timeout > 0:
-                    signal.alarm(opts.timeout)
-                opts.stdin = sys.stdin.buffer.read()
-                signal.alarm(0)
-            except:
-                opts.stdin = b''
-                
-        # Set default LHOST for reverse payloads
-        if (opts.payload and 'reverse' in opts.payload.lower() and 
-            'LHOST' not in datastore):
-            datastore['LHOST'] = '127.0.0.1'  # Default fallback
-            
-        opts.datastore = datastore
-        return opts
-        
-    def dump_platforms(self):
-        """List supported platforms"""
-        platforms = [
-            'aix', 'android', 'apple_ios', 'bsd', 'bsdi', 'cisco', 'firefox',
-            'freebsd', 'hardware', 'hpux', 'irix', 'java', 'javascript', 'linux',
-            'mainframe', 'multi', 'netbsd', 'netware', 'nodejs', 'openbsd',
-            'osx', 'php', 'python', 'r', 'ruby', 'solaris', 'unix', 'windows'
-        ]
-        
-        output = "\n    Framework Platforms [--platform <value>]\n"
-        output += "    " + "=" * 50 + "\n\n"
-        for platform in sorted(platforms):
-            output += f"    {platform}\n"
-        output += "\n"
-        return output
-        
-    def dump_archs(self):
-        """List supported architectures"""
-        archs = [
-            'aarch64', 'armbe', 'armle', 'cbea', 'cbea64', 'cmd', 'dalvik',
-            'firefox', 'java', 'mips', 'mips64', 'mips64le', 'mipsbe', 'mipsle',
-            'nodejs', 'php', 'ppc', 'ppc64', 'ppc64le', 'ppce500v2', 'python',
-            'r', 'ruby', 'sparc', 'sparc64', 'tty', 'x64', 'x86', 'x86_64', 'zarch'
-        ]
-        
-        output = "\n    Framework Architectures [--arch <value>]\n"
-        output += "    " + "=" * 50 + "\n\n"
-        for arch in sorted(archs):
-            output += f"    {arch}\n"
-        output += "\n"
-        return output
-        
-    def dump_encrypt(self):
-        """List encryption formats"""
-        encrypts = [
-            'aes256', 'base64', 'blowfish', 'des', 'rc4', 'xor'
-        ]
-        
-        output = "\n    Framework Encryption Formats [--encrypt <value>]\n"
-        output += "    " + "=" * 50 + "\n\n"
-        for encrypt in sorted(encrypts):
-            output += f"    {encrypt}\n"
-        output += "\n"
-        return output
-        
-    def dump_formats(self):
-        """List output formats"""
-        executable_formats = [
-            'asp', 'aspx', 'aspx-exe', 'axis2', 'dll', 'elf', 'elf-so', 'exe',
-            'exe-only', 'exe-service', 'exe-small', 'hta-psh', 'jar', 'jsp',
-            'loop-vbs', 'macho', 'msi', 'msi-nouac', 'osx-app', 'psh', 'psh-cmd',
-            'psh-net', 'psh-reflection', 'vba', 'vba-exe', 'vba-psh', 'vbs', 'war'
-        ]
-        
-        transform_formats = [
-            'bash', 'c', 'csharp', 'dw', 'dword', 'hex', 'java', 'js_be', 'js_le',
-            'num', 'perl', 'pl', 'powershell', 'ps1', 'py', 'python', 'raw', 'rb',
-            'ruby', 'sh', 'vbapplication', 'vbscript'
-        ]
-        
-        output = "\n    Framework Executable Formats [--format <value>]\n"
-        output += "    " + "=" * 50 + "\n\n"
+            # Execute the Ruby version with all arguments
+            os.execv(str(ruby_script), ['msfvenom'] + sys.argv[1:])
+        except Exception as e:
+            print(f"Error executing Ruby msfvenom: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("Error: Ruby msfvenom not found", file=sys.stderr)
+        print("Native Python version implementation pending Ruby removal", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nAborting...")
+        sys.exit(1)
 
 

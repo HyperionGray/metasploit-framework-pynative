@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-Metasploit Framework Console - PyNative Version
+Metasploit Framework Console - Python Version
 
 This user interface provides users with a command console interface to the
-framework. This is the Python-native implementation.
+framework.
 
-Converted from Ruby msfconsole script - Ruby will be deleted soon.
+Converted from Ruby msfconsole script.
 """
 
 import sys
@@ -18,30 +18,22 @@ from pathlib import Path
 def main():
     """Main entry point for msfconsole."""
     
-    # Show PyNative message
-    if not os.environ.get('MSF_QUIET') and '-q' not in sys.argv and '--quiet' not in sys.argv:
-        print("\n" + "="*70)
-        print("  🐍 Metasploit Framework - PyNative Console")
-        print("="*70)
-        print("  This is the Python-native Metasploit Framework!")
-        print("  Ruby has been converted to Python - no more TODOs!")
-        print("")
-        print("  For module usage:")
-        print("    python3 modules/exploits/path/to/exploit.py --help")
-        print("="*70 + "\n")
+    # Get the repo root
+    repo_root = Path(__file__).parent.resolve()
     
-    # PyNative Metasploit Framework - No Ruby delegation needed
-    print("🐍 PyNative Metasploit Framework Console")
-    print("Ruby-to-Python conversion complete!")
-    print("This is now a Python-native implementation.")
-    print("Use --help for available options")
-    
-    # TODO: Implement full Python console functionality
-    # For now, show that we're PyNative and exit gracefully
-    print("\nPyNative conversion successful!")
-    print("Ruby files have been renamed to .rb extension")
-    print("Python files are now the primary executables")
-    print("No more Ruby delegation - this is pure Python!")
+    # Delegate to the Ruby version (now msfconsole.rb)
+    ruby_script = repo_root / "msfconsole.rb"
+    if ruby_script.exists():
+        try:
+            # Execute the Ruby version with all arguments
+            os.execv(str(ruby_script), ['msfconsole'] + sys.argv[1:])
+        except Exception as e:
+            print(f"Error executing Ruby msfconsole: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print("Error: Ruby msfconsole not found", file=sys.stderr)
+        print("Native Python console implementation pending Ruby removal", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
