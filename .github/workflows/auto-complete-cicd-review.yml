@@ -95,17 +95,28 @@ jobs:
           python-version: '3.11'
         continue-on-error: true
 
-      - name: Install Playwright for E2E
-        if: matrix.test-type == 'e2e'
+      - name: Install Test Dependencies
         run: |
-          if [ -f "package.json" ]; then
-            npm install
-            npm install -D @playwright/test playwright
-            npx playwright install --with-deps chromium firefox webkit
+          echo "Installing test dependencies..."
+          pip install -r requirements.txt
+          
+          # Install Playwright for E2E tests
+          if [ "${{ matrix.test-type }}" = "e2e" ]; then
+            pip install playwright pytest-playwright
+            python -m playwright install --with-deps chromium firefox webkit
           fi
-          pip install pytest playwright pytest-playwright
-          python -m playwright install --with-deps chromium firefox webkit
-        continue-on-error: true
+
+      - name: Run Code Quality Checks
+        if: matrix.test-type == 'unit'
+        run: |
+          echo "Running code quality checks..."
+          python tools/code_quality_improver.py --analyze
+          
+          # Run linting
+          flake8 lib/ modules/ tools/ --max-line-length=120 --ignore=E203,W503 || echo "Linting issues found"
+          
+          # Run type checking
+          mypy lib/ --ignore-missing-imports || echo "Type checking issues found"
 
       - name: Run Tests - ${{ matrix.test-type }}
         run: |
@@ -113,22 +124,20 @@ jobs:
           
           case "${{ matrix.test-type }}" in
             unit)
-              if [ -f "package.json" ] && grep -q '"test"' package.json; then
-                npm test -- --testPathPattern="unit" || npm test || echo "Unit tests not configured"
-              fi
-              pytest tests/unit/ 2>/dev/null || echo "Python unit tests not configured"
+              python run_tests.py unit --verbose
               ;;
             integration)
-              pytest tests/integration/ 2>/dev/null || echo "Integration tests not configured"
-              npm test -- --testPathPattern="integration" 2>/dev/null || echo "JS integration tests not configured"
+              python run_tests.py integration --verbose
               ;;
             e2e)
-              # Playwright tests
-              npx playwright test 2>/dev/null || echo "Playwright JS tests not configured"
-              pytest tests/e2e/ 2>/dev/null || pytest --browser chromium 2>/dev/null || echo "Playwright Python tests not configured"
+              # Set up test environment
+              export TEST_BASE_URL="http://localhost:3000"
+              export TEST_HEADLESS="true"
+              
+              # Run Playwright E2E tests
+              python run_tests.py e2e --verbose
               ;;
           esac
-        continue-on-error: true
 
       - name: Upload Test Results
         uses: actions/upload-artifact@main

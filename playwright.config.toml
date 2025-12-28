@@ -1,0 +1,48 @@
+# Playwright-specific pytest configuration
+# This file extends the main pytest configuration for Playwright E2E tests
+
+[tool.pytest.ini_options.playwright]
+# Playwright-specific settings
+base_url = "http://localhost:3000"
+browser = "chromium"
+headed = false
+slow_mo = 0
+video = "retain-on-failure"
+screenshot = "only-on-failure"
+trace = "retain-on-failure"
+
+# Test discovery for Playwright tests
+testpaths = ["test/e2e", "test/playwright"]
+python_files = ["test_e2e_*.py", "test_playwright_*.py", "*_e2e_test.py"]
+
+# Playwright-specific markers
+markers = [
+    "e2e: End-to-end tests using Playwright",
+    "ui: User interface tests",
+    "api: API endpoint tests via browser",
+    "performance: Performance tests using Playwright",
+    "visual: Visual regression tests",
+    "mobile: Mobile browser tests",
+    "cross_browser: Tests that run on multiple browsers"
+]
+
+# Playwright test configuration
+addopts = [
+    "--browser=chromium",
+    "--browser=firefox", 
+    "--browser=webkit",
+    "--headed=false",
+    "--video=retain-on-failure",
+    "--screenshot=only-on-failure",
+    "--tracing=retain-on-failure",
+    "--output=test-results",
+    "--workers=4"
+]
+
+# Environment variables for Playwright tests
+env = [
+    "TEST_BASE_URL=http://localhost:3000",
+    "TEST_TIMEOUT=30000",
+    "TEST_HEADLESS=true",
+    "TEST_SLOW_MO=0"
+]
