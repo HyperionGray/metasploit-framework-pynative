@@ -2,9 +2,9 @@ name: MSF Python Framework Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, master ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, master ]
   schedule:
     # Run tests daily at 2 AM UTC
     - cron: '0 2 * * *'
