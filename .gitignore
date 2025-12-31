@@ -100,5 +100,12 @@ docker-compose.local*
 *.pyc
 rspec.failures
 
+# Python coverage and test artifacts
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.hypothesis/
+
 #Ignore any base disk store files
 db/modules_metadata_base.pstore
