@@ -50,11 +50,12 @@ jobs:
           echo "## Code Cleanliness Analysis" > /tmp/review-results/cleanliness.md
           echo "" >> /tmp/review-results/cleanliness.md
           
-          # Find large files
+          # Find large files (exclude binary files)
           echo "### Large Files (>500 lines):" >> /tmp/review-results/cleanliness.md
           find . -type f \( -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.java" -o -name "*.go" -o -name "*.cs" \) \
             ! -path "*/node_modules/*" ! -path "*/dist/*" ! -path "*/build/*" ! -path "*/.venv/*" \
-            -exec sh -c 'lines=$(wc -l < "$1"); if [ "$lines" -gt 500 ]; then echo "$lines lines: $1"; fi' _ {} \; \
+            ! -path "*/data/exploits/*" \
+            -exec sh -c 'file "$1" | grep -q "text" && lines=$(wc -l < "$1" 2>/dev/null) && [ "$lines" -gt 500 ] && echo "$lines lines: $1"' _ {} \; \
             | sort -rn >> /tmp/review-results/cleanliness.md || echo "No large files found" >> /tmp/review-results/cleanliness.md
           
           echo "✅ Code cleanliness analysis complete"

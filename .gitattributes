@@ -1,0 +1,20 @@
+# Mark MPEG transport stream files as binary (not TypeScript source files)
+*.ts linguist-detectable=false
+data/exploits/**/*.ts binary
+data/exploits/**/*.m3u8 binary
+
+# Mark other known binary and data files
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.jar binary
+*.class binary
+*.pyc binary
+*.pyo binary
+*.sqlite binary
+*.db binary
+
+# Explicitly mark TypeScript source files in specific directories
+# (Add patterns here if you have actual TypeScript code)
+# e.g., src/**/*.ts linguist-language=TypeScript
