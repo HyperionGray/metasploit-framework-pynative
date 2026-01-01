@@ -57,7 +57,7 @@ Keeping the following in mind gives your contribution the best chance of landing
 #### <u>New Modules</u>
 * **Do** check the issue tracker to see if there is a `suggestion-module` issue for the module you want to write, and assign yourself to it if there is.
 * **Do** license your code as BSD 3-clause, BSD 2-clause, or MIT.
-* **Do** stick to the [Ruby style guide] and use [Rubocop] to find common style issues.
+* **Do** stick to the [Ruby style guide] and use [Rubocop] to find common style issues (for Ruby modules).
 * **Do** set up `msftidy` to fix any errors or warnings that come up as a [pre-commit hook].
 * **Do** use the many module mixin [API]s.
 * **Do** include instructions on how to setup the vulnerable environment or software.
@@ -65,6 +65,18 @@ Keeping the following in mind gives your contribution the best chance of landing
 * **Do** ask cve@rapid7.com for a CVE ID if this describes a new vulnerability (remember to mention your PR number!)
 * **Don't** include more than one module per pull request.
 * **Don't** submit new [scripts].  Scripts are shipped as examples for automating local tasks, and anything "serious" can be done with post modules and local exploits.
+
+#### <u>Python-Native Code (New in this Fork)</u>
+* **Do** use Python 3.11+ features and type hints where appropriate.
+* **Do** follow [PEP 8] style guidelines and run [flake8] before submitting.
+* **Do** write [pytest] tests for new Python modules and library code.
+* **Do** use Python idioms and patterns rather than Ruby-isms in new code.
+* **Do** document security-sensitive operations like `eval()` and `exec()` usage with clear comments explaining why they are necessary.
+* **Do** validate and sanitize user inputs, especially when using dynamic code execution.
+* **Do** use type hints to improve code clarity and catch errors early.
+* **Don't** introduce new security vulnerabilities through unsafe deserialization or code injection.
+* **Don't** use deprecated Python features or libraries.
+* **Don't** copy code from AI/LLM without testing and understanding what it does.
 
 #### <u>Library Code</u>
 * **Do** write [RSpec] tests - even the smallest change in a library can break existing code.
@@ -118,3 +130,6 @@ curve, so keep it up!
 [Issues]:https://github.com/rapid7/metasploit-framework/issues
 [Metasploit Slack]:https://www.metasploit.com/slack
 [#metasploit on Freenode IRC]:http://webchat.freenode.net/?channels=%23metasploit&uio=d4
+[PEP 8]:https://peps.python.org/pep-0008/
+[flake8]:https://flake8.pycqa.org/
+[pytest]:https://docs.pytest.org/

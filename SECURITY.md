@@ -48,6 +48,18 @@ When using Metasploit Framework:
 4. **Credentials**: Never commit credentials or sensitive data
 5. **Modules**: Review module code before execution
 
+#### Python-Native Code Security (This Fork)
+
+For developers working with Python code in this fork:
+
+1. **Dynamic Code Execution**: Use `eval()` and `exec()` only when absolutely necessary for exploit functionality. Always document why it's needed.
+2. **Input Validation**: Validate and sanitize all user inputs, especially when using dynamic code execution.
+3. **Deserialization**: Avoid `pickle.loads()` on untrusted data. Use safer alternatives like JSON.
+4. **Dependencies**: Keep Python dependencies updated. Check for CVEs before adding new dependencies.
+5. **Type Safety**: Use type hints to catch potential security issues during development.
+6. **Secret Management**: Use environment variables or secure vaults for credentials. Check `.gitleaksignore` for patterns to avoid.
+7. **Code Review**: All Python code changes undergo automated security scanning via GitHub secret scanning and Amazon Q (when configured).
+
 ## Security Resources
 
 - [Metasploit Documentation](https://docs.metasploit.com/)
