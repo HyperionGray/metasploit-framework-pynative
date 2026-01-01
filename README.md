@@ -75,6 +75,42 @@ Access the latest version of Metasploit from the [Nightly Installers](https://do
 ## Documentation
 Comprehensive documentation, including usage guides, is available at [Metasploit Docs](https://docs.metasploit.com/).
 
+## Features
+
+### Python-Native Implementation
+- **Modern Language**: Metasploit Framework rewritten in Python for better accessibility and performance
+- **Faster Startup**: Significantly reduced startup time compared to Ruby implementation
+- **7,456+ Python Modules**: Complete transpilation of all Ruby modules to Python
+
+### Exploitation & Security Tools
+- **Exploit Modules**: Comprehensive collection of exploit modules for various platforms and vulnerabilities
+- **Auxiliary Modules**: Port scanning, fuzzing, protocol analysis, and reconnaissance tools
+- **Payloads**: Wide variety of payloads for different architectures and operating systems
+- **Post-Exploitation**: Extensive post-exploitation modules for maintaining access and gathering information
+
+### Binary Analysis & Reverse Engineering
+- **Radare2 Integration**: Advanced binary analysis with GDB-like command interface
+- **LLDB Support**: Dynamic debugging capabilities for runtime analysis
+- **Binary Instrumentation**: AFL-style coverage tracking and code path analysis
+- **In-Memory Fuzzing**: High-speed fuzzing with stack manipulation
+
+### Modern C2 & Shell Management
+- **Sliver C2**: Professional Go-based C2 with mTLS, WireGuard, and HTTP(S) protocols
+- **Havoc C2**: Modern C2 with GUI teamserver and advanced evasion techniques
+- **pwncat-cs**: Advanced shell handler with automatic privilege escalation
+- **Villain**: Web-based UI for managing multiple shells at scale
+
+### Development Tools
+- **Ruby ↔ Python Transpiler**: Bidirectional conversion between Ruby and Python code
+- **Multi-Language Support**: Write exploits in Python, Ruby, or any supported language via PF framework
+- **Pwntools Integration**: Industry-standard exploitation library built-in
+- **Modern Tooling**: Black, flake8, isort for code quality; pytest for testing
+
+### Database & Session Management
+- **PostgreSQL Support**: Efficient database backend for storing scan results and session data
+- **Session Handling**: Professional session management with encryption and team collaboration features
+- **Workspace Organization**: Logical separation of different projects and engagements
+
 ## Development Environment
 To set up a development environment, visit the [Development Setup Guide](https://docs.metasploit.com/docs/development/get-started/setting-up-a-metasploit-development-environment.html).
 
