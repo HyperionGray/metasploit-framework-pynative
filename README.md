@@ -241,6 +241,11 @@ python3 modules/exploits/multi/http/generic_rce_example_2024.py
 python3 tasks.py test
 python3 tasks.py lint
 
+# Run tests with pytest (configured in pyproject.toml)
+pytest
+pytest -m unit  # Run only unit tests
+pytest --cov=lib --cov=modules --cov-report=html  # With coverage
+
 # Install Python dependencies
 pip3 install -r requirements.txt
 ```
@@ -249,6 +254,7 @@ See also:
 - **[docs/ruby2py/](docs/ruby2py/)** - **Complete Ruby→Python conversion documentation**
 - [ruby2py/README.md](ruby2py/README.md) - Conversion tools usage guide
 - [modules_legacy/README.md](modules_legacy/README.md) - Legacy module documentation
+- [docs/TEST_COVERAGE_GUIDE.md](docs/TEST_COVERAGE_GUIDE.md) - Test coverage guide
 
 ## Binary Analysis with Radare2
 
@@ -403,6 +409,9 @@ To contribute to Metasploit:
 
 - **[Developer Quick Start Guide](docs/DEVELOPMENT_GUIDE.md)** - Quick start guide for new contributors
 - **[Testing Guide](TESTING.md)** - Comprehensive testing documentation
+- **[Test Coverage Guide](docs/TEST_COVERAGE_GUIDE.md)** - Test coverage strategy and best practices
 - **[Code Quality Guidelines](CODE_QUALITY.md)** - Code quality standards and best practices
+- **[Code Quality Guide](docs/CODE_QUALITY_GUIDE.md)** - Architecture and coding standards
+- **[Security Best Practices](docs/SECURITY_BEST_PRACTICES.md)** - Secure coding guidelines
 - **[Contributing Guide](CONTRIBUTING.md)** - Complete contribution guidelines
-- **[Security Policy](.github/SECURITY.md)** - Security vulnerability reporting
+- **[Security Policy](SECURITY.md)** - Security vulnerability reporting
