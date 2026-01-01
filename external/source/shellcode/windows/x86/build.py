@@ -1,38 +1,68 @@
 #!/usr/bin/env python3
-#=============================================================================#
-# A simple python build script to build the singles/stages/stagers and
-# some usefull information such as offsets and a hex dump. The binary output
-# will be placed in the bin directory. A hex string and usefull comments will
-# be printed to screen.
-#
-# Example:
-#     >python build.py stager_reverse_tcp_nx
-#
-# Example, to build everything:
-#     >python build.py all > build_output.txt
-#
-# Author: Stephen Fewer (stephen_fewer[at]harmonysecurity[dot]com)
-#=============================================================================#
+
+"""
+Build script for Windows x86 shellcode assembly.
+
+This script assembles various shellcode components (singles, stages, stagers,
+egghunters, kernel code) using NASM and outputs binary files along with
+useful information such as offsets and hex dumps.
+
+Usage:
+    python build.py <name>          # Build specific shellcode
+    python build.py all             # Build all shellcode
+    python build.py clean           # Clean binary files
+
+Author: Stephen Fewer (stephen_fewer[at]harmonysecurity[dot]com)
+"""
+
 import os
 import sys
 import time
 from subprocess import Popen
 from struct import pack
 
+
 def clean(dir='./bin/'):
+    """
+    Remove all files (except .keep) from the specified directory.
+
+    Args:
+        dir: Directory path to clean (default: './bin/')
+    """
     for root, dirs, files in os.walk(dir):
         for name in files:
             if name != '.keep':
                 os.remove(os.path.join(root, name))
 
+
 def locate(src_file, dir='./src/'):
+    """
+    Locate a source file within the source directory tree.
+
+    Args:
+        src_file: Name of the source file to locate
+        dir: Root directory to search (default: './src/')
+
+    Returns:
+        Path to the directory containing the file, or None if not found
+    """
     for root, dirs, files in os.walk(dir):
         for name in files:
             if src_file == name:
                 return root
     return None
 
+
 def build(name):
+    """
+    Build a shellcode binary from assembly source using NASM.
+
+    Assembles the specified .asm file and calls xmit() to output
+    information about the resulting binary.
+
+    Args:
+        name: Name of the shellcode (without .asm extension)
+    """
     location = locate('%s.asm' % name)
     if location:
         input = os.path.normpath(os.path.join(location, name))
@@ -44,7 +74,15 @@ def build(name):
     else:
         print("[-] Unable to locate '%s.asm' in the src directory" % name)
 
+
 def xmit_dump_ruby(data, length=16):
+    """
+    Output binary data as a Ruby-style hex string dump.
+
+    Args:
+        data: Binary data to dump
+        length: Number of bytes per line (default: 16)
+    """
     dump = ''
     for i in range(0, len(data), length):
         bytes = data[i: i+length]
@@ -54,12 +92,33 @@ def xmit_dump_ruby(data, length=16):
         dump += '%s\n' % (hex)
     print(dump)
 
+
 def xmit_offset(data, name, value, match_offset=0):
+    """
+    Find and print the offset of a specific value in the binary data.
+
+    Args:
+        data: Binary data to search
+        name: Descriptive name for the offset
+        value: Byte sequence to find
+        match_offset: Additional offset to add to result (default: 0)
+    """
     offset = data.find(value)
     if offset != -1:
         print('# %s Offset: %d' % (name, offset + match_offset))
 
+
 def xmit(name, dump_ruby=True):
+    """
+    Output information about a built shellcode binary.
+
+    Prints the name, length, important offsets, and optionally a hex dump
+    of the shellcode. Also checks for NULL bytes in egghunter shellcode.
+
+    Args:
+        name: Name of the shellcode
+        dump_ruby: Whether to output Ruby-style hex dump (default: True)
+    """
     bin = os.path.normpath(os.path.join('./bin/', '%s.bin' % name))
     f = open(bin, 'rb')
     data = bytearray(f.read())
@@ -96,7 +155,16 @@ def xmit(name, dump_ruby=True):
     if dump_ruby:
         xmit_dump_ruby(data)
 
+
 def main(argv=None):
+    """
+    Main entry point for the build script.
+
+    Processes command-line arguments and dispatches to appropriate functions.
+
+    Args:
+        argv: Command-line arguments (default: sys.argv)
+    """
     if not argv:
         argv = sys.argv
         if len(argv) == 1:
