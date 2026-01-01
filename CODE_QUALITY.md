@@ -517,6 +517,55 @@ All code changes are automatically checked by CI:
 
 See `.github/workflows/` for CI configuration.
 
+## File Size Guidelines
+
+### Large Files in the Repository
+
+Some files in the repository legitimately exceed 500 lines. This section documents these files and explains why they are acceptable:
+
+#### Exploit Data Files
+- `data/exploits/CVE-*/`: Binary exploit data files, media files (e.g., MPEG transport streams with `.ts` extension)
+- These are **data files**, not source code, and should be excluded from code cleanliness checks
+
+#### Transpilers and Code Generation Tools
+- `tools/py2ruby_transpiler.py` (~977 lines): Ruby-to-Python transpiler
+- `ruby2py/py2ruby/transpiler.py` (~977 lines): Core transpiler logic
+- `tools/ast_transpiler/ast_translator.py` (~973 lines): AST translation engine
+- These are complex code generation tools that inherently require comprehensive pattern matching
+
+#### Test Suites
+- `test/test_comprehensive_suite.py` (~664 lines): Comprehensive test suite
+- `test/python_framework/test_http_client.py` (~575 lines): HTTP client tests
+- `test/python_framework/test_exploit.py` (~566 lines): Exploit framework tests
+- `test/python_framework/test_ssh_client.py` (~544 lines): SSH client tests
+- Large test files are acceptable as they provide thorough coverage
+
+#### Security Analysis Tools
+- `lib/msf/util/llvm_instrumentation.py` (~716 lines): LLVM instrumentation for binary analysis
+- `lib/rex/binary_analysis/fuzzer.py` (~512 lines): Fuzzing framework
+- `lib/rex/binary_analysis/lldb_debugger.py` (~511 lines): LLDB debugger integration
+- Security analysis tools require extensive functionality and configuration
+
+#### Integration Modules
+- `lib/msf/core/integrations/sliver.py` (~519 lines): Sliver C2 framework integration
+- `scripts/meterpreter/winenum.py` (~521 lines): Windows enumeration script
+- Complex integrations naturally require more code
+
+### When Large Files Are a Problem
+
+A file should be considered for refactoring if:
+1. It has **high cyclomatic complexity** (many nested conditions)
+2. It violates the **Single Responsibility Principle** (does multiple unrelated things)
+3. It has **low test coverage** (under 70%)
+4. It's difficult to understand or maintain
+
+### File Size Guidelines by Type
+
+- **Modules/Exploits**: Aim for under 500 lines
+- **Test Files**: 500-1000 lines acceptable if well-organized
+- **Tools/Utilities**: Consider splitting if over 1000 lines
+- **Data Files**: No limit (these aren't code)
+
 ## Summary
 
 Maintaining high code quality requires:
