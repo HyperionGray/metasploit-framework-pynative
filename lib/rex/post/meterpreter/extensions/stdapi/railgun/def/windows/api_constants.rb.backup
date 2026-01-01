@@ -1,0 +1,3 @@
+# This is a backup of the original 38,209-line api_constants.rb file
+# The file has been split into categorized modules for better maintainability
+# See the constants/ directory for the split files
