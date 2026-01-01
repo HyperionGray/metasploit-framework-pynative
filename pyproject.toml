@@ -35,26 +35,30 @@ addopts = [
     "--maxfail=10",
     "-ra",
     "--durations=10",
-    "--timeout=300"
+    "--timeout=300",
+    "--verbose",
+    "--color=yes"
 ]
 markers = [
     "unit: Unit tests for individual components",
-    "integration: Integration tests between components", 
-    "functional: Functional tests for complete workflows",
-    "security: Security-focused tests",
+    "integration: Integration tests for component interaction", 
+    "functional: Functional tests for end-to-end workflows",
+    "security: Security-focused tests for cryptographic and exploit functions",
     "performance: Performance and benchmark tests",
-    "network: Tests requiring network access",
+    "network: Tests for network-dependent operations",
     "slow: Tests that take a long time to run",
     "exploit: Tests for exploit modules",
     "auxiliary: Tests for auxiliary modules",
-    "payload: Tests for payload modules",
+    "payload: Tests for payload generation and handling",
     "encoder: Tests for encoder modules",
     "crypto: Tests for cryptographic functions",
     "http: Tests for HTTP client functionality",
     "rex: Tests for Rex library components",
     "msf: Tests for MSF core components",
     "ruby_compat: Tests for Ruby compatibility",
-    "external_deps: Tests requiring external tools"
+    "external_deps: Tests for functionality requiring external tools",
+    "binary_analysis: Tests for binary analysis tools (Radare2, LLDB)",
+    "framework: Tests for core framework functionality"
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
@@ -65,33 +69,6 @@ log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--verbose",
-    "--tb=short",
-    "--color=yes"
-]
-markers = [
-    "unit: Unit tests for individual components",
-    "integration: Integration tests for component interaction", 
-    "functional: Functional tests for end-to-end workflows",
-    "security: Security-focused tests for cryptographic and exploit functions",
-    "performance: Performance and benchmark tests",
-    "slow: Tests that take a long time to run",
-    "network: Tests that require network access",
-    "binary_analysis: Tests for binary analysis tools (Radare2, LLDB)",
-    "exploit: Tests for exploit modules",
-    "payload: Tests for payload generation and handling",
-    "crypto: Tests for cryptographic functions",
-    "framework: Tests for core framework functionality"
-]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning"
-]
 timeout = 300
 timeout_method = "thread"
 

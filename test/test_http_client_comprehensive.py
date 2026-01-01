@@ -300,8 +300,7 @@ class TestHTTPClientIntegration:
         """Set up test environment."""
         self.client = HTTPClient(rhost='httpbin.org', rport=80)
         
-    @pytest.mark.skipif(not pytest.config.getoption("--run-integration", default=False),
-                       reason="Integration tests disabled")
+    @pytest.mark.skip(reason="Integration tests disabled by default")
     def test_real_http_request(self):
         """Test real HTTP request (requires network)."""
         # This would test against a real service

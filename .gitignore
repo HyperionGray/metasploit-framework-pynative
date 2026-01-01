@@ -29,6 +29,10 @@ features/support/targets.yml
 spec/dummy
 # simplecov coverage data
 coverage
+# Python coverage data
+.coverage
+coverage.xml
+htmlcov/
 doc/
 external/source/meterpreter/java/bin
 external/source/meterpreter/java/build
