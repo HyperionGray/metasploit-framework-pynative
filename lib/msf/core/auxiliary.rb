@@ -20,6 +20,7 @@ class Auxiliary < Msf::Module
 
 
   include HasActions
+  include Msf::Auxiliary::StructuredLogging
 
   #
   # Returns MODULE_AUX to indicate that this is an auxiliary module.
@@ -47,6 +48,17 @@ class Auxiliary < Msf::Module
     self.sockets = Array.new
     self.queue   = Array.new
     self.fail_reason = Msf::Module::Failure::None
+    
+    # Register structured logging options
+    register_advanced_options([
+      OptBool.new('AUX_LOG_ENABLED', [true, 'Enable structured logging for auxiliary module', true]),
+      OptEnum.new('AUX_LOG_FORMAT', [true, 'Format for auxiliary log output', 'json', ['json', 'csv', 'text']]),
+      OptString.new('AUX_LOG_DIR', [false, 'Directory for auxiliary log files (default: ~/.msf4/logs/auxiliary_logs)']),
+      OptBool.new('AUX_LOG_VERBOSE', [true, 'Show auxiliary log messages in console output', false])
+    ], Auxiliary)
+    
+    # Initialize structured logging
+    initialize_structured_logging
   end
 
   #
@@ -125,6 +137,36 @@ class Auxiliary < Msf::Module
   # Called after 'run' returns
   #
   def cleanup
+    # Generate and log summary before cleanup
+    if respond_to?(:generate_auxiliary_log_summary)
+      summary = generate_auxiliary_log_summary
+      if summary && !summary.empty?
+        log_auxiliary_result(
+          level: 'info',
+          type: 'summary',
+          message: "Auxiliary module completed",
+          data: summary
+        )
+        
+        # Print summary to console if verbose
+        if datastore['VERBOSE'] || datastore['AUX_LOG_VERBOSE']
+          print_status("Auxiliary module summary:")
+          print_status("  Duration: #{summary[:duration].round(2)} seconds")
+          print_status("  Total log entries: #{summary[:total_entries]}")
+          print_status("  Targets processed: #{summary[:targets].length}")
+          print_status("  Findings: #{summary[:findings_count]}")
+          if structured_log_file_path
+            print_good("Detailed logs saved to: #{structured_log_file_path}")
+          end
+        end
+      end
+    end
+    
+    # Clean up old logs periodically (1% chance to avoid overhead)
+    if rand(100) == 0 && respond_to?(:cleanup_old_auxiliary_logs)
+      cleanup_old_auxiliary_logs
+    end
+    
     abort_sockets()
   end
 
