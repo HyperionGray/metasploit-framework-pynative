@@ -1,0 +1,139 @@
+================================================================================
+  PULL REQUEST MERGE DOCUMENTATION - TABLE OF CONTENTS
+================================================================================
+
+This documentation package provides everything needed to merge 62 open pull
+requests in the metasploit-framework-pynative repository.
+
+START HERE: PR_MERGE_README.md
+    └─ Quick start guide with overview and immediate actions
+
+UNDERSTANDING THE SCOPE:
+├─ PR_MERGE_ANALYSIS.md
+│    └─ Complete analysis of all 62 PRs, constraints, and recommendations
+│
+└─ MERGE_ORDER.md
+     └─ Prioritized merge sequence with phases and dependencies
+
+EXECUTION OPTIONS:
+├─ merge_prs.sh (Automated)
+│    └─ Interactive script using GitHub CLI for automated merging
+│
+└─ MANUAL_MERGE_GUIDE.md (Manual)
+     └─ Step-by-step instructions for manual merging via web or CLI
+
+================================================================================
+QUICK REFERENCE
+================================================================================
+
+Priority 1 (CRITICAL): Configuration Fixes
+  ┌────────────────────────────────────────────────────────┐
+  │ IMPORTANT: Merge ONLY ONE of these PRs first:         │
+  │ • PR #248 (Recommended) - Most comprehensive fix      │
+  │ • PR #247 (Alternative)                               │
+  │ • PR #244 (Alternative)                               │
+  │                                                        │
+  │ These all fix TOML parsing errors but conflict!       │
+  └────────────────────────────────────────────────────────┘
+
+Priority 2 (HIGH): Infrastructure
+  • PR #246 - CI/CD workflow fixes
+  • PR #245 - Documentation updates
+
+Priority 3 (HIGH): Testing
+  • PR #235 - E2E test installation
+  • PR #224 - Additional E2E tests
+
+Priority 4 (REVIEW REQUIRED): Large Migrations
+  • PRs #215-#238 - Ruby-to-Python migration series
+  • Each requires individual evaluation
+
+================================================================================
+EXECUTION SUMMARY
+================================================================================
+
+Method A: Automated Script
+  $ ./merge_prs.sh
+  (Requires: GitHub CLI authenticated)
+
+Method B: Manual via GitHub Web
+  1. Go to https://github.com/HyperionGray/metasploit-framework-pynative/pulls
+  2. Follow MANUAL_MERGE_GUIDE.md
+  3. Merge in priority order
+
+Method C: Manual via Git CLI
+  See MANUAL_MERGE_GUIDE.md, "Method 3: Git Command Line"
+
+================================================================================
+TIME ESTIMATES
+================================================================================
+
+Phase 1 (Critical):     30 minutes + testing
+Phase 2 (Infrastructure): 1 hour
+Phase 3 (Testing):      1-2 hours
+Phase 4 (Migrations):   Multiple days (requires review)
+
+Total for high-priority items: 2-3 hours
+
+================================================================================
+TESTING CHECKLIST
+================================================================================
+
+After each merge phase:
+  □ git pull origin master
+  □ pip install -r requirements.txt
+  □ pytest
+  □ Check CI/CD pipeline status
+  □ Verify no broken imports
+
+================================================================================
+SUPPORT RESOURCES
+================================================================================
+
+Troubleshooting:  See MANUAL_MERGE_GUIDE.md "Troubleshooting" section
+Conflict Help:    See MANUAL_MERGE_GUIDE.md "Handling Conflicts"
+Risk Assessment:  See MERGE_ORDER.md "Merge Conflict Risk Assessment"
+Full Analysis:    See PR_MERGE_ANALYSIS.md
+
+================================================================================
+LIMITATIONS
+================================================================================
+
+This documentation package cannot:
+  ✗ Directly merge PRs (requires GitHub credentials)
+  ✗ Access remote PR branches automatically
+  ✗ Resolve conflicts requiring human judgment
+
+This documentation package provides:
+  ✓ Complete analysis of all 62 PRs
+  ✓ Prioritized merge plan with dependencies
+  ✓ Automated merge scripts
+  ✓ Step-by-step manual instructions
+  ✓ Risk assessment and mitigation strategies
+  ✓ Testing and validation guidance
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Read PR_MERGE_README.md for overview
+2. Review MERGE_ORDER.md to understand priorities
+3. Choose execution method (automated vs manual)
+4. Start with Phase 1 (critical fixes)
+5. Test after each phase
+6. Continue through remaining phases
+
+================================================================================
+QUESTIONS?
+================================================================================
+
+• Check the detailed documentation files
+• Review PR comments for author context
+• Contact repository maintainers
+• See issue #250 for discussions
+
+================================================================================
+Last Updated: 2026-01-01
+Documentation Package Version: 1.0
+Total PRs to Merge: 62 (excluding PR #250)
+================================================================================
