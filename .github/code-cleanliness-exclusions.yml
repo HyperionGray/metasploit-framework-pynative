@@ -1,0 +1,175 @@
+---
+# Code Cleanliness Review - Exclusions Configuration
+#
+# This file defines files and patterns that should be excluded from the
+# automated code cleanliness review. Files listed here are intentionally
+# large and don't need to be flagged in the review.
+#
+# Exclusion Categories:
+# 1. API/Protocol Constants - Large constant/data definitions
+# 2. Generated Files - Auto-generated code
+# 3. Data Files - OUI tables, error codes, DTCs, etc.
+# 4. Test Fixtures - Comprehensive test data
+# 5. Legacy Files - Files maintained for compatibility
+
+# API and Protocol Constants
+# These files contain large amounts of constant definitions for Windows API,
+# error codes, and protocol specifications. They are reference data.
+api_constants:
+  - ./lib/rex/post/meterpreter/extensions/stdapi/railgun/def/windows/api_constants.rb
+  - ./lib/rex/post/meterpreter/extensions/stdapi/railgun/def/windows/def_kernel32.rb
+  - ./lib/rex/post/meterpreter/extensions/stdapi/railgun/def/windows/def_user32.rb
+  - ./lib/rex/post/meterpreter/extensions/stdapi/railgun/def/windows/def_advapi32.rb
+  - ./lib/rex/post/meterpreter/extensions/stdapi/railgun/def/windows/def_ws2_32.rb
+  - ./lib/msf/core/post/windows/error.rb
+  - ./lib/msf/windows_error.rb
+  - ./lib/rex/proto/smb/constants.rb
+
+# Reference Data Files
+# These files contain large lookup tables and reference data
+data_files:
+  - ./lib/rex/oui.rb  # MAC address OUI lookup table
+  - ./lib/msf/core/post/hardware/automotive/dtc.rb  # Diagnostic Trouble Codes
+  - ./lib/msf/core/mitre/attack/technique.rb  # MITRE ATT&CK technique mapping
+
+# Protocol Codecs and Definitions
+# Files implementing protocol specifications or codecs
+protocols:
+  - ./lib/rex/proto/iax2/codecs/g711.rb  # Audio codec implementation
+  - ./lib/rex/proto/ms_dtyp.rb  # Microsoft data type definitions
+  - ./lib/rex/proto/kerberos/pac/krb5_pac.rb  # Kerberos PAC structure
+
+# Test Files with Comprehensive Test Data
+# Test files often have many test cases and fixtures
+test_fixtures:
+  - ./spec/lib/rex/proto/x11/window.rb
+  - ./spec/lib/msf/debug_spec.rb
+  - ./spec/lib/msf/core/payload_generator_spec.rb
+  - ./spec/lib/msf/core/data_store_with_fallbacks_spec.rb
+  - ./spec/lib/msf/core/auxiliary/prometheus_spec.rb
+  - ./spec/lib/rex/proto/x11/connect.rb
+  - ./spec/support/shared/examples/msf/db_manager/import/metasploit_framework/xml.rb
+  - ./spec/lib/msf/core/rhosts_walker_spec.rb
+  - ./spec/support/shared/examples/msf/db_manager/module_cache.rb
+  - ./spec/support/shared/examples/msf/db_manager/session.rb
+  - ./spec/lib/msf/core/auxiliary/mikrotik_spec.rb
+  - ./spec/lib/rex/proto/x11/xkeyboard.rb
+  - ./spec/lib/msf/core/exploit/browser_autopwn2_spec.rb
+  - ./spec/lib/msf/ui/console/command_dispatcher/auxiliary_spec.rb
+  - ./spec/rubocop/cop/lint/detect_invalid_pack_directives_spec.rb
+  - ./spec/lib/msf/core/auxiliary/cisco_spec.rb
+  - ./spec/lib/rex/proto/kerberos/model/kdc_request_spec.rb
+  - ./spec/lib/msf/ui/console/command_dispatcher/core_spec.rb
+  - ./spec/lib/msf/core/auxiliary/juniper_spec.rb
+  - ./spec/lib/msf/core/post/windows/task_scheduler_spec.rb
+  - ./spec/lib/rex/proto/http/client_spec.rb
+  - ./spec/lib/msf/core/exploit/cmdstager_spec.rb
+  - ./spec/lib/rex/proto/kerberos/pac/krb5_pac_spec.rb
+  - ./spec/lib/metasploit/framework/credential_collection_spec.rb
+  - ./spec/lib/metasploit/framework/database_spec.rb
+  - ./spec/lib/msf/core/exploit/remote/kerberos/client_spec.rb
+  - ./spec/lib/msf/ui/console/command_dispatcher/creds_spec.rb
+  - ./spec/lib/msf/ui/console/command_dispatcher/exploit_spec.rb
+  - ./spec/lib/msf/core/post/azure_spec.rb
+  - ./spec/api/json_rpc_spec.rb
+  - ./spec/lib/rex/proto/kerberos/model/kdc_request_body_spec.rb
+  - ./spec/msf/core/auxiliary/auth_brute_spec.rb
+  - ./spec/lib/msf/core/post/linux/system_spec.rb
+  - ./spec/lib/rex/post/meterpreter/packet_spec.rb
+  - ./spec/lib/msf/core/auxiliary/vyos_spec.rb
+  - ./spec/lib/rex/proto/kerberos/credential_cache/krb5_ccache_presenter_spec.rb
+  - ./spec/support/acceptance/child_process.rb
+  - ./spec/lib/rex/proto/nuuo/client_spec.rb
+  - ./spec/lib/msf/core/auxiliary/ubiquiti_spec.rb
+  - ./spec/acceptance/meterpreter_spec.rb
+  - ./spec/lib/msf/core/post/vcenter/vcenter_spec.rb
+  - ./spec/lib/msf/base/serializer/readable_text_spec.rb
+
+# Exploit Data Files (TypeScript/Python)
+# These are exploit payloads or proof-of-concepts
+exploit_data:
+  - ./data/exploits/CVE-2019-12477/epicsax0.ts
+  - ./data/exploits/CVE-2019-12477/epicsax1.ts
+  - ./data/exploits/CVE-2019-12477/epicsax2.ts
+  - ./data/exploits/CVE-2019-12477/epicsax3.ts
+  - ./data/exploits/CVE-2019-12477/epicsax4.ts
+  - ./data/exploits/CVE-2021-3156/userspec_generic.py
+
+# Build and Development Tools
+# Tools that may be legitimately large
+dev_tools:
+  - ./tools/dev/msftidy.rb  # Metasploit code linter
+  - ./tools/py2ruby_transpiler.py  # Transpiler
+  - ./ruby2py/py2ruby/transpiler.py
+  - ./bak/transpilers/py2ruby/transpiler.py
+  - ./tools/ast_transpiler/ast_translator.py
+  - ./tools/dev/hash_cracker_validator.rb
+  - ./docs/navigation.rb  # Documentation navigation
+  - ./docs/build.rb  # Documentation builder
+  - ./bak/python_ast_generator.py
+
+# Third-party Libraries (vendored)
+# External libraries included in the repo
+vendored_libs:
+  - ./lib/rbmysql.rb
+  - ./lib/rbmysql/error.rb
+  - ./lib/rbmysql/protocol.rb
+  - ./lib/postgres/postgres-pr/message.rb
+  - ./lib/net/dns/resolver.rb
+  - ./lib/net/dns/header.rb
+  - ./lib/net/dns/packet.rb
+  - ./lib/snmp/manager.rb
+  - ./lib/snmp/varbind.rb
+
+# Database Schema
+# Generated database schema files
+database:
+  - ./db/schema.rb
+
+# Test Suites
+# Comprehensive integration test files
+test_suites:
+  - ./test/test_comprehensive_suite.py
+  - ./test/python_framework/test_http_client.py
+  - ./test/python_framework/test_exploit.py
+  - ./test/python_framework/test_ssh_client.py
+  - ./test/test_postgres_client.py
+  - ./test/test_integration_comprehensive.py
+
+# Scripts (Legacy)
+# Maintained for backward compatibility
+legacy_scripts:
+  - ./scripts/meterpreter/winenum.rb
+  - ./scripts/meterpreter/winenum.py
+
+# Plugin Files
+# Plugins that integrate with external tools
+plugins:
+  - ./plugins/wmap.rb
+  - ./plugins/nessus.rb
+  - ./plugins/nexpose.rb
+  - ./plugins/openvas.rb
+  - ./plugins/capture.rb
+  - ./plugins/wiki.rb
+  - ./plugins/lab.rb
+
+# Notes:
+# - Files excluded here are typically:
+#   * Reference/lookup data (constants, error codes, OUI tables)
+#   * Protocol implementations requiring complete specs
+#   * Test fixtures with comprehensive coverage
+#   * Vendored third-party code
+#   * Generated files (schemas, etc.)
+#
+# - Files NOT excluded (should be reviewed):
+#   * Core framework code
+#   * Module dispatchers
+#   * Business logic
+#   * New custom code
+#
+# Review Criteria for Adding Exclusions:
+# 1. Is the file primarily data/constants? → Likely exclude
+# 2. Is it a complete protocol/codec implementation? → Likely exclude
+# 3. Is it third-party/vendored code? → Exclude
+# 4. Is it generated? → Exclude
+# 5. Is it business logic that could be split? → DO NOT exclude

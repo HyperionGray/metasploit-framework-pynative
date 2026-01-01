@@ -32,7 +32,18 @@ jobs:
           echo "Files larger than 500 lines that may benefit from splitting:" >> /tmp/analysis.md
           echo "" >> /tmp/analysis.md
           
-          # Find files larger than 500 lines (excluding common large files)
+          # Extract exclusion patterns from the YAML config (strip comments)
+          # Parse the exclusions file and create a list of paths to exclude
+          if [ -f .github/code-cleanliness-exclusions.yml ]; then
+            echo "Loading exclusions from .github/code-cleanliness-exclusions.yml" >&2
+            # Extract file paths (lines with "- ./") and strip comments
+            # Use flexible pattern to handle varying indentation
+            grep "^[[:space:]]*- \./" .github/code-cleanliness-exclusions.yml | sed 's/^[[:space:]]*- //' | sed 's/ *#.*//' > /tmp/exclusions.txt
+          else
+            touch /tmp/exclusions.txt
+          fi
+          
+          # Find files larger than 500 lines (excluding common large files and exclusions)
           find . -type f \( -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.java" -o -name "*.go" -o -name "*.cs" -o -name "*.rb" \) \
             ! -path "*/node_modules/*" \
             ! -path "*/dist/*" \
@@ -41,7 +52,28 @@ jobs:
             ! -path "*/vendor/*" \
             -exec wc -l {} \; | \
             awk '$1 > 500 {print $1 " lines: " $2}' | \
-            sort -rn >> /tmp/analysis.md || echo "No large files found" >> /tmp/analysis.md
+            sort -rn > /tmp/all_large_files.txt
+
+          # Filter out excluded files (use grep -F for literal string matching)
+          if [ -s /tmp/exclusions.txt ] && [ -s /tmp/all_large_files.txt ]; then
+            # grep -v returns non-zero if all lines match (i.e., all files excluded)
+            # Use explicit handling instead of || true
+            if grep -v -F -f /tmp/exclusions.txt /tmp/all_large_files.txt > /tmp/filtered_files.txt; then
+              mv /tmp/filtered_files.txt /tmp/all_large_files.txt
+            else
+              # All files were excluded
+              : > /tmp/all_large_files.txt
+            fi
+          fi
+
+          # Output results
+          if [ -s /tmp/all_large_files.txt ]; then
+            cat /tmp/all_large_files.txt >> /tmp/analysis.md
+            echo "" >> /tmp/analysis.md
+            echo "_Note: Files excluded based on .github/code-cleanliness-exclusions.yml (data files, constants, test fixtures, vendored libraries)_" >> /tmp/analysis.md
+          else
+            echo "No large files found (after exclusions)" >> /tmp/analysis.md
+          fi
           
           echo "" >> /tmp/analysis.md
           echo "## Code Complexity Analysis" >> /tmp/analysis.md
@@ -103,6 +135,18 @@ jobs:
             
             ${analysis}
             
+            ## Exclusions
+            
+            The following types of files are excluded from this review:
+            - API and protocol constant definitions (e.g., Windows API constants)
+            - Reference data files (e.g., OUI tables, error codes, DTC codes)
+            - Test fixtures and comprehensive test suites
+            - Vendored third-party libraries
+            - Database schemas and generated files
+            - Exploit data files and proof-of-concepts
+            
+            See \`.github/code-cleanliness-exclusions.yml\` for the full list and rationale.
+            
             ## Recommendations
             
             Please review the analysis above and:
@@ -111,6 +155,17 @@ jobs:
             3. Remove code duplication
             4. Ensure consistent code style
             5. Improve code organization and structure
+            
+            ## Adding Exclusions
+            
+            If you believe a file should be excluded from this review:
+            1. Consider if it fits one of these criteria:
+               - Primarily contains data/constants/lookup tables
+               - Implements a complete protocol or codec specification
+               - Is third-party/vendored code
+               - Is auto-generated
+            2. Add it to \`.github/code-cleanliness-exclusions.yml\` with a category and rationale
+            3. Files containing business logic that could be split should NOT be excluded
             
             ## Next Steps
             
