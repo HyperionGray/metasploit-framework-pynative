@@ -34,6 +34,8 @@ coverage
 coverage.xml
 htmlcov/
 doc/
+# Backup directory for temporary and archived files
+bak/
 external/source/meterpreter/java/bin
 external/source/meterpreter/java/build
 external/source/meterpreter/java/extensions
