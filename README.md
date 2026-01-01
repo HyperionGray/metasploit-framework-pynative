@@ -94,6 +94,57 @@ For questions and suggestions, you can:
 
 **Note:** Some community members may still use IRC channels and the metasploit-hackers mailing list, though the primary support channels are now GitHub Discussions and Slack.
 
+## Features
+
+### Core Capabilities
+
+- **🐍 Python-Native Framework**: Complete transpilation of Ruby codebase to Python for better accessibility and performance
+- **🎯 Extensive Exploit Database**: Thousands of exploits, payloads, and auxiliary modules for penetration testing
+- **🔧 Module Development**: Easy-to-use framework for writing custom exploits in Python or Ruby
+- **🌐 Network Exploitation**: Support for various protocols (HTTP, SMB, SSH, LDAP, Postgres, and more)
+- **💉 Payload Generation**: Advanced payload creation with msfvenom for multiple platforms and architectures
+
+### Advanced Tools
+
+- **🔍 Binary Analysis**: Integrated Radare2 and LLDB for reverse engineering and debugging
+  - GDB-like command interface for familiar workflow
+  - AFL-style coverage tracking and instrumentation
+  - In-memory fuzzing capabilities
+- **🛠️ Modern C2 Frameworks**: Professional command-and-control integration
+  - Sliver: Go-based C2 with encrypted channels (mTLS, WireGuard, HTTP(S), DNS)
+  - Havoc: Modern C2 with GUI teamserver and advanced evasion
+- **🔌 Enhanced Shell Handlers**: 
+  - pwncat-cs: Automatic privilege escalation and post-exploitation
+  - Villain: Web-based UI for managing multiple shells
+- **🧬 Fuzzing Support**: AFL++, libFuzzer integration for vulnerability discovery
+
+### Development & Integration
+
+- **🔄 Bidirectional Transpilation**: Ruby ↔ Python conversion tools
+- **📦 Language Flexibility**: Write exploits in multiple languages (Python, Ruby, C, C++, Go, Rust, and more)
+- **🏗️ Modern Build System**: Python requirements.txt, pyproject.toml, and task automation
+- **✅ Testing Infrastructure**: Comprehensive pytest-based testing with RSpec compatibility
+- **🎨 Code Quality**: Automated linting with flake8, Black, isort, and Rubocop
+- **🐛 Debugging Tools**: GDB, GEF, pwndbg integration for exploit development
+
+### Exploitation Features
+
+- **📚 Module Library**: 
+  - Exploit modules for CVEs and custom vulnerabilities
+  - Auxiliary modules for scanning, fuzzing, and information gathering
+  - Post-exploitation modules for privilege escalation and persistence
+- **🎭 Evasion Techniques**: Sleep obfuscation, indirect syscalls, and anti-analysis features
+- **🔐 Session Management**: Multi-session handling with secure encrypted communications
+- **👥 Team Collaboration**: Teamserver support for coordinated red team operations
+- **📊 Database Integration**: PostgreSQL backend for tracking campaigns and results
+
+### Compatibility
+
+- **🔙 Legacy Support**: Pre-2020 Ruby modules maintained in `modules_legacy/` for compatibility
+- **🐧 Cross-Platform**: Linux, macOS, and Windows support
+- **🔌 API Access**: REST API and RPC interface for automation and integration
+- **📖 Extensive Documentation**: Comprehensive guides, API docs, and examples
+
 ## Python-Native Framework (Round 4) - TRANSPILATION COMPLETE! 🎉
 
 🐍 **ALL RUBY FILES HAVE BEEN TRANSPILED TO PYTHON!** 🐍
