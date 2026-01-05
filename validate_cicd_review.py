@@ -31,9 +31,13 @@ def check_documentation():
     all_present = True
     for doc in docs:
         if Path(doc).exists():
-            word_count = len(Path(doc).read_text(encoding='utf-8').split())
-            docs[doc] = word_count
-            print(f"  ✅ {doc}: {word_count} words")
+            try:
+                word_count = len(Path(doc).read_text(encoding='utf-8').split())
+                docs[doc] = word_count
+                print(f"  ✅ {doc}: {word_count} words")
+            except (UnicodeDecodeError, PermissionError, OSError) as e:
+                print(f"  ⚠️  {doc}: Cannot read file ({type(e).__name__})")
+                all_present = False
         else:
             print(f"  ❌ {doc}: MISSING")
             all_present = False
@@ -115,6 +119,10 @@ def analyze_large_files():
                 continue
             
             try:
+                # Use errors='replace' to handle encoding issues gracefully
+                # This is acceptable for line counting as we only need to count lines,
+                # not parse the actual content. Binary/problematic files won't affect
+                # the count accuracy significantly.
                 line_count = len(file.read_text(encoding='utf-8', errors='replace').splitlines())
                 if line_count > 500:
                     # Categorize file
@@ -129,8 +137,12 @@ def analyze_large_files():
                         'lines': line_count,
                         'category': category
                     })
-            except (UnicodeDecodeError, PermissionError, OSError) as e:
-                # Skip files that can't be read (binary files, permission issues, etc.)
+            except (UnicodeDecodeError, PermissionError, OSError):
+                # Skip files that can't be read:
+                # - Binary files that can't be decoded
+                # - Files without read permissions
+                # - OS-level errors (deleted files, symlink issues, etc.)
+                # These are expected and don't indicate problems with the codebase
                 continue
     
     # Sort by line count
