@@ -31,7 +31,7 @@ def check_documentation():
     all_present = True
     for doc in docs:
         if Path(doc).exists():
-            word_count = len(Path(doc).read_text().split())
+            word_count = len(Path(doc).read_text(encoding='utf-8').split())
             docs[doc] = word_count
             print(f"  ✅ {doc}: {word_count} words")
         else:
@@ -115,7 +115,7 @@ def analyze_large_files():
                 continue
             
             try:
-                line_count = len(file.read_text(errors='ignore').splitlines())
+                line_count = len(file.read_text(encoding='utf-8', errors='replace').splitlines())
                 if line_count > 500:
                     # Categorize file
                     category = 'other'
@@ -129,8 +129,9 @@ def analyze_large_files():
                         'lines': line_count,
                         'category': category
                     })
-            except Exception as e:
-                pass
+            except (UnicodeDecodeError, PermissionError, OSError) as e:
+                # Skip files that can't be read (binary files, permission issues, etc.)
+                continue
     
     # Sort by line count
     large_files.sort(key=lambda x: x['lines'], reverse=True)
