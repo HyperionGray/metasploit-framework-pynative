@@ -37,7 +37,7 @@ export MSF_DATA_ROOT="$MSF_ROOT/data"
 export MSF_CONFIG_ROOT="$MSF_ROOT/config"
 
 # Python-specific environment
-export PYTHONPATH="$MSF_ROOT/lib:$MSF_ROOT:$PYTHONPATH"
+export PYTHONPATH="$MSF_ROOT/lib/msf/core/modules/external/python:$MSF_ROOT/python_framework:$MSF_ROOT/lib:$MSF_ROOT:$PYTHONPATH"
 export MSF_PYTHON_MODE=1
 
 # Update prompt to show MSF environment is active
@@ -45,9 +45,8 @@ export PS1="(msf) $MSF_ORIGINAL_PS1"
 
 # Define MSF command functions
 msf_console() {
-    echo "🐍 MSF Python Console - Enhanced Metasploit Experience"
-    echo "   Traditional Ruby console: $MSF_ROOT/msfconsole"
-    echo "   Python framework: $MSF_ROOT/lib/msf.py"
+    echo "[*] MSF Python Console"
+    echo "    For Ruby console: $MSF_ROOT/msfconsole --ruby"
     echo ""
     
     if [ "$1" = "--ruby" ] || [ "$1" = "-r" ]; then
@@ -87,66 +86,62 @@ except ImportError as e:
 }
 
 msf_venom() {
-    echo "🐍 MSF Venom - Payload Generator"
-    if [ -f "$MSF_ROOT/msfvenom.py" ]; then
-        echo "Using Python version..."
-        python3 "$MSF_ROOT/msfvenom.py" "$@"
-    else
-        echo "Using Ruby version..."
-        "$MSF_ROOT/msfvenom" "$@"
-    fi
+    echo "[*] MsfVenom - Payload Generator (Python)"
+    "$MSF_ROOT/msfvenom" "$@"
 }
 
 msf_db() {
-    echo "🐍 MSF Database Management"
+    echo "[*] MSF Database Management"
     "$MSF_ROOT/msfdb" "$@"
 }
 
 msf_rpc() {
-    echo "🐍 MSF RPC Server"
+    echo "[*] MSF RPC Server"
     "$MSF_ROOT/msfrpcd" "$@"
 }
 
 msf_update() {
-    echo "🐍 MSF Update"
+    echo "[*] MSF Update"
     "$MSF_ROOT/msfupdate" "$@"
 }
 
 msf_exploit() {
-    echo "🐍 Quick Exploit Launcher"
-    echo "Usage: msf_exploit <exploit_path> [options]"
     if [ -z "$1" ]; then
-        echo "Available exploits:"
-        find "$MSF_ROOT/modules/exploits" -name "*.py" | head -10
-        echo "... (use 'find $MSF_ROOT/modules/exploits -name \"*.py\"' for full list)"
+        echo "[*] Quick Exploit Launcher"
+        echo "Usage: msf_exploit <module_path> [--help] [options]"
+        echo ""
+        echo "Examples:"
+        echo "  msf_exploit exploits/example.py --help"
+        echo "  msf_exploit exploits/multi/http/struts_dmi_exec --rhost 192.168.1.1"
+        echo ""
+        echo "Recent Python exploits:"
+        find "$MSF_ROOT/modules/exploits" -name "*.py" -type f 2>/dev/null | head -10
+        return 0
+    fi
+    
+    local module_path="$1"
+    shift
+    
+    # Handle both full paths and relative module paths
+    local full_path
+    if [ -f "$module_path" ]; then
+        full_path="$module_path"
+    elif [ -f "$MSF_ROOT/modules/$module_path" ]; then
+        full_path="$MSF_ROOT/modules/$module_path"
+    elif [ -f "$MSF_ROOT/modules/${module_path}.py" ]; then
+        full_path="$MSF_ROOT/modules/${module_path}.py"
+    else
+        echo "[-] Module not found: $module_path"
+        echo "    Try: msf_search <keyword>"
         return 1
     fi
     
-    python3 -c "
-import sys
-import os
-
-# Get MSF_ROOT from environment to avoid shell escape sequences
-msf_root = os.environ.get('MSF_ROOT', '')
-if not msf_root:
-    print('Error: MSF_ROOT environment variable not set')
-    sys.exit(1)
-
-sys.path.insert(0, os.path.join(msf_root, 'lib'))
-sys.path.insert(0, msf_root)
-
-try:
-    from msf.core.exploit import Exploit
-    print(f'Loading exploit: $1')
-    # TODO: Implement exploit loading and execution
-    print('Exploit functionality coming soon!')
-except ImportError:
-    print('Python framework not ready, use msf_console for now')
-"
+    echo "[*] Running: $full_path"
+    python3 "$full_path" "$@"
 }
 
 msf_check() {
-    echo "🐍 Quick Vulnerability Check"
+    echo "[*] Quick Vulnerability Check"
     echo "Usage: msf_check <target> [exploit_path]"
     if [ -z "$1" ]; then
         echo "Please specify a target"
@@ -159,18 +154,41 @@ msf_check() {
 }
 
 msf_search() {
-    echo "🐍 MSF Module Search"
     if [ -z "$1" ]; then
-        echo "Usage: msf_search <search_term>"
-        return 1
+        echo "[*] MSF Module Search"
+        echo "Usage: msf_search <keyword>"
+        echo ""
+        echo "Categories:"
+        ls -1 "$MSF_ROOT/modules/" 2>/dev/null | grep -v README
+        return 0
     fi
     
-    echo "Searching for: $1"
-    find "$MSF_ROOT/modules" -name "*$1*" -type f | head -20
+    echo "[*] Searching modules for: $1"
+    echo ""
+    # Search Python modules first (preferred)
+    local py_results
+    py_results=$(find "$MSF_ROOT/modules" -name "*$1*.py" -type f 2>/dev/null | head -15)
+    if [ -n "$py_results" ]; then
+        echo "Python modules:"
+        echo "$py_results" | while read -r f; do
+            echo "  ${f#$MSF_ROOT/modules/}"
+        done
+        echo ""
+    fi
+    
+    # Also show Ruby modules for reference
+    local rb_results
+    rb_results=$(find "$MSF_ROOT/modules" -name "*$1*.rb" -type f 2>/dev/null | head -10)
+    if [ -n "$rb_results" ]; then
+        echo "Ruby modules (legacy):"
+        echo "$rb_results" | while read -r f; do
+            echo "  ${f#$MSF_ROOT/modules/}"
+        done
+    fi
 }
 
 msf_info() {
-    echo "🐍 MSF Environment Information"
+    echo "[*] MSF Environment Information"
     echo "MSF Root: $MSF_ROOT"
     echo "Python Path: $PYTHONPATH"
     echo "Database Config: $MSF_DATABASE_CONFIG"
@@ -178,6 +196,7 @@ msf_info() {
     echo "Plugin Paths: $MSF_PLUGIN_PATHS"
     echo ""
     echo "Available Commands:"
+    echo "  msf            - Bash-friendly stateful CLI (workspace file)"
     echo "  msf_console    - Start MSF console (Python-enhanced)"
     echo "  msf_venom      - Payload generator"
     echo "  msf_db         - Database management"
@@ -194,7 +213,7 @@ msf_info() {
 }
 
 msf_deactivate() {
-    echo "🐍 Deactivating MSF environment..."
+    echo "[*] Deactivating MSF environment..."
     
     # Restore original environment
     if [ -n "${MSF_ORIGINAL_PATH}" ]; then
@@ -236,18 +255,20 @@ if [ -f "$MSF_ROOT/tools/bish-please/bish.sh" ]; then
     source "$MSF_ROOT/tools/bish-please/bish.sh" 2>/dev/null
 fi
 
+# Enable bash completion for `msf` (interactive bash only)
+if [ -z "${MSF_NO_COMPLETION}" ] && [ -n "${BASH_VERSION}" ] && [[ $- == *i* ]]; then
+    if command -v msf >/dev/null 2>&1; then
+        eval "$(msf shell-init)" 2>/dev/null || true
+    fi
+fi
+
 # Show activation message
-echo "🐍 Metasploit Framework Environment Activated!"
+echo "[*] Metasploit Framework Environment Activated"
 echo ""
-echo "This gives you a Python virtual environment-like experience for MSF."
-echo "Type 'msf_info' for available commands or 'msf_console' to get started."
-echo ""
-echo "Traditional MSF commands (msfconsole, msfvenom, etc.) are still available"
-echo "and will show guidance toward the Python-enhanced versions."
+echo "    Python-native MSF - use 'msf_info' for commands"
 echo ""
 if [ -f "$MSF_ROOT/tools/bish-please/bish.sh" ]; then
-    echo "🚀 Bish-please navigation is available. Type 'bish' for quick navigation."
-    echo ""
+    echo "    bish-please navigation available ('bish')"
 fi
-echo "To deactivate: msf_deactivate"
+echo "    Deactivate: msf_deactivate"
 echo ""

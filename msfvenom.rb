@@ -15,6 +15,7 @@ unless ENV['MSF_QUIET'] || ARGV.include?('-q') || ARGV.include?('--quiet') || AR
   puts "="*70
   puts "  NOTE: This is the legacy Ruby version."
   puts "  For the primary Python-native experience, use:"
-  puts "    python3 msfvenom.py"
+  puts "    ./msfvenom"
+  puts "    # (compat wrapper: python3 msfvenom.py)"
   puts "="*70 + "\n"
 end

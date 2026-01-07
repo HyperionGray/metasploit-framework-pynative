@@ -75,6 +75,35 @@ msf_db status
 msf_rpc
 ```
 
+### Step 2.5: Bash-Friendly, Stateful Workflow (`msf`)
+
+This repo includes a small `msf` CLI that **persists state in a workspace file**
+so you can use normal shell pipes/loops while running modules.
+
+```bash
+# Pick a module (persists as the active module)
+msf use auxiliary/scanner/http/tomcat_enum
+
+# Set options (module-scoped by default)
+msf set RHOSTS 127.0.0.1
+msf set RPORT 80
+
+# Inspect options + current values
+msf show options
+
+# Run the active module
+msf run
+```
+
+Workspaces are stored under `~/.msf4/pynative/workspaces/` by default.
+You can override the base directory with `MSF_PYNATIVE_HOME`.
+
+If you're using bash, tab completion can be enabled with:
+
+```bash
+eval "$(msf shell-init)"
+```
+
 ### Step 3: Run Python Modules Directly
 
 You can also run Python exploit modules directly:

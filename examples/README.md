@@ -4,6 +4,24 @@ This directory contains example code demonstrating various features and integrat
 
 ## Examples
 
+### MSF CLI Smoke (`msf_cli_smoke.sh`)
+
+Quick sanity check for the bash-friendly, stateful `msf` CLI (no network actions; uses `--dry-run`).
+
+**Usage:**
+```bash
+./msf_cli_smoke.sh
+```
+
+### MsfVenom Stub ELF (`msfvenom_stub_elf.sh`)
+
+Generates a benign `-f elf` stub using `./msfvenom` and runs it (pipeline sanity check).
+
+**Usage:**
+```bash
+./msfvenom_stub_elf.sh
+```
+
 ### PF Task Example (`pf_task_example.py`)
 
 Demonstrates how to write exploits as PF (Pwntools Framework) tasks instead of traditional MSF modules.

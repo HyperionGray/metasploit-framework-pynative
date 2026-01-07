@@ -1,13 +1,17 @@
-# Transpiler Tools Directory
+# Transpiler Tools Directory (Legacy)
 
-This directory contains tools for converting between Ruby and Python code in the Metasploit Framework.
+This directory contains legacy/experimental conversion tooling.
+
+**Canonical conversion tools live at the repo root in `ruby2py/`.**
+Use that directory (or the small wrappers in `tools/`) as the single source of truth.
 
 ## Structure
 
-- `ruby2py/` - Tools for converting Ruby code to Python
-- `py2ruby/` - Tools for converting Python code to Ruby  
-- `shared/` - Common utilities used by both conversion directions
+- `ruby2py/` (repo root) - Ruby→Python converter (`ruby2py/convert.py`)
+- `ruby2py/py2ruby/` (repo root) - Python→Ruby transpiler (`ruby2py/py2ruby/transpiler.py`)
+- `tools/ruby2py_convert.py` - Convenience wrapper for Ruby→Python
+- `tools/py2ruby_transpiler.py` - Convenience wrapper for Python→Ruby
 
 ## Usage
 
-See individual subdirectory README files for specific usage instructions.
+See `ruby2py/README.md` for the up-to-date entry points and examples.

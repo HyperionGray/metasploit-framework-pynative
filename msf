@@ -1,0 +1,716 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+msf - Bash-friendly Metasploit (PyNative) CLI
+
+This CLI is intentionally *not* an interactive shell. It persists state in a
+workspace file so users can run normal bash/zsh pipelines and loops while still
+using Metasploit-style commands.
+"""
+
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import json
+import os
+import subprocess
+import sys
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, Iterable, Optional
+
+MSF_ROOT = Path(__file__).resolve().parent
+
+_TYPE_DIR_ALIASES = {
+    "exploit": "exploits",
+    "payload": "payloads",
+    "encoder": "encoders",
+    "nop": "nops",
+    "evasion": "evasions",
+}
+
+_SYNONYMS = {
+    # Common MSF-ish names -> common template names in this repo.
+    "rhosts": ("rhost",),
+    "rhost": ("rhosts",),
+    "lhosts": ("lhost",),
+    "lhost": ("lhosts",),
+}
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _normalize_key(key: str) -> str:
+    return key.strip().lower()
+
+
+def _pynative_home() -> Path:
+    # Keep separate from classic ~/.msf4 files, but colocate by default.
+    override = os.environ.get("MSF_PYNATIVE_HOME")
+    if override:
+        return Path(override).expanduser()
+    return Path.home() / ".msf4" / "pynative"
+
+
+def _config_path() -> Path:
+    return _pynative_home() / "config.json"
+
+
+def _workspaces_dir() -> Path:
+    return _pynative_home() / "workspaces"
+
+
+def _ensure_dirs() -> None:
+    _workspaces_dir().mkdir(parents=True, exist_ok=True)
+
+
+def _load_json(path: Path, default: Dict[str, Any]) -> Dict[str, Any]:
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+
+
+def _atomic_write_json(path: Path, data: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tmp.replace(path)
+
+
+def _load_config() -> Dict[str, Any]:
+    return _load_json(_config_path(), {"current_workspace": "default"})
+
+
+def _save_config(cfg: Dict[str, Any]) -> None:
+    _atomic_write_json(_config_path(), cfg)
+
+
+def _workspace_name_from_env_or_config(cli_workspace: Optional[str]) -> str:
+    if cli_workspace:
+        return cli_workspace
+    env = os.environ.get("MSF_WORKSPACE")
+    if env:
+        return env
+    return str(_load_config().get("current_workspace", "default"))
+
+
+def _workspace_path(name: str) -> Path:
+    safe = "".join(c for c in name if c.isalnum() or c in ("-", "_", "."))
+    if not safe:
+        safe = "default"
+    return _workspaces_dir() / f"{safe}.json"
+
+
+def _new_workspace_state(name: str) -> Dict[str, Any]:
+    return {
+        "version": 1,
+        "name": name,
+        "created_at": _now_iso(),
+        "updated_at": _now_iso(),
+        "active_module": None,
+        "global_datastore": {},
+        "modules": {},
+    }
+
+
+def _load_workspace(name: str) -> Dict[str, Any]:
+    _ensure_dirs()
+    path = _workspace_path(name)
+    if not path.exists():
+        state = _new_workspace_state(name)
+        _atomic_write_json(path, state)
+        return state
+    state = _load_json(path, _new_workspace_state(name))
+    # Ensure minimal schema.
+    state.setdefault("version", 1)
+    state.setdefault("name", name)
+    state.setdefault("active_module", None)
+    state.setdefault("global_datastore", {})
+    state.setdefault("modules", {})
+    return state
+
+
+def _save_workspace(state: Dict[str, Any]) -> None:
+    state["updated_at"] = _now_iso()
+    _atomic_write_json(_workspace_path(str(state.get("name", "default"))), state)
+
+
+def _rel_to_root(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(MSF_ROOT))
+    except Exception:
+        return str(path.resolve())
+
+
+def _pythonpath_parts() -> Iterable[str]:
+    return (
+        str(MSF_ROOT / "lib" / "msf" / "core" / "modules" / "external" / "python"),
+        str(MSF_ROOT / "python_framework"),
+        str(MSF_ROOT / "lib"),
+        str(MSF_ROOT),
+    )
+
+
+def _ensure_process_sys_path() -> None:
+    # Ensure in-process imports (for metadata inspection) work.
+    for part in reversed(list(_pythonpath_parts())):
+        if part not in sys.path:
+            sys.path.insert(0, part)
+
+
+def _subprocess_env() -> Dict[str, str]:
+    env = os.environ.copy()
+    env["MSF_ROOT"] = str(MSF_ROOT)
+    env["MSF_PYTHON_MODE"] = "1"
+    existing = env.get("PYTHONPATH", "")
+    prefix = ":".join(_pythonpath_parts())
+    env["PYTHONPATH"] = prefix + (":" + existing if existing else "")
+    return env
+
+
+def _resolve_module_ref(module_ref: str) -> Path:
+    candidate = Path(module_ref)
+    if candidate.is_file():
+        if candidate.suffix.lower() != ".py":
+            raise FileNotFoundError(f"Only Python modules are supported (got {candidate.suffix}): {module_ref}")
+        return candidate.resolve()
+
+    ref = module_ref.strip().lstrip("/")
+    if ref.startswith("modules/"):
+        ref = ref[len("modules/") :]
+
+    parts = list(Path(ref).parts)
+    if parts:
+        parts[0] = _TYPE_DIR_ALIASES.get(parts[0], parts[0])
+    rel = Path(*parts)
+
+    base = MSF_ROOT / "modules" / rel
+    if base.is_file():
+        if base.suffix.lower() != ".py":
+            raise FileNotFoundError(f"Only Python modules are supported (got {base.suffix}): {module_ref}")
+        return base.resolve()
+    if base.suffix == "":
+        py = base.with_suffix(".py")
+        if py.is_file():
+            return py.resolve()
+        rb = base.with_suffix(".rb")
+        if rb.is_file():
+            raise FileNotFoundError(
+                f"Only Python modules are supported (Ruby module exists): {module_ref} -> {_rel_to_root(rb)}"
+            )
+
+    raise FileNotFoundError(f"Module not found: {module_ref}")
+
+
+@dataclass(frozen=True)
+class ModuleInfo:
+    path: Path
+    metadata: Dict[str, Any]
+
+    @property
+    def options(self) -> Dict[str, Dict[str, Any]]:
+        opts = self.metadata.get("options", {})
+        return opts if isinstance(opts, dict) else {}
+
+
+def _load_module_metadata(module_path: Path) -> ModuleInfo:
+    _ensure_process_sys_path()
+    spec = importlib.util.spec_from_file_location("msf_target_module", module_path)
+    if not spec or not spec.loader:
+        raise RuntimeError(f"Unable to load module: {module_path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    meta = getattr(mod, "metadata", None)
+    if not isinstance(meta, dict):
+        raise RuntimeError(f"Module does not expose dict `metadata`: {module_path}")
+    return ModuleInfo(path=module_path, metadata=meta)
+
+
+def _effective_datastore(state: Dict[str, Any], module_key: Optional[str]) -> Dict[str, Any]:
+    global_ds = state.get("global_datastore", {}) or {}
+    effective: Dict[str, Any] = {str(_normalize_key(k)): v for k, v in global_ds.items()}
+    if not module_key:
+        return effective
+    mod = (state.get("modules", {}) or {}).get(module_key, {}) or {}
+    mod_ds = mod.get("datastore", {}) or {}
+    for k, v in mod_ds.items():
+        effective[str(_normalize_key(k))] = v
+    return effective
+
+
+def _print_kv(title: str, value: Any) -> None:
+    print(f"{title}: {value}")
+
+
+def cmd_workspace(args: argparse.Namespace) -> int:
+    name = _workspace_name_from_env_or_config(args.workspace)
+
+    if args.subcommand == "list":
+        _ensure_dirs()
+        for ws in sorted(_workspaces_dir().glob("*.json")):
+            print(ws.stem)
+        return 0
+
+    if args.subcommand == "use":
+        if not args.name:
+            print("workspace use: missing NAME", file=sys.stderr)
+            return 2
+        cfg = _load_config()
+        cfg["current_workspace"] = args.name
+        _save_config(cfg)
+        _load_workspace(args.name)  # create if missing
+        print(args.name)
+        return 0
+
+    if args.subcommand == "show":
+        state = _load_workspace(name)
+        _print_kv("workspace", state.get("name", name))
+        _print_kv("active_module", state.get("active_module"))
+        return 0
+
+    # Default: print current workspace name.
+    print(name)
+    return 0
+
+
+def cmd_status(args: argparse.Namespace) -> int:
+    name = _workspace_name_from_env_or_config(args.workspace)
+    state = _load_workspace(name)
+    _print_kv("workspace", state.get("name", name))
+    _print_kv("active_module", state.get("active_module"))
+    _print_kv("global_keys", len((state.get("global_datastore", {}) or {}).keys()))
+    if state.get("active_module"):
+        mod_key = str(state["active_module"])
+        mod_state = (state.get("modules", {}) or {}).get(mod_key, {}) or {}
+        _print_kv("module_keys", len((mod_state.get("datastore", {}) or {}).keys()))
+    return 0
+
+
+def cmd_search(args: argparse.Namespace) -> int:
+    term = args.term.lower()
+    modules_dir = MSF_ROOT / "modules"
+    if not modules_dir.exists():
+        print(f"Modules directory not found: {modules_dir}", file=sys.stderr)
+        return 2
+
+    hits = 0
+    for path in sorted(modules_dir.rglob("*.py")):
+        rel = str(path.relative_to(modules_dir))
+        if term in rel.lower():
+            print(rel)
+            hits += 1
+            if args.limit and hits >= args.limit:
+                break
+    return 0 if hits else 1
+
+
+def cmd_use(args: argparse.Namespace) -> int:
+    name = _workspace_name_from_env_or_config(args.workspace)
+    state = _load_workspace(name)
+    try:
+        resolved = _resolve_module_ref(args.module)
+    except FileNotFoundError as e:
+        print(str(e), file=sys.stderr)
+        return 2
+    module_key = _rel_to_root(resolved)
+    state["active_module"] = module_key
+    state.setdefault("modules", {}).setdefault(module_key, {"datastore": {}})
+    _save_workspace(state)
+    print(module_key)
+    return 0
+
+
+def cmd_set(args: argparse.Namespace) -> int:
+    name = _workspace_name_from_env_or_config(args.workspace)
+    state = _load_workspace(name)
+    key = _normalize_key(args.key)
+
+    target: Dict[str, Any]
+    if args.global_scope:
+        target = state.setdefault("global_datastore", {})
+    else:
+        module_key = state.get("active_module")
+        if not module_key:
+            print("No active module. Use: msf use <module>", file=sys.stderr)
+            return 2
+        mod = state.setdefault("modules", {}).setdefault(str(module_key), {"datastore": {}})
+        target = mod.setdefault("datastore", {})
+
+    target[key] = args.value
+    _save_workspace(state)
+    print(f"{key} => {args.value}")
+    return 0
+
+
+def cmd_unset(args: argparse.Namespace) -> int:
+    name = _workspace_name_from_env_or_config(args.workspace)
+    state = _load_workspace(name)
+    key = _normalize_key(args.key)
+
+    target: Dict[str, Any]
+    if args.global_scope:
+        target = state.setdefault("global_datastore", {})
+    else:
+        module_key = state.get("active_module")
+        if not module_key:
+            print("No active module. Use: msf use <module>", file=sys.stderr)
+            return 2
+        mod = state.setdefault("modules", {}).setdefault(str(module_key), {"datastore": {}})
+        target = mod.setdefault("datastore", {})
+
+    if key in target:
+        del target[key]
+        _save_workspace(state)
+        return 0
+    return 1
+
+
+def cmd_show(args: argparse.Namespace) -> int:
+    if args.what != "options":
+        print(f"Unknown show target: {args.what}", file=sys.stderr)
+        return 2
+
+    name = _workspace_name_from_env_or_config(args.workspace)
+    state = _load_workspace(name)
+    module_key = state.get("active_module")
+    if not module_key:
+        print("No active module. Use: msf use <module>", file=sys.stderr)
+        return 2
+
+    module_path = _resolve_module_ref(str(module_key))
+    try:
+        info = _load_module_metadata(module_path)
+    except Exception as e:
+        print(f"Failed to load module metadata: {e}", file=sys.stderr)
+        print(f"Module: {_rel_to_root(module_path)}", file=sys.stderr)
+        return 2
+    effective = _effective_datastore(state, str(module_key))
+
+    print(f"Module: {_rel_to_root(module_path)}")
+    print("")
+    print(f"{'Name':<22} {'Current':<18} {'Default':<10} {'Required':<8} Description")
+    print("-" * 90)
+    for opt_name, props in sorted(info.options.items()):
+        norm = _normalize_key(opt_name)
+        current = effective.get(norm)
+        if current is None:
+            for alt in _SYNONYMS.get(norm, ()):
+                if alt in effective:
+                    current = effective[alt]
+                    break
+        default = props.get("default", "")
+        required = "yes" if bool(props.get("required", False)) else "no"
+        desc = str(props.get("description", "")).strip().replace("\n", " ")
+        print(f"{opt_name:<22} {str(current)[:17]:<18} {str(default)[:9]:<10} {required:<8} {desc}")
+    return 0
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    name = _workspace_name_from_env_or_config(args.workspace)
+    state = _load_workspace(name)
+    module_key = state.get("active_module")
+    if not module_key:
+        print("No active module. Use: msf use <module>", file=sys.stderr)
+        return 2
+
+    module_path = _resolve_module_ref(str(module_key))
+    try:
+        info = _load_module_metadata(module_path)
+    except Exception as e:
+        print(f"Failed to load module metadata: {e}", file=sys.stderr)
+        print(f"Module: {_rel_to_root(module_path)}", file=sys.stderr)
+        return 2
+    effective = _effective_datastore(state, str(module_key))
+
+    argv: list[str] = ["python3", str(module_path)]
+    for opt_name, props in info.options.items():
+        norm = _normalize_key(opt_name)
+        value = effective.get(norm)
+        if value is None:
+            for alt in _SYNONYMS.get(norm, ()):
+                if alt in effective:
+                    value = effective[alt]
+                    break
+        if value is None:
+            continue
+        # Let module-side argparse do type conversions/validation.
+        argv.extend([f"--{opt_name.replace('_', '-')}", str(value)])
+
+    if args.dry_run:
+        print(" ".join(argv))
+        return 0
+
+    env = _subprocess_env()
+    try:
+        proc = subprocess.run(argv, env=env)
+    except Exception as e:
+        print(f"Failed to start module process: {e}", file=sys.stderr)
+        return 2
+    # Save last run info for basic UX/debugging.
+    mod = state.setdefault("modules", {}).setdefault(str(module_key), {"datastore": {}})
+    mod["last_run_at"] = _now_iso()
+    mod["last_exit_code"] = int(proc.returncode)
+    _save_workspace(state)
+    return int(proc.returncode)
+
+def cmd_shell_init(args: argparse.Namespace) -> int:
+    # Bash-only for now.
+    if args.shell and args.shell != "bash":
+        print(f"Unsupported shell: {args.shell}", file=sys.stderr)
+        return 2
+
+    script = r"""# msf shell integration (bash)
+# Usage:
+#   eval "$(msf shell-init)"
+_msf_completion() {
+  local cur
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  # Ask msf for completions. One completion per line.
+  mapfile -t COMPREPLY < <(command msf _complete "${COMP_CWORD}" "${COMP_WORDS[@]}" 2>/dev/null)
+  # If msf returns nothing, fall back to default completion behavior.
+  if [ "${#COMPREPLY[@]}" -eq 0 ]; then
+    COMPREPLY=()
+    return 0
+  fi
+}
+complete -o default -F _msf_completion msf
+"""
+    print(script)
+    return 0
+
+
+def _list_workspaces() -> list[str]:
+    _ensure_dirs()
+    return sorted({p.stem for p in _workspaces_dir().glob("*.json")})
+
+
+def _complete_modules(prefix: str) -> list[str]:
+    modules_dir = MSF_ROOT / "modules"
+    if not modules_dir.exists():
+        return []
+
+    raw = prefix.lstrip("/")
+    if raw.startswith("modules/"):
+        raw = raw[len("modules/") :]
+
+    dir_part = ""
+    frag = raw
+    if "/" in raw:
+        dir_part, frag = raw.rsplit("/", 1)
+        dir_part = dir_part + "/"
+
+    base_dir = modules_dir / dir_part
+    if not base_dir.exists() or not base_dir.is_dir():
+        # If the user is typing a type alias (exploit/, payload/, ...), translate for lookup.
+        parts = raw.split("/", 1)
+        if parts and parts[0] in _TYPE_DIR_ALIASES:
+            translated = _TYPE_DIR_ALIASES[parts[0]] + ("/" + parts[1] if len(parts) > 1 else "")
+            return _complete_modules(translated)
+        return []
+
+    candidates: list[str] = []
+    try:
+        for entry in sorted(base_dir.iterdir(), key=lambda p: p.name):
+            if entry.name.startswith("."):
+                continue
+            if entry.is_dir():
+                candidates.append(f"{dir_part}{entry.name}/")
+                continue
+            if entry.is_file() and entry.suffix.lower() == ".py":
+                candidates.append(f"{dir_part}{entry.stem}")
+    except Exception:
+        return []
+
+    # Top-level: offer type aliases for canonical directories.
+    if dir_part == "":
+        for alias, canonical in _TYPE_DIR_ALIASES.items():
+            if (modules_dir / canonical).is_dir():
+                candidates.append(f"{alias}/")
+
+    # Filter by what the user has typed.
+    return sorted({c for c in candidates if c.startswith(raw)})
+
+
+def cmd__complete(args: argparse.Namespace) -> int:
+    """
+    Internal completion helper for bash.
+
+    Called as:
+      msf _complete <cword> <words...>
+    """
+    try:
+        cword = int(args.cword)
+    except Exception:
+        return 0
+
+    words = args.words
+    if not words or words[0] != "msf":
+        return 0
+
+    cur = words[cword] if 0 <= cword < len(words) else ""
+    prev = words[cword - 1] if cword - 1 >= 0 and cword - 1 < len(words) else ""
+
+    # Complete global options.
+    global_opts = ["-h", "--help", "-w", "--workspace"]
+    if cur.startswith("-"):
+        for opt in global_opts:
+            if opt.startswith(cur):
+                print(opt)
+        return 0
+
+    if prev in ("-w", "--workspace"):
+        for name in _list_workspaces():
+            if name.startswith(cur):
+                print(name)
+        return 0
+
+    # Determine command (first non-option after argv[0]).
+    cmd = None
+    for w in words[1:]:
+        if not w or w.startswith("-"):
+            continue
+        cmd = w
+        break
+
+    commands = ["workspace", "status", "search", "use", "set", "unset", "show", "run", "shell-init"]
+    if cmd is None or (cword == 1 and cur):
+        for c in commands:
+            if c.startswith(cur):
+                print(c)
+        return 0
+
+    if cmd == "workspace":
+        # msf workspace [list|use|show]
+        if len(words) <= 2 or cword == 2:
+            for subc in ("list", "use", "show"):
+                if subc.startswith(cur):
+                    print(subc)
+            return 0
+        if len(words) >= 3 and words[2] == "use" and cword == 3:
+            for name in _list_workspaces():
+                if name.startswith(cur):
+                    print(name)
+            return 0
+        return 0
+
+    if cmd == "use" and cword == 2:
+        for m in _complete_modules(cur):
+            print(m)
+        return 0
+
+    if cmd in ("set", "unset") and cword == 2:
+        # Offer option names from active module, if any.
+        ws = _workspace_name_from_env_or_config(None)
+        state = _load_workspace(ws)
+        module_key = state.get("active_module")
+        if not module_key:
+            return 0
+        try:
+            info = _load_module_metadata(_resolve_module_ref(str(module_key)))
+        except Exception:
+            return 0
+        keys = sorted(info.options.keys())
+        # Include common synonyms.
+        for k in list(keys):
+            norm = _normalize_key(k)
+            for syn in _SYNONYMS.get(norm, ()):
+                if syn not in keys:
+                    keys.append(syn)
+        for k in sorted(set(keys)):
+            if str(k).startswith(cur):
+                print(k)
+        return 0
+
+    if cmd == "show" and cword == 2:
+        if "options".startswith(cur):
+            print("options")
+        return 0
+
+    if cmd == "run" and cword == 2:
+        if "--dry-run".startswith(cur):
+            print("--dry-run")
+        return 0
+
+    if cmd == "shell-init" and cword == 2:
+        # Future-proofing for multi-shell support.
+        if "--shell".startswith(cur):
+            print("--shell")
+        return 0
+
+    return 0
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(prog="msf", description="Metasploit (PyNative) - bash-friendly CLI")
+    p.add_argument("-w", "--workspace", help="Workspace name (default: config/MSF_WORKSPACE)")
+
+    sub = p.add_subparsers(dest="command", required=True)
+
+    sp = sub.add_parser("workspace", help="Manage workspaces")
+    sp.set_defaults(func=cmd_workspace)
+    sp_sub = sp.add_subparsers(dest="subcommand")
+    sp_sub.add_parser("list", help="List workspaces").set_defaults(subcommand="list")
+    sp_use = sp_sub.add_parser("use", help="Select workspace")
+    sp_use.add_argument("name", nargs="?")
+    sp_use.set_defaults(subcommand="use")
+    sp_sub.add_parser("show", help="Show workspace status").set_defaults(subcommand="show")
+
+    sp = sub.add_parser("status", help="Show current state")
+    sp.set_defaults(func=cmd_status)
+
+    sp = sub.add_parser("search", help="Search modules by path substring")
+    sp.add_argument("term")
+    sp.add_argument("--limit", type=int, default=50)
+    sp.set_defaults(func=cmd_search)
+
+    sp = sub.add_parser("use", help="Select active module")
+    sp.add_argument("module", help="Module path or reference under modules/")
+    sp.set_defaults(func=cmd_use)
+
+    sp = sub.add_parser("set", help="Set an option (module-scoped by default)")
+    sp.add_argument("key")
+    sp.add_argument("value")
+    sp.add_argument("-g", "--global", dest="global_scope", action="store_true", help="Set global datastore")
+    sp.set_defaults(func=cmd_set)
+
+    sp = sub.add_parser("unset", help="Unset an option (module-scoped by default)")
+    sp.add_argument("key")
+    sp.add_argument("-g", "--global", dest="global_scope", action="store_true", help="Unset from global datastore")
+    sp.set_defaults(func=cmd_unset)
+
+    sp = sub.add_parser("show", help="Show module information")
+    sp.add_argument("what", choices=["options"])
+    sp.set_defaults(func=cmd_show)
+
+    sp = sub.add_parser("run", help="Run the active module")
+    sp.add_argument("--dry-run", action="store_true", help="Print the underlying python command and exit")
+    sp.set_defaults(func=cmd_run)
+
+    sp = sub.add_parser("shell-init", help="Print bash completion init script")
+    sp.add_argument("--shell", default="bash", help="Shell name (only bash supported)")
+    sp.set_defaults(func=cmd_shell_init)
+
+    sp = sub.add_parser("_complete", help=argparse.SUPPRESS)
+    sp.add_argument("cword")
+    sp.add_argument("words", nargs=argparse.REMAINDER)
+    sp.set_defaults(func=cmd__complete)
+
+    return p
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    return int(args.func(args))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

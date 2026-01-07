@@ -144,3 +144,12 @@ rspec.failures
 
 #Ignore any base disk store files
 db/modules_metadata_base.pstore
+
+# bish-please artifacts
+.bish-index
+.bish.sqlite
+**/.bish-index
+**/.bish.sqlite
+
+# local scratch/log file
+file.txt

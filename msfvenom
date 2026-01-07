@@ -10,10 +10,7 @@ import argparse
 import sys
 import os
 import signal
-import time
 import struct
-import base64
-import binascii
 from pathlib import Path
 
 class MsfVenomError(Exception):
@@ -61,7 +58,7 @@ class MsfVenom:
     def parse_args(self, args):
         """Parse command line arguments"""
         parser = argparse.ArgumentParser(
-            prog='msfvenom.py',
+            prog='msfvenom',
             description='MsfVenom - a Metasploit standalone payload generator (Python version).\n'
                        'Also a replacement for msfpayload and msfencode.',
             formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -146,10 +143,8 @@ class MsfVenom:
         parser.add_argument('datastore', nargs='*',
                           help='Datastore options in KEY=VALUE format')
         
-        try:
-            opts = parser.parse_args(args)
-        except SystemExit:
-            raise UsageError("Invalid arguments")
+        opts = parser.parse_args(args)
+        payload_arg_provided = ('-p' in args) or ('--payload' in args)
             
         # Process datastore options
         datastore = {}
@@ -167,12 +162,16 @@ class MsfVenom:
             opts.payload = 'stdin'
             
         if opts.payload == 'stdin' and not opts.list:
-            print("Attempting to read payload from STDIN...", file=sys.stderr)
             try:
-                if opts.timeout > 0:
-                    signal.alarm(opts.timeout)
-                opts.stdin = sys.stdin.buffer.read()
-                signal.alarm(0)
+                # Avoid hanging interactive users when they didn't explicitly
+                # ask to read a payload from stdin.
+                if (not payload_arg_provided) and sys.stdin.isatty():
+                    opts.stdin = None
+                else:
+                    if opts.timeout > 0:
+                        signal.alarm(opts.timeout)
+                    opts.stdin = sys.stdin.buffer.read()
+                    signal.alarm(0)
             except:
                 opts.stdin = b''
                 
@@ -246,5 +245,224 @@ class MsfVenom:
         
         output = "\n    Framework Executable Formats [--format <value>]\n"
         output += "    " + "=" * 50 + "\n\n"
+        for fmt in sorted(executable_formats):
+            output += f"    {fmt}\n"
+        output += "\n"
+
+        output += "\n    Framework Transform Formats [--format <value>]\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for fmt in sorted(transform_formats):
+            output += f"    {fmt}\n"
+        output += "\n"
+        return output
+
+    def _dump_module_tree(self, base_dir: Path, title: str) -> str:
+        entries = []
+        if base_dir.exists():
+            for path in base_dir.rglob("*.py"):
+                if path.name.startswith("__"):
+                    continue
+                rel = path.relative_to(base_dir).with_suffix("")
+                entries.append(str(rel).replace(os.sep, "/"))
+
+        output = f"\n    {title}\n"
+        output += "    " + "=" * 50 + "\n\n"
+        for name in sorted(entries):
+            output += f"    {name}\n"
+        output += "\n"
+        return output
+
+    def dump_payloads(self) -> str:
+        return self._dump_module_tree(MSF_ROOT / "modules" / "payloads", "Framework Payloads [-p <value>]")
+
+    def dump_encoders(self) -> str:
+        return self._dump_module_tree(MSF_ROOT / "modules" / "encoders", "Framework Encoders [-e <value>]")
+
+    def dump_nops(self) -> str:
+        return self._dump_module_tree(MSF_ROOT / "modules" / "nops", "Framework NOP Generators")
 
 
+MSF_ROOT = Path(__file__).resolve().parent
+
+
+def _build_elf_linux_x86_64_stub(message: bytes) -> bytes:
+    """
+    Build a minimal Linux x86_64 ELF that prints `message` then exits(0).
+
+    This is intentionally a benign stub to validate output pipelines.
+    """
+    if not message.endswith(b"\n"):
+        message += b"\n"
+
+    # Layout:
+    #   ELF64_Ehdr (0x40)
+    #   ELF64_Phdr (0x38)
+    #   padding to 0x80
+    #   code + message
+    code_offset = 0x80
+
+    # Machine code (x86_64 Linux syscalls):
+    #   write(1, msg, len)
+    #   exit(0)
+    msg_len = len(message)
+    if msg_len > 0xFFFFFFFF:
+        raise ValueError("message too large")
+
+    code = bytearray()
+    code += b"\xb8\x01\x00\x00\x00"  # mov eax, 1
+    code += b"\xbf\x01\x00\x00\x00"  # mov edi, 1
+    # lea rsi, [rip+disp32] ; disp32 patched below
+    code += b"\x48\x8d\x35\x00\x00\x00\x00"
+    code += b"\xba" + struct.pack("<I", msg_len)  # mov edx, msg_len
+    code += b"\x0f\x05"  # syscall
+    code += b"\xb8\x3c\x00\x00\x00"  # mov eax, 60
+    code += b"\x31\xff"  # xor edi, edi
+    code += b"\x0f\x05"  # syscall
+
+    msg_offset_in_code = len(code)
+    next_ip_after_lea = 5 + 5 + 7  # offsets after lea instruction (from code start)
+    disp32 = msg_offset_in_code - next_ip_after_lea
+    code[5 + 5 + 3 : 5 + 5 + 7] = struct.pack("<i", disp32)
+
+    body = bytes(code) + message
+
+    # Pad headers up to code offset.
+    header_and_phdr_size = 0x40 + 0x38
+    if header_and_phdr_size > code_offset:
+        raise ValueError("invalid layout")
+    padding = b"\x00" * (code_offset - header_and_phdr_size)
+
+    file_size = code_offset + len(body)
+
+    # ELF header
+    e_ident = b"\x7fELF" + bytes([2, 1, 1, 0]) + b"\x00" * 8  # 64-bit, LE, v1, SYSV
+    ehdr = struct.pack(
+        "<16sHHIQQQIHHHHHH",
+        e_ident,
+        2,  # e_type: ET_EXEC
+        0x3E,  # e_machine: EM_X86_64
+        1,  # e_version
+        0x400000 + code_offset,  # e_entry
+        0x40,  # e_phoff
+        0,  # e_shoff
+        0,  # e_flags
+        0x40,  # e_ehsize
+        0x38,  # e_phentsize
+        1,  # e_phnum
+        0,  # e_shentsize
+        0,  # e_shnum
+        0,  # e_shstrndx
+    )
+
+    # Program header: single RX segment mapping the whole file at 0x400000.
+    phdr = struct.pack(
+        "<IIQQQQQQ",
+        1,  # p_type: PT_LOAD
+        5,  # p_flags: PF_R | PF_X
+        0,  # p_offset
+        0x400000,  # p_vaddr
+        0x400000,  # p_paddr
+        file_size,  # p_filesz
+        file_size,  # p_memsz
+        0x1000,  # p_align
+    )
+
+    return ehdr + phdr + padding + body
+
+
+def _write_output(out_path: str | None, output: bytes | str) -> None:
+    if out_path:
+        mode = "wb" if isinstance(output, (bytes, bytearray)) else "w"
+        with open(out_path, mode, encoding=None if mode == "wb" else "utf-8") as f:
+            f.write(output)
+        return
+
+    if isinstance(output, (bytes, bytearray)):
+        sys.stdout.buffer.write(output)
+        return
+    sys.stdout.write(output)
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = argv if argv is not None else sys.argv[1:]
+    venom = MsfVenom()
+
+    try:
+        opts = venom.parse_args(argv)
+    except SystemExit as e:
+        # argparse uses SystemExit(0) for --help and SystemExit(2) for parse errors.
+        code = e.code
+        return int(code) if isinstance(code, int) else 0
+
+    # Listing mode
+    if opts.list is not None:
+        requested = opts.list if opts.list else ["all"]
+        for kind in requested:
+            kind = (kind or "").lower()
+            if kind in ("platforms", "platform", "plats"):
+                sys.stdout.write(venom.dump_platforms())
+            elif kind in ("archs", "arch", "architectures"):
+                sys.stdout.write(venom.dump_archs())
+            elif kind in ("encrypt", "encryption"):
+                sys.stdout.write(venom.dump_encrypt())
+            elif kind in ("formats", "format"):
+                sys.stdout.write(venom.dump_formats())
+            elif kind in ("payloads", "payload"):
+                sys.stdout.write(venom.dump_payloads())
+            elif kind in ("encoders", "encoder"):
+                sys.stdout.write(venom.dump_encoders())
+            elif kind in ("nops", "nop"):
+                sys.stdout.write(venom.dump_nops())
+            elif kind == "all":
+                sys.stdout.write(venom.dump_payloads())
+                sys.stdout.write(venom.dump_encoders())
+                sys.stdout.write(venom.dump_nops())
+                sys.stdout.write(venom.dump_platforms())
+                sys.stdout.write(venom.dump_archs())
+                sys.stdout.write(venom.dump_encrypt())
+                sys.stdout.write(venom.dump_formats())
+            else:
+                print(f"Unknown list type: {kind}", file=sys.stderr)
+                return 1
+        return 0
+
+    if opts.list_options:
+        print("Listing payload options is not implemented in the Python version yet.", file=sys.stderr)
+        return 1
+
+    fmt = (opts.format or "raw").lower()
+
+    # Payload bytes (MVP: stdin only)
+    payload_bytes = b""
+    if getattr(opts, "stdin", None) is not None:
+        payload_bytes = opts.stdin
+    if opts.payload and opts.payload != "stdin":
+        print(
+            f"Payload generation is not implemented yet for: {opts.payload}\n"
+            "MVP workaround: supply raw bytes via stdin using `-p -`.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if fmt == "elf":
+        arch = (opts.arch or "x64").lower()
+        if arch in ("x64", "x86_64"):
+            msg = b"msfvenom stub (no payload generation)\n"
+            if payload_bytes:
+                msg = f"msfvenom stub (received {len(payload_bytes)} bytes on stdin)\n".encode("utf-8")
+            elf = _build_elf_linux_x86_64_stub(msg)
+            _write_output(opts.out, elf)
+            return 0
+        print(f"Unsupported --arch for -f elf in Python MVP: {opts.arch}", file=sys.stderr)
+        return 1
+
+    print(
+        "Payload generation/encoding is not implemented in the Python version yet.\n"
+        "Supported output for now: `-f elf` (benign stub ELF).",
+        file=sys.stderr,
+    )
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
