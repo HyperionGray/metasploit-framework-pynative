@@ -1,0 +1,88 @@
+# Dependabot configuration for automated dependency updates
+# See: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "HyperionGray/maintainers"
+    labels:
+      - "dependencies"
+      - "python"
+      - "automated"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Group minor and patch updates together to reduce PR noise
+    groups:
+      development-dependencies:
+        patterns:
+          - "pytest*"
+          - "flake8*"
+          - "black*"
+          - "isort*"
+          - "ipdb*"
+          - "sphinx*"
+          - "coverage*"
+          - "factory-boy*"
+          - "freezegun*"
+          - "pytest-*"
+        update-types:
+          - "minor"
+          - "patch"
+      security-dependencies:
+        patterns:
+          - "cryptography*"
+          - "requests*"
+          - "urllib3*"
+          - "flask*"
+        update-types:
+          - "patch"
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "HyperionGray/maintainers"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Docker dependencies (if applicable)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "HyperionGray/maintainers"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+
+# Ignore patterns (can be uncommented and customized as needed)
+# ignore:
+#   - dependency-name: "specific-package"
+#     versions: ["1.x", "2.x"]
