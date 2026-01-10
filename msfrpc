@@ -4,17 +4,25 @@
 """
 Metasploit Framework RPC Client - Python Native Version
 
+<<<<<<< HEAD
 This script provides a client interface to connect to the Metasploit
 RPC server.
+=======
+Python-native RPC client interface.
+>>>>>>> master
 
 Pure Python implementation.
 """
 
 import sys
+<<<<<<< HEAD
 import os
 import argparse
 import socket
 import ssl
+=======
+import argparse
+>>>>>>> master
 from pathlib import Path
 
 
@@ -22,6 +30,7 @@ def main():
     """Main entry point for msfrpc."""
     
     parser = argparse.ArgumentParser(
+<<<<<<< HEAD
         description='Metasploit Framework RPC Client - Python Native Version'
     )
     parser.add_argument('-H', '--host', default='127.0.0.1',
@@ -56,11 +65,50 @@ def main():
     print("    - Start server: msfrpcd")
     print("    - Use Python RPC library: pymetasploit3")
     print("    - Or connect via HTTP/HTTPS to RPC endpoint")
+=======
+        prog='msfrpc',
+        description='Metasploit Framework RPC Client - Python-native implementation',
+        epilog='This is a Python-native implementation. Ruby version has been removed.'
+    )
+    
+    parser.add_argument('-s', '--server', default='127.0.0.1',
+                       help='Connect to this RPC server (default: 127.0.0.1)')
+    parser.add_argument('-p', '--port', default=55553, type=int,
+                       help='Connect to this port (default: 55553)')
+    parser.add_argument('-u', '--user', default='msf',
+                       help='Username for authentication (default: msf)')
+    parser.add_argument('-P', '--password',
+                       help='Password for authentication')
+    parser.add_argument('-S', '--ssl', action='store_true',
+                       help='Use SSL/TLS connection')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                       help='Suppress banner output')
+    
+    args = parser.parse_args()
+    
+    if not args.quiet:
+        print("=" * 70)
+        print("  Metasploit Framework RPC Client - Python-Native")
+        print("=" * 70)
+        print()
+        print(f"  Server: {args.server}:{args.port}")
+        print(f"  SSL: {'Enabled' if args.ssl else 'Disabled'}")
+        print()
+    
+    print("🐍 Python-native RPC client")
+    print("RPC client functionality is under development.")
+    print()
+    print("For now, use the following alternatives:")
+    print("  - Python requests library with RPC API")
+    print("  - msfrpcd daemon with custom client")
+    print()
+    return 0
+>>>>>>> master
 
 
 if __name__ == "__main__":
     try:
-        main()
+        sys.exit(main())
     except KeyboardInterrupt:
         print("\nAborting...")
         sys.exit(1)

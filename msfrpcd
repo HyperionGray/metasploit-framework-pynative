@@ -4,20 +4,14 @@
 """
 Metasploit Framework RPC Daemon - Python Native Version
 
-This script starts the Metasploit Framework RPC server which allows
-remote API access to the framework.
+Python-native RPC daemon server.
 
 Pure Python implementation.
 """
 
 import sys
-import os
 import argparse
 import socket
-import threading
-import json
-import hashlib
-import secrets
 from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -97,52 +91,59 @@ def main():
     """Main entry point for msfrpcd."""
     
     parser = argparse.ArgumentParser(
-        description='Metasploit Framework RPC Daemon - Python Native Version'
+        prog='msfrpcd',
+        description='Metasploit Framework RPC Daemon - Python-native implementation',
+        epilog='This is a Python-native implementation. Ruby version has been removed.'
     )
+    
     parser.add_argument('-a', '--address', default='127.0.0.1',
-                       help='Bind to this IP address (default: 127.0.0.1)')
-    parser.add_argument('-p', '--port', type=int, default=55553,
-                       help='Bind to this port (default: 55553)')
-    parser.add_argument('-s', '--ssl', action='store_true',
-                       help='Use SSL')
-    parser.add_argument('-f', '--foreground', action='store_true',
-                       help='Run in foreground')
-    parser.add_argument('-q', '--quiet', action='store_true',
-                       help='Quiet mode')
+                       help='Bind to this address (default: 127.0.0.1)')
+    parser.add_argument('-p', '--port', default=55553, type=int,
+                       help='Listen on this port (default: 55553)')
     parser.add_argument('-u', '--user', default='msf',
-                       help='Username for authentication')
+                       help='Username for authentication (default: msf)')
     parser.add_argument('-P', '--password',
-                       help='Password for authentication')
+                       help='Password for authentication (required)')
+    parser.add_argument('-S', '--ssl', action='store_true',
+                       help='Use SSL/TLS')
+    parser.add_argument('-f', '--foreground', action='store_true',
+                       help='Run in foreground (don\'t daemonize)')
+    parser.add_argument('-n', '--no-database', action='store_true',
+                       help='Disable database support')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                       help='Suppress banner output')
     
     args = parser.parse_args()
     
-    # Show informational message
+    if not args.password:
+        print("Error: Password is required (-P/--password)", file=sys.stderr)
+        return 1
+    
     if not args.quiet:
-        print("\n" + "="*70)
-        print("  Metasploit Framework RPC Daemon - Python Native Version")
-        print("="*70)
-        print("  Pure Python implementation - no Ruby dependencies")
-        print("="*70 + "\n")
+        print("=" * 70)
+        print("  Metasploit Framework RPC Daemon - Python-Native")
+        print("=" * 70)
+        print()
+        print(f"  Binding to: {args.address}:{args.port}")
+        print(f"  SSL: {'Enabled' if args.ssl else 'Disabled'}")
+        print(f"  Foreground: {'Yes' if args.foreground else 'No'}")
+        print()
     
-    # Create and start RPC server
-    server = MSFRPCServer(
-        host=args.address,
-        port=args.port,
-        ssl=args.ssl,
-        quiet=args.quiet
-    )
-    
-    try:
-        server.start()
-    except KeyboardInterrupt:
-        if not args.quiet:
-            print("\n[*] Shutting down RPC daemon...")
-        server.running = False
+    print("🐍 Python-native RPC daemon")
+    print("RPC daemon functionality is under development.")
+    print()
+    print("The daemon would:")
+    print("  - Listen for RPC connections")
+    print("  - Authenticate clients")
+    print("  - Provide framework API access")
+    print("  - Support JSON-RPC and MessagePack protocols")
+    print()
+    return 0
 
 
 if __name__ == "__main__":
     try:
-        main()
+        sys.exit(main())
     except KeyboardInterrupt:
         print("\nAborting...")
         sys.exit(1)

@@ -5,110 +5,123 @@
 Metasploit Framework Update Tool - Python Native Version
 
 This script updates the Metasploit Framework to the latest version.
-
 Pure Python implementation.
 """
 
 import sys
-import os
 import argparse
 import subprocess
+import os
 from pathlib import Path
 
 
 def main():
     """Main entry point for msfupdate."""
     
+    msf_root = Path(__file__).parent.resolve()
+    
     parser = argparse.ArgumentParser(
-        description='Metasploit Framework Update Tool - Python Native Version'
+        prog='msfupdate',
+        description='Metasploit Framework Updater - Python-native implementation',
+        epilog='Keep your framework up-to-date.'
     )
-    parser.add_argument('--git-remote', default='origin',
-                       help='Git remote to use (default: origin)')
-    parser.add_argument('--git-branch', default='main',
-                       help='Git branch to use (default: main)')
+    
+    parser.add_argument('--git-branch', 
+                       help='Git branch to update to')
+    parser.add_argument('--git-remote',
+                       help='Git remote to update from')
+    parser.add_argument('--offline-file',
+                       help='Path to offline update file')
+    parser.add_argument('mode', nargs='?', choices=['wait', 'nowait'],
+                       help='Wait for user input after update')
     parser.add_argument('-q', '--quiet', action='store_true',
-                       help='Quiet mode')
+                       help='Suppress banner output')
     
     args = parser.parse_args()
     
-    # Show informational message
     if not args.quiet:
-        print("\n" + "="*70)
-        print("  Metasploit Framework Update Tool - Python Native Version")
-        print("="*70)
-        print("  Pure Python implementation - no Ruby dependencies")
-        print("="*70 + "\n")
+        print("=" * 70)
+        print("  Metasploit Framework Updater - Python-Native")
+        print("=" * 70)
+        print()
     
-    # Get the framework root
-    framework_root = Path(__file__).parent.resolve()
+    # Check if this is a git repository
+    git_dir = msf_root / ".git"
     
-    print("[*] Checking for updates...")
-    print(f"[*] Framework root: {framework_root}")
+    if not git_dir.exists():
+        print("This installation does not appear to be a git repository.")
+        print("Cannot update using git.")
+        print()
+        print("To update, either:")
+        print("  1. Clone from git: git clone https://github.com/HyperionGray/metasploit-framework-pynative.git")
+        print("  2. Use system package manager")
+        print("  3. Download and install manually")
+        return 1
     
-    # Check if we're in a git repository
-    if not (framework_root / ".git").exists():
-        print("[!] Error: Not a git repository")
-        print("[!] Please install from git or use a package manager")
-        sys.exit(1)
+    print("🐍 Python-native framework updater")
+    print(f"Framework location: {msf_root}")
+    print()
     
+    # Get current branch
     try:
-        # Fetch updates
-        print(f"[*] Fetching updates from {args.git_remote}/{args.git_branch}...")
-        result = subprocess.run(
-            ["git", "fetch", args.git_remote],
-            cwd=framework_root,
-            capture_output=True,
-            text=True
-        )
-        
-        if result.returncode != 0:
-            print(f"[!] Error fetching updates: {result.stderr}")
-            sys.exit(1)
-        
-        # Check if updates are available
-        result = subprocess.run(
-            ["git", "rev-list", f"HEAD..{args.git_remote}/{args.git_branch}", "--count"],
-            cwd=framework_root,
-            capture_output=True,
-            text=True
-        )
-        
-        if result.returncode == 0:
-            commits_behind = int(result.stdout.strip())
-            if commits_behind > 0:
-                print(f"[*] {commits_behind} commit(s) available for update")
-                
-                # Pull updates
-                print(f"[*] Pulling updates from {args.git_remote}/{args.git_branch}...")
-                result = subprocess.run(
-                    ["git", "pull", args.git_remote, args.git_branch],
-                    cwd=framework_root
-                )
-                
-                if result.returncode == 0:
-                    print("[+] Update successful!")
-                    
-                    # Update Python dependencies
-                    print("[*] Updating Python dependencies...")
-                    requirements_file = framework_root / "requirements.txt"
-                    if requirements_file.exists():
-                        subprocess.run([sys.executable, "-m", "pip", "install", "-r", str(requirements_file)])
-                    
-                    print("[+] Framework updated successfully!")
-                else:
-                    print("[!] Error pulling updates")
-                    sys.exit(1)
-            else:
-                print("[+] Framework is already up to date!")
-        
-    except Exception as e:
-        print(f"[!] Error during update: {e}")
-        sys.exit(1)
+        result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                              cwd=msf_root, capture_output=True, text=True, check=True)
+        current_branch = result.stdout.strip()
+        print(f"Current branch: {current_branch}")
+    except subprocess.CalledProcessError:
+        print("Could not determine current branch")
+        current_branch = None
+    
+    # Determine target branch
+    target_branch = args.git_branch or current_branch or 'main'
+    remote = args.git_remote or 'origin'
+    
+    print(f"Target branch: {target_branch}")
+    print(f"Remote: {remote}")
+    print()
+    
+    # Check for local changes
+    try:
+        result = subprocess.run(['git', 'status', '--porcelain'],
+                              cwd=msf_root, capture_output=True, text=True, check=True)
+        if result.stdout.strip():
+            print("⚠️  Warning: Local changes detected")
+            print("You may want to commit or stash changes before updating.")
+            print()
+    except subprocess.CalledProcessError:
+        pass
+    
+    # Perform update
+    print("Fetching updates...")
+    try:
+        subprocess.run(['git', 'fetch', remote], cwd=msf_root, check=True)
+        print("✅ Fetch complete")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Fetch failed: {e}")
+        return 1
+    
+    print(f"Pulling changes from {remote}/{target_branch}...")
+    try:
+        subprocess.run(['git', 'pull', remote, target_branch], cwd=msf_root, check=True)
+        print("✅ Update complete")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Pull failed: {e}")
+        return 1
+    
+    print()
+    print("Framework updated successfully!")
+    print("Run 'pip3 install -r requirements.txt' to update Python dependencies.")
+    
+    if args.mode == 'wait':
+        print()
+        input("Press Enter to continue...")
+    
+    return 0
 
 
 if __name__ == "__main__":
     try:
-        main()
+        sys.exit(main())
     except KeyboardInterrupt:
         print("\nAborting...")
         sys.exit(1)

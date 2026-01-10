@@ -7,8 +7,8 @@ This guide will help you get started with the Python-native Metasploit Framework
 ### Prerequisites
 
 - Python 3.8 or higher
-- Ruby 3.0 or higher (for legacy modules)
 - Git
+- PostgreSQL (optional, for database features)
 
 ### Clone the Repository
 
@@ -22,9 +22,6 @@ cd metasploit-framework-pynative
 ```bash
 # Install Python dependencies
 pip3 install -r requirements.txt
-
-# Install Ruby dependencies (for legacy modules)
-bundle install
 ```
 
 ## 🐍 Getting Started - The Preferred Way
