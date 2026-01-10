@@ -113,7 +113,7 @@ While Ruby files still exist in the repository, they are **NOT** used in the mai
 ## Compatibility Scripts Removed
 
 **Removed/Archived:**
-- `tools/modules/profile.sh` - Old Ruby profiling script (moved to `bak/`)
+- `tools/modules/profile.sh` - Old Ruby profiling script (moved to `bak/tools/modules/profile.sh.bak`)
 
 **Remaining but Not Used in Runtime:**
 - Transpiler scripts in `ruby2py/` - Development tools only

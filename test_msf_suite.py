@@ -8,6 +8,7 @@ and no Ruby compatibility scripts exist.
 
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 MSF_ROOT = Path(__file__).parent.resolve()
@@ -127,15 +128,30 @@ def main():
     print("Searching for Ruby execution calls in main executables...")
     ruby_exec_found = False
     
+    # Patterns to check for Ruby execution
+    ruby_patterns = [
+        'exec ruby', 'ruby ', '/usr/bin/ruby', '/usr/bin/env ruby',
+        'subprocess.run([\'ruby\'', 'subprocess.run(["ruby"',
+        'Popen([\'ruby\'', 'Popen(["ruby"'
+    ]
+    
     for exe in executables:
         exe_path = MSF_ROOT / exe
         if exe_path.exists():
             try:
                 with open(exe_path, 'r') as f:
                     content = f.read()
-                    if 'exec ruby' in content or 'ruby ' in content.split('\n')[0]:
-                        print(f"❌ {exe}: Found Ruby execution")
-                        ruby_exec_found = True
+                    for pattern in ruby_patterns:
+                        if pattern in content:
+                            # Check if it's in the shebang (which we already validated) or actual code
+                            lines = content.split('\n')
+                            for i, line in enumerate(lines):
+                                if pattern in line and i > 0:  # Skip shebang line
+                                    print(f"❌ {exe}: Found Ruby execution pattern: {pattern}")
+                                    ruby_exec_found = True
+                                    break
+                            if ruby_exec_found:
+                                break
             except Exception as e:
                 print(f"⚠️  {exe}: Could not read - {e}")
     
@@ -148,35 +164,46 @@ def main():
     # Test 6: Test msfvenom ELF generation
     print("\n\n## TEST 6: Testing msfvenom ELF Generation\n")
     
-    elf_test = subprocess.run(
-        ['./msfvenom', '-f', 'elf', '-a', 'x64', '-o', '/tmp/test_msf_elf.bin'],
-        cwd=MSF_ROOT,
-        capture_output=True,
-        text=True,
-        timeout=10
-    )
+    # Use tempfile for cross-platform compatibility
+    with tempfile.NamedTemporaryFile(suffix='.elf', delete=False) as tmp_elf:
+        tmp_elf_path = tmp_elf.name
     
-    if elf_test.returncode == 0:
-        elf_path = Path('/tmp/test_msf_elf.bin')
-        if elf_path.exists():
-            file_result = subprocess.run(
-                ['file', str(elf_path)],
-                capture_output=True,
-                text=True
-            )
-            if 'ELF' in file_result.stdout:
-                print("✅ msfvenom ELF generation successful")
-                print(f"File type: {file_result.stdout.strip()}")
-                results.append(True)
+    try:
+        elf_test = subprocess.run(
+            ['./msfvenom', '-f', 'elf', '-a', 'x64', '-o', tmp_elf_path],
+            cwd=MSF_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if elf_test.returncode == 0:
+            elf_path = Path(tmp_elf_path)
+            if elf_path.exists():
+                file_result = subprocess.run(
+                    ['file', str(elf_path)],
+                    capture_output=True,
+                    text=True
+                )
+                if 'ELF' in file_result.stdout:
+                    print("✅ msfvenom ELF generation successful")
+                    print(f"File type: {file_result.stdout.strip()}")
+                    results.append(True)
+                else:
+                    print("❌ Generated file is not an ELF")
+                    results.append(False)
             else:
-                print("❌ Generated file is not an ELF")
+                print("❌ ELF file was not created")
                 results.append(False)
         else:
-            print("❌ ELF file was not created")
+            print("❌ msfvenom ELF generation failed")
             results.append(False)
-    else:
-        print("❌ msfvenom ELF generation failed")
-        results.append(False)
+    finally:
+        # Clean up temporary file
+        try:
+            Path(tmp_elf_path).unlink(missing_ok=True)
+        except Exception:
+            pass
     
     # Summary
     print("\n\n" + "="*70)
