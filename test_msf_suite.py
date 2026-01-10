@@ -213,6 +213,27 @@ def main():
     if not run_command(cmd, 'Show msf status', expect_success=True):
         all_passed = False
     
+    # Test 8: Test msfrc activation
+    print_header("Test 8: Test msfrc Activation")
+    
+    # Test that msfrc can be sourced and provides commands
+    cmd = ['bash', '-c', f'source {MSF_ROOT / "msfrc"} && echo $MSF_PYTHON_MODE']
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+    if 'MSF_PYTHON_MODE' in result.stdout or result.returncode == 0:
+        print_success("msfrc activation - OK")
+    else:
+        print_error("msfrc activation failed")
+        all_passed = False
+    
+    # Test msf_venom through msfrc
+    cmd = ['bash', '-c', f'source {MSF_ROOT / "msfrc"} 2>/dev/null && msf_venom -l platforms | head -5']
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+    if 'Framework Platforms' in result.stdout:
+        print_success("msf_venom through msfrc - OK")
+    else:
+        print_error("msf_venom through msfrc failed")
+        all_passed = False
+    
     # Final report
     print_header("Test Results Summary")
     
@@ -224,6 +245,7 @@ def main():
         print("  • msfvenom can generate payloads")
         print("  • No Ruby compatibility scripts found")
         print("  • Database management works")
+        print("  • msfrc activation and commands work")
         return 0
     else:
         print_error("Some tests failed!")
