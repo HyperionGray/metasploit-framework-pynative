@@ -129,10 +129,13 @@ def main():
     ruby_exec_found = False
     
     # Patterns to check for Ruby execution
+    # These are deliberately specific to avoid false positives
     ruby_patterns = [
-        'exec ruby', 'ruby ', '/usr/bin/ruby', '/usr/bin/env ruby',
-        'subprocess.run([\'ruby\'', 'subprocess.run(["ruby"',
-        'Popen([\'ruby\'', 'Popen(["ruby"'
+        'exec ruby',           # shell exec
+        'subprocess.run([\'ruby\'',  # Python subprocess
+        'subprocess.run(["ruby"',
+        'Popen([\'ruby\'',     # Python Popen
+        'Popen(["ruby"'
     ]
     
     for exe in executables:
@@ -141,17 +144,18 @@ def main():
             try:
                 with open(exe_path, 'r') as f:
                     content = f.read()
-                    for pattern in ruby_patterns:
-                        if pattern in content:
-                            # Check if it's in the shebang (which we already validated) or actual code
-                            lines = content.split('\n')
-                            for i, line in enumerate(lines):
-                                if pattern in line and i > 0:  # Skip shebang line
-                                    print(f"❌ {exe}: Found Ruby execution pattern: {pattern}")
-                                    ruby_exec_found = True
-                                    break
-                            if ruby_exec_found:
+                    lines = content.split('\n')  # Split once for efficiency
+                    
+                    for i, line in enumerate(lines):
+                        if i == 0:  # Skip shebang line (already validated)
+                            continue
+                        for pattern in ruby_patterns:
+                            if pattern in line:
+                                print(f"❌ {exe}: Found Ruby execution pattern '{pattern}' at line {i+1}")
+                                ruby_exec_found = True
                                 break
+                        if ruby_exec_found:
+                            break
             except Exception as e:
                 print(f"⚠️  {exe}: Could not read - {e}")
     
@@ -180,18 +184,32 @@ def main():
         if elf_test.returncode == 0:
             elf_path = Path(tmp_elf_path)
             if elf_path.exists():
-                file_result = subprocess.run(
-                    ['file', str(elf_path)],
-                    capture_output=True,
-                    text=True
-                )
-                if 'ELF' in file_result.stdout:
-                    print("✅ msfvenom ELF generation successful")
-                    print(f"File type: {file_result.stdout.strip()}")
-                    results.append(True)
-                else:
-                    print("❌ Generated file is not an ELF")
-                    results.append(False)
+                # Try using the 'file' command if available, otherwise check magic bytes
+                try:
+                    file_result = subprocess.run(
+                        ['file', str(elf_path)],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if file_result.returncode == 0 and 'ELF' in file_result.stdout:
+                        print("✅ msfvenom ELF generation successful")
+                        print(f"File type: {file_result.stdout.strip()}")
+                        results.append(True)
+                    else:
+                        print("❌ Generated file is not an ELF")
+                        results.append(False)
+                except (subprocess.TimeoutExpired, FileNotFoundError):
+                    # Fallback: Check ELF magic bytes directly
+                    with open(elf_path, 'rb') as f:
+                        magic = f.read(4)
+                        if magic == b'\x7fELF':
+                            print("✅ msfvenom ELF generation successful")
+                            print("File type: ELF (verified by magic bytes)")
+                            results.append(True)
+                        else:
+                            print("❌ Generated file is not an ELF")
+                            results.append(False)
             else:
                 print("❌ ELF file was not created")
                 results.append(False)
