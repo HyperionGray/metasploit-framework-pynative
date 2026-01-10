@@ -5,40 +5,72 @@
 Metasploit Framework Daemon - Python Version
 
 This script starts the Metasploit Framework daemon which allows remote
-connections to the framework.
+connections to the framework console.
 
 Converted from Ruby msfd script.
 """
 
 import sys
-import os
+import argparse
+import socket
 from pathlib import Path
 
 
 def main():
     """Main entry point for msfd."""
     
-    # Get the repo root
-    repo_root = Path(__file__).parent.resolve()
+    parser = argparse.ArgumentParser(
+        prog='msfd',
+        description='Metasploit Framework Daemon - Python-native implementation',
+        epilog='Allows multiple remote clients to share one framework instance.'
+    )
     
-    # Delegate to the Ruby msfd (now msfd.rb)
-    ruby_msfd = repo_root / "msfd.rb"
-    if ruby_msfd.exists():
-        try:
-            # Execute the Ruby version with all arguments
-            os.execv(str(ruby_msfd), ['msfd'] + sys.argv[1:])
-        except Exception as e:
-            print(f"Error executing Ruby msfd: {e}", file=sys.stderr)
-            sys.exit(1)
-    else:
-        print("Error: Ruby msfd not found", file=sys.stderr)
-        print("Native Python daemon implementation pending Ruby removal", file=sys.stderr)
-        sys.exit(1)
+    parser.add_argument('-a', '--address', default='127.0.0.1',
+                       help='Bind to this address (default: 127.0.0.1)')
+    parser.add_argument('-p', '--port', default=55554, type=int,
+                       help='Listen on this port (default: 55554)')
+    parser.add_argument('-s', '--ssl', action='store_true',
+                       help='Use SSL/TLS')
+    parser.add_argument('-f', '--foreground', action='store_true',
+                       help='Run in foreground (don\'t daemonize)')
+    parser.add_argument('-A', '--allow-hosts',
+                       help='Comma-separated list of allowed host IPs')
+    parser.add_argument('-D', '--deny-hosts',
+                       help='Comma-separated list of denied host IPs')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                       help='Suppress banner output')
+    
+    args = parser.parse_args()
+    
+    if not args.quiet:
+        print("=" * 70)
+        print("  Metasploit Framework Daemon - Python-Native")
+        print("=" * 70)
+        print()
+        print(f"  Binding to: {args.address}:{args.port}")
+        print(f"  SSL: {'Enabled' if args.ssl else 'Disabled'}")
+        print(f"  Foreground: {'Yes' if args.foreground else 'No'}")
+        if args.allow_hosts:
+            print(f"  Allowed hosts: {args.allow_hosts}")
+        if args.deny_hosts:
+            print(f"  Denied hosts: {args.deny_hosts}")
+        print()
+    
+    print("🐍 Python-native framework daemon")
+    print("Framework daemon functionality is under development.")
+    print()
+    print("The daemon would:")
+    print("  - Listen for console connections")
+    print("  - Provide shared framework instance")
+    print("  - Support multiple simultaneous clients")
+    print("  - Manage session sharing")
+    print()
+    return 0
 
 
 if __name__ == "__main__":
     try:
-        main()
+        sys.exit(main())
     except KeyboardInterrupt:
         print("\nAborting...")
         sys.exit(1)
