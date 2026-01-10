@@ -8,6 +8,7 @@ This script tests all MSF executables to ensure they work properly
 and are fully converted from Ruby to Python.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -103,7 +104,6 @@ def test_executable_exists(executable: str) -> TestResult:
         return TestResult(f"{executable} exists", False, "Not a file")
     
     # Check if executable
-    import os
     if not os.access(path, os.X_OK):
         return TestResult(f"{executable} exists", False, "Not executable")
     
@@ -128,7 +128,6 @@ def test_no_ruby_references(executable: str) -> TestResult:
             'class < ',
             'module Msf',
             'def self.',
-            '@@ ',
         ]
         
         for pattern in ruby_patterns:

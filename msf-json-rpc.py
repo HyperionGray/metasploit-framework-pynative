@@ -36,7 +36,10 @@ if os.environ.get('MSF_LOCAL_LIB'):
 # Set environment variables
 os.environ['MSF_ROOT'] = str(MSF_ROOT)
 os.environ['MSF_PYTHON_MODE'] = '1'
+
 app = Flask(__name__)
+
+
 @app.route('/api/v1/health', methods=['GET'])
 def health():
     """Health check endpoint for warmup verification."""
