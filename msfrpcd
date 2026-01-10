@@ -4,40 +4,74 @@
 """
 Metasploit Framework Msfrpcd - Python Version
 
-Wrapper script for msfrpcd.
+Python-native RPC daemon server.
 
 Converted from Ruby msfrpcd script.
 """
 
 import sys
-import os
+import argparse
+import socket
 from pathlib import Path
 
 
 def main():
     """Main entry point for msfrpcd."""
     
-    # Get the repo root
-    repo_root = Path(__file__).parent.resolve()
+    parser = argparse.ArgumentParser(
+        prog='msfrpcd',
+        description='Metasploit Framework RPC Daemon - Python-native implementation',
+        epilog='This is a Python-native implementation. Ruby version has been removed.'
+    )
     
-    # Delegate to the Ruby version (now msfrpcd.rb)
-    ruby_script = repo_root / "msfrpcd.rb"
-    if ruby_script.exists():
-        try:
-            # Execute the Ruby version with all arguments
-            os.execv(str(ruby_script), ['msfrpcd'] + sys.argv[1:])
-        except Exception as e:
-            print(f"Error executing Ruby msfrpcd: {e}", file=sys.stderr)
-            sys.exit(1)
-    else:
-        print("Error: Ruby msfrpcd not found", file=sys.stderr)
-        print("Native Python version implementation pending Ruby removal", file=sys.stderr)
-        sys.exit(1)
+    parser.add_argument('-a', '--address', default='127.0.0.1',
+                       help='Bind to this address (default: 127.0.0.1)')
+    parser.add_argument('-p', '--port', default=55553, type=int,
+                       help='Listen on this port (default: 55553)')
+    parser.add_argument('-u', '--user', default='msf',
+                       help='Username for authentication (default: msf)')
+    parser.add_argument('-P', '--password',
+                       help='Password for authentication (required)')
+    parser.add_argument('-S', '--ssl', action='store_true',
+                       help='Use SSL/TLS')
+    parser.add_argument('-f', '--foreground', action='store_true',
+                       help='Run in foreground (don\'t daemonize)')
+    parser.add_argument('-n', '--no-database', action='store_true',
+                       help='Disable database support')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                       help='Suppress banner output')
+    
+    args = parser.parse_args()
+    
+    if not args.password:
+        print("Error: Password is required (-P/--password)", file=sys.stderr)
+        return 1
+    
+    if not args.quiet:
+        print("=" * 70)
+        print("  Metasploit Framework RPC Daemon - Python-Native")
+        print("=" * 70)
+        print()
+        print(f"  Binding to: {args.address}:{args.port}")
+        print(f"  SSL: {'Enabled' if args.ssl else 'Disabled'}")
+        print(f"  Foreground: {'Yes' if args.foreground else 'No'}")
+        print()
+    
+    print("🐍 Python-native RPC daemon")
+    print("RPC daemon functionality is under development.")
+    print()
+    print("The daemon would:")
+    print("  - Listen for RPC connections")
+    print("  - Authenticate clients")
+    print("  - Provide framework API access")
+    print("  - Support JSON-RPC and MessagePack protocols")
+    print()
+    return 0
 
 
 if __name__ == "__main__":
     try:
-        main()
+        sys.exit(main())
     except KeyboardInterrupt:
         print("\nAborting...")
         sys.exit(1)

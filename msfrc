@@ -46,15 +46,10 @@ export PS1="(msf) $MSF_ORIGINAL_PS1"
 # Define MSF command functions
 msf_console() {
     echo "[*] MSF Python Console"
-    echo "    For Ruby console: $MSF_ROOT/msfconsole --ruby"
     echo ""
     
-    if [ "$1" = "--ruby" ] || [ "$1" = "-r" ]; then
-        echo "Starting traditional Ruby console..."
-        "$MSF_ROOT/msfconsole" "${@:2}"
-    else
-        echo "Starting Python-enhanced console..."
-        python3 -c "
+    echo "Starting Python-native console..."
+    python3 -c "
 import sys
 import os
 
@@ -77,12 +72,14 @@ try:
     code.interact(local=globals())
 except ImportError as e:
     print(f'Error loading MSF Python framework: {e}')
-    print('Falling back to Ruby console...')
-    import subprocess
-    msfconsole_path = os.path.join(msf_root, 'msfconsole')
-    subprocess.run([msfconsole_path] + sys.argv[1:])
+    print('Framework module not yet fully implemented.')
+    print('')
+    print('For now, you can:')
+    print('  - Run modules directly: python3 modules/exploits/path/to/module.py --help')
+    print('  - Use msf_venom for payload generation')
+    print('  - Use msf_search to find modules')
+    sys.exit(1)
 " "$@"
-    fi
 }
 
 msf_venom() {
