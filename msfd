@@ -4,19 +4,15 @@
 """
 Metasploit Framework Daemon - Python Native Version
 
-This script starts the Metasploit Framework daemon which allows remote
-connections to the framework using native Python implementation.=======
-
+This script starts the Metasploit Framework daemon, allowing remote
+connections to the framework console through a native Python implementation.
 This is the primary daemon interface for the Metasploit Framework.
 """
 
 import sys
-import os
 import argparse
 import socket
 import threading
-import time
-from pathlib import Path
 
 
 class MsfDaemon:

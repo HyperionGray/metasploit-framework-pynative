@@ -5,7 +5,7 @@
 Metasploit Framework Update Tool - Python Native Version
 
 This script updates the Metasploit Framework to the latest version.
-Pure Python implementation.
+Pure Python implementation converted from the original Ruby msfupdate script.
 """
 
 import sys
