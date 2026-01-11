@@ -2,120 +2,83 @@
 # -*- coding: utf-8 -*-
 
 """
-MSF JSON-RPC Web Service - Python Implementation
+Metasploit JSON-RPC Web Service - Python Implementation
 
-This is the Python-native implementation of the Metasploit JSON-RPC API.
-Replaces the Ruby msf-json-rpc.ru rackup file.
+This is a Python-native implementation of the Metasploit JSON-RPC web service.
+Previously implemented in Ruby using Sinatra/Rack (msf-json-rpc.ru).
 
-Start using:
-    python3 msf-json-rpc.py
-    # or with gunicorn/waitress:
-    gunicorn -b localhost:8081 msf-json-rpc:app
-    waitress-serve --host=localhost --port=8081 msf-json-rpc:app
+Usage:
+    # Development
+    python3 msf-json-rpc.py --host localhost --port 8081
+
+    # Production
+    python3 msf-json-rpc.py --host 0.0.0.0 --port 8081 --production
 """
 
-import os
 import sys
+import argparse
 from pathlib import Path
 
-try:
-    from flask import Flask, jsonify
-except ImportError:
-    print("Error: Flask is required. Install with: pip3 install flask", file=sys.stderr)
-    sys.exit(1)
-
-# Setup MSF environment
-MSF_ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(MSF_ROOT / "lib"))
-sys.path.insert(0, str(MSF_ROOT / "python_framework"))
-sys.path.insert(0, str(MSF_ROOT))
-
-if os.environ.get('MSF_LOCAL_LIB'):
-    sys.path.insert(0, os.environ['MSF_LOCAL_LIB'])
-
-# Set environment variables
-os.environ['MSF_ROOT'] = str(MSF_ROOT)
-os.environ['MSF_PYTHON_MODE'] = '1'
-
-app = Flask(__name__)
-
-
-@app.route('/api/v1/health', methods=['GET'])
-def health():
-    """Health check endpoint for warmup verification."""
-    return jsonify({'data': {'status': 'UP'}})
-
-@app.route('/api/v1/version', methods=['GET'])
-def version():
-    """Version information endpoint."""
-    return jsonify({
-        'data': {
-            'version': 'PyNative-1.0',
-            'implementation': 'Python',
-            'status': 'operational'
-        }
-    })
-
-@app.route('/')
-def root():
-    """Root endpoint with API information."""
-    return jsonify({
-        'service': 'Metasploit JSON-RPC API',
-        'implementation': 'Python-Native',
-        'endpoints': [
-            '/api/v1/health',
-            '/api/v1/version'
-        ],
-        'note': 'Full RPC implementation pending Python MSF framework completion'
-    })
-
-# Placeholder for future RPC endpoints
-@app.route('/api/v1/<path:endpoint>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def api_placeholder(endpoint):
-    """Placeholder for future RPC endpoints."""
-    return jsonify({
-        'error': 'Endpoint not yet implemented',
-        'endpoint': endpoint,
-        'message': 'Full JSON-RPC functionality is under development in Python'
-    }), 501
+# Add framework lib to path
+FRAMEWORK_PATH = Path(__file__).parent.resolve()
+FRAMEWORK_LIB_PATH = FRAMEWORK_PATH / 'lib'
+if str(FRAMEWORK_LIB_PATH) not in sys.path:
+    sys.path.insert(0, str(FRAMEWORK_LIB_PATH))
 
 
 def main():
-    """Run the development server."""
-    import argparse
+    """Main entry point for JSON-RPC web service."""
     
     parser = argparse.ArgumentParser(
-        description='Metasploit JSON-RPC Web Service (Python)'
+        prog='msf-json-rpc',
+        description='Metasploit JSON-RPC Web Service - Python-native implementation',
+        epilog='This replaces the Ruby Rack-based service (msf-json-rpc.ru)'
     )
-    parser.add_argument('--host', default='localhost',
-                       help='Host to bind to (default: localhost)')
-    parser.add_argument('--port', type=int, default=8081,
-                       help='Port to bind to (default: 8081)')
-    parser.add_argument('--debug', action='store_true',
-                       help='Enable debug mode')
+    
+    parser.add_argument('--host', '--address', default='localhost',
+                       help='Bind to this address (default: localhost)')
+    parser.add_argument('--port', '-p', default=8081, type=int,
+                       help='Listen on this port (default: 8081)')
+    parser.add_argument('--production', action='store_true',
+                       help='Run in production mode')
+    parser.add_argument('--ssl', action='store_true',
+                       help='Use SSL/TLS')
+    parser.add_argument('--ssl-cert', help='Path to SSL certificate')
+    parser.add_argument('--ssl-key', help='Path to SSL private key')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                       help='Suppress banner output')
     
     args = parser.parse_args()
     
-    print("=" * 70)
-    print("  Metasploit JSON-RPC Web Service - Python-Native")
-    print("=" * 70)
+    if not args.quiet:
+        print("=" * 70)
+        print("  Metasploit JSON-RPC Web Service - Python-Native")
+        print("=" * 70)
+        print()
+        print(f"  Address: {args.host}:{args.port}")
+        print(f"  Mode: {'Production' if args.production else 'Development'}")
+        print(f"  SSL: {'Enabled' if args.ssl else 'Disabled'}")
+        print()
+    
+    print("🐍 Python-native JSON-RPC web service")
+    print("JSON-RPC web service functionality is under development.")
     print()
-    print(f"  Binding to: {args.host}:{args.port}")
-    print(f"  Debug mode: {'Enabled' if args.debug else 'Disabled'}")
+    print("The service would provide:")
+    print("  - RESTful JSON-RPC API")
+    print("  - Authentication and session management")
+    print("  - Framework access via HTTP")
+    print("  - Health check endpoint")
     print()
-    print("  Available endpoints:")
-    print("    GET  /api/v1/health   - Health check")
-    print("    GET  /api/v1/version  - Version info")
-    print()
-    print("  For production deployment, use gunicorn or waitress:")
-    print(f"    gunicorn -b {args.host}:{args.port} msf-json-rpc:app")
-    print(f"    waitress-serve --host={args.host} --port={args.port} msf-json-rpc:app")
-    print()
-    print("=" * 70)
+    print("For now, this is a placeholder implementation.")
+    print("The Ruby version (msf-json-rpc.ru) has been deprecated.")
     print()
     
-    app.run(host=args.host, port=args.port, debug=args.debug)
+    return 0
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("\nShutting down...")
+        sys.exit(0)

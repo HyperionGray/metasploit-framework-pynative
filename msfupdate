@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Metasploit Framework Msfupdate - Python Version
+Metasploit Framework Update Tool - Python Native Version
 
-Python-native framework update tool.
-
-Converted from Ruby msfupdate script.
+This script updates the Metasploit Framework to the latest version.
+Pure Python implementation converted from the original Ruby msfupdate script.
 """
 
 import sys

@@ -2,137 +2,187 @@
 # -*- coding: utf-8 -*-
 
 """
-Metasploit Framework Msfdb - Python Version
+Metasploit Framework Database Manager - Python Native Version
 
-Python-native database management tool.
-
-Converted from Ruby msfdb script.
+This script manages the Metasploit Framework database using a native Python
+implementation.
+This is the primary database management interface for the Metasploit Framework.
 """
 
-import sys
 import argparse
-import subprocess
-import os
+import sys
+import time
 from pathlib import Path
 
 
-def main():
-    """Main entry point for msfdb."""
-    
-    parser = argparse.ArgumentParser(
-        prog='msfdb',
-        description='Metasploit Framework Database Manager - Python-native implementation',
-        epilog='Manage the PostgreSQL database for Metasploit Framework.'
-    )
-    
-    parser.add_argument('command', nargs='?', default='status',
-                       choices=['init', 'start', 'stop', 'restart', 'status', 'delete', 'reinit'],
-                       help='Database command to execute (default: status)')
-    parser.add_argument('-q', '--quiet', action='store_true',
-                       help='Suppress banner output')
-    
-    args = parser.parse_args()
-    
-    if not args.quiet:
-        print("=" * 70)
-        print("  Metasploit Framework Database Manager - Python-Native")
-        print("=" * 70)
-        print()
-    
-    msf_config = Path.home() / ".msf4"
-    db_config = msf_config / "database.yml"
-    
-    print(f"🐍 Python-native database management")
-    print(f"Command: {args.command}")
-    print()
-    
-    if args.command == "status":
+class MsfDatabase:
+    """Python implementation of the Metasploit Database Manager"""
+
+    def __init__(self):
+        self.db_name = 'msf'
+        self.db_user = 'msf'
+        self.db_host = '127.0.0.1'
+        self.db_port = 5432
+        self.config_dir = Path.home() / '.msf4'
+        self.db_config = self.config_dir / 'database.yml'
+
+    def status(self):
+        """Check database configuration status"""
         print("Checking database status...")
-        if db_config.exists():
-            print(f"✅ Database config exists: {db_config}")
+
+        if self.db_config.exists():
+            print(f"✅ Database config exists: {self.db_config}")
             print("Database appears to be configured.")
-        else:
-            print(f"❌ No database config found at: {db_config}")
-            print("Run 'msfdb init' to initialize the database.")
-        
-    elif args.command == "init":
-        print("Initializing database...")
-        print("Note: This is a placeholder implementation.")
-        print("For full functionality, ensure PostgreSQL is installed and running.")
-        
-        if not msf_config.exists():
-            msf_config.mkdir(parents=True, exist_ok=True)
-            print(f"✅ Created config directory: {msf_config}")
-        
-        if not db_config.exists():
-            # Create a basic database config
-            config_content = """# Metasploit Framework Database Configuration
+            return True
+
+        print(f"❌ No database config found at: {self.db_config}")
+        print("Run 'msfdb init' to initialize the database.")
+        return False
+
+    def init(self):
+        """Initialize database configuration"""
+        print("Initializing Metasploit Framework database...")
+
+        if not self.config_dir.exists():
+            self.config_dir.mkdir(parents=True, exist_ok=True)
+            print(f"✅ Created config directory: {self.config_dir}")
+
+        config_content = f"""# Metasploit Framework Database Configuration
 # Python-native implementation
 
 development:
   adapter: postgresql
-  database: msf_dev
-  username: msf
-  password: msf
-  host: localhost
-  port: 5432
+  database: {self.db_name}_dev
+  username: {self.db_user}
+  password: changeme
+  host: {self.db_host}
+  port: {self.db_port}
   pool: 5
   timeout: 5
 
 production:
   adapter: postgresql
-  database: msf
-  username: msf
-  password: msf
-  host: localhost
-  port: 5432
+  database: {self.db_name}
+  username: {self.db_user}
+  password: changeme
+  host: {self.db_host}
+  port: {self.db_port}
   pool: 25
   timeout: 5
 
 test:
   adapter: postgresql
-  database: msf_test
-  username: msf
-  password: msf
-  host: localhost
-  port: 5432
+  database: {self.db_name}_test
+  username: {self.db_user}
+  password: changeme
+  host: {self.db_host}
+  port: {self.db_port}
   pool: 5
   timeout: 5
 """
-            db_config.write_text(config_content)
-            print(f"✅ Created database config: {db_config}")
-        else:
-            print(f"Database config already exists: {db_config}")
-        
-    elif args.command == "start":
+        self.db_config.write_text(config_content)
+        print(f"✅ Created database config: {self.db_config}")
+        print("Note: This is a placeholder implementation. PostgreSQL must still be installed separately.")
+
+    def start(self):
+        """Start database placeholder"""
         print("Starting database...")
-        print("Note: Use system PostgreSQL service management (systemctl/pg_ctl)")
-        
-    elif args.command == "stop":
+        print("Database start is not yet implemented in Python. Use your system PostgreSQL service (systemctl/pg_ctl).")
+
+    def stop(self):
+        """Stop database placeholder"""
         print("Stopping database...")
-        print("Note: Use system PostgreSQL service management (systemctl/pg_ctl)")
-        
-    elif args.command == "restart":
+        print("Database stop is not yet implemented in Python. Use your system PostgreSQL service (systemctl/pg_ctl).")
+
+    def restart(self):
+        """Restart database placeholder"""
         print("Restarting database...")
-        print("Note: Use system PostgreSQL service management (systemctl/pg_ctl)")
-        
-    elif args.command == "delete":
-        print("Deleting database...")
-        if db_config.exists():
-            db_config.unlink()
-            print(f"✅ Removed database config: {db_config}")
+        self.stop()
+        time.sleep(2)
+        self.start()
+
+    def delete(self):
+        """Delete database configuration"""
+        print("Deleting database configuration...")
+        if self.db_config.exists():
+            self.db_config.unlink()
+            print(f"✅ Removed database config: {self.db_config}")
         else:
-            print("No database config to delete.")
-    
-    elif args.command == "reinit":
-        print("Reinitializing database...")
-        if db_config.exists():
-            db_config.unlink()
-            print("✅ Removed old config")
-        # Then call init
-        print("Initializing new config...")
-        # Reuse init logic would go here
-        
+            print("No database config found to delete.")
+
+    def reinit(self):
+        """Reinitialize database configuration"""
+        print("Reinitializing database configuration...")
+        self.delete()
+        self.init()
+
+
+def main():
+    """Main entry point for msfdb."""
+
+    parser = argparse.ArgumentParser(
+        prog='msfdb',
+        description='Metasploit Framework Database Manager - Python-native implementation',
+        epilog='Manage the PostgreSQL database for Metasploit Framework.'
+    )
+    parser.add_argument('command', nargs='?', default='status',
+                        choices=['init', 'start', 'stop', 'restart', 'status', 'delete', 'reinit'],
+                        help='Database command to execute (default: status)')
+    parser.add_argument('-q', '--quiet', action='store_true',
+                        help='Suppress banner output')
+    parser.add_argument('-d', '--debug', action='store_true',
+                        help='Enable debug output')
+    parser.add_argument('--component', choices=['database', 'webservice', 'all'], default='database',
+                        help='Component to manage (database only is currently supported)')
+    parser.add_argument('--use-defaults', action='store_true',
+                        help='Use default values without prompting (not yet implemented)')
+
+    args = parser.parse_args()
+
+    if not args.quiet:
+        print("=" * 70)
+        print("  Metasploit Framework Database Manager - Python-Native")
+        print("=" * 70)
+        print()
+        print(f"  Command: {args.command}")
+        print(f"  Component: {args.component}")
+        if args.debug:
+            print("  Debug: Enabled")
+        if args.use_defaults:
+            print("  Using defaults where available")
+        print()
+
+    if args.component != 'database':
+        print(f"Component '{args.component}' is not yet supported; defaulting to database actions.")
+        print()
+
+    db_manager = MsfDatabase()
+
+    try:
+        if args.command == 'init':
+            db_manager.init()
+        elif args.command == 'start':
+            db_manager.start()
+        elif args.command == 'stop':
+            db_manager.stop()
+        elif args.command == 'restart':
+            db_manager.restart()
+        elif args.command == 'status':
+            db_manager.status()
+        elif args.command == 'delete':
+            db_manager.delete()
+        elif args.command == 'reinit':
+            db_manager.reinit()
+        else:
+            print(f"Unknown command: {args.command}")
+            return 1
+    except KeyboardInterrupt:
+        print("\n[*] Operation cancelled")
+        return 1
+    except Exception as exc:
+        print(f"[!] Error: {exc}")
+        return 1
+
     print()
     return 0
 
