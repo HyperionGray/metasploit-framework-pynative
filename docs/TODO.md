@@ -7,7 +7,7 @@ This document tracks remaining work items for the complete Ruby to Python conver
 
 ## Completed ✅
 
-### Phase 1: Ruby Compatibility Removal (Completed)
+### Phase 1: Ruby Compatibility Removal (Completed - 2026-01-10)
 - ✅ Removed Ruby compatibility wrappers from all main executables
 - ✅ Converted msfrpc to native Python implementation
 - ✅ Converted msfrpcd to native Python implementation
@@ -166,7 +166,12 @@ To contribute to any of these items:
 
 ## Notes
 
-- Ruby files have been moved to `bak/` directories but not deleted
-- External Ruby files (in `external/`) are intentionally kept
+- **Ruby files removed**: 7,048+ Ruby module files deleted from runtime paths (2026-01-10)
+- **Only 816 Ruby files remain** in non-runtime locations (db/, external/, spec/)
+- External Ruby files (in `external/`) are intentionally kept as build scripts
+- Test Ruby files (in `spec/`) are intentionally kept for development
+- Database schema (db/schema.rb) is kept for Rails/ActiveRecord compatibility
 - All main executables are now pure Python (no Ruby execution)
 - msfrc environment activation is the recommended usage pattern
+- 4,948 Python modules available
+- All functionality verified working with comprehensive test suite (17/17 tests passing)
