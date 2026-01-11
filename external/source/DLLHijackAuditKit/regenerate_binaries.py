@@ -17,12 +17,12 @@ def main():
     # Change to DLL directory
     os.chdir(dllbase)
     
-    # Generate binaries
+    # Generate binaries using Python msfvenom
     commands = [
-        ["ruby", msfv, "-p", "windows/exec", "CMD=calc.exe", "-f", "exe", "-o", "runcalc.exe"],
-        ["ruby", msfv, "-p", "windows/exec", "CMD=calc.exe", "-f", "dll", "-o", "runcalc.dll"],
-        ["ruby", msfv, "-p", "windows/exec", "CMD=cmd.exe /c echo yes > exploited.txt", "-f", "dll", "-o", "runtest.dll"],
-        ["ruby", msfv, "-p", "windows/exec", "CMD=cmd.exe /c echo yes > exploited.txt", "-f", "exe", "-o", "runtest.exe"],
+        ["python3", msfv, "-p", "windows/exec", "CMD=calc.exe", "-f", "exe", "-o", "runcalc.exe"],
+        ["python3", msfv, "-p", "windows/exec", "CMD=calc.exe", "-f", "dll", "-o", "runcalc.dll"],
+        ["python3", msfv, "-p", "windows/exec", "CMD=cmd.exe /c echo yes > exploited.txt", "-f", "dll", "-o", "runtest.dll"],
+        ["python3", msfv, "-p", "windows/exec", "CMD=cmd.exe /c echo yes > exploited.txt", "-f", "exe", "-o", "runtest.exe"],
     ]
     
     for cmd in commands:
