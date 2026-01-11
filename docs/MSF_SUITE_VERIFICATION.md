@@ -194,7 +194,7 @@ While there are still Ruby files in the repository (~825 files), they are:
 - **External dependencies** (`external/` directory) - third-party code not in execution path
 - **Test specifications** (`spec/` directory) - legacy test framework
 - **Data files** (`data/` directory) - auxiliary scripts and examples
-- **Documentation** (`docs/` directory) - Jekyll plugins for documentation site  
+- **Documentation** (`docs/` directory) - Jekyll plugins for documentation site
 - **Legacy modules** (`legacy/` directory) - preserved for reference only
 - **Database schema** (`db/schema.rb`) - database structure definition
 
