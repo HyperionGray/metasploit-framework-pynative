@@ -2,42 +2,42 @@
 # -*- coding: utf-8 -*-
 
 """
-Metasploit Framework Msfrpc - Python Version
+Metasploit Framework RPC Client - Python Native Version
 
-Python-native RPC client interface.
+This script provides a client interface to connect to the Metasploit
+RPC server using a Python-native implementation converted from the
+original Ruby client.
 
-Converted from Ruby msfrpc script.
+Pure Python implementation.
 """
 
-import sys
 import argparse
-from pathlib import Path
+import sys
 
 
 def main():
     """Main entry point for msfrpc."""
-    
+
     parser = argparse.ArgumentParser(
         prog='msfrpc',
         description='Metasploit Framework RPC Client - Python-native implementation',
-        epilog='This is a Python-native implementation. Ruby version has been removed.'
+        epilog='This is a Python-native implementation; the Ruby client has been removed.'
     )
-    
-    parser.add_argument('-s', '--server', default='127.0.0.1',
-                       help='Connect to this RPC server (default: 127.0.0.1)')
+    parser.add_argument('-s', '--server', '--host', dest='server', default='127.0.0.1',
+                        help='RPC server host (default: 127.0.0.1)')
     parser.add_argument('-p', '--port', default=55553, type=int,
-                       help='Connect to this port (default: 55553)')
+                        help='RPC server port (default: 55553)')
     parser.add_argument('-u', '--user', default='msf',
-                       help='Username for authentication (default: msf)')
+                        help='Username for authentication (default: msf)')
     parser.add_argument('-P', '--password',
-                       help='Password for authentication')
-    parser.add_argument('-S', '--ssl', action='store_true',
-                       help='Use SSL/TLS connection')
+                        help='Password for authentication')
+    parser.add_argument('-S', '--ssl', dest='ssl', action='store_true',
+                        help='Use SSL/TLS connection')
     parser.add_argument('-q', '--quiet', action='store_true',
-                       help='Suppress banner output')
-    
+                        help='Suppress banner output')
+
     args = parser.parse_args()
-    
+
     if not args.quiet:
         print("=" * 70)
         print("  Metasploit Framework RPC Client - Python-Native")
@@ -46,14 +46,22 @@ def main():
         print(f"  Server: {args.server}:{args.port}")
         print(f"  SSL: {'Enabled' if args.ssl else 'Disabled'}")
         print()
-    
+
+    print(f"[*] Connecting (conceptually) to {args.server}:{args.port}...")
+    if args.password:
+        print("[*] Password supplied; authentication is not implemented in this placeholder client.")
+    print("[!] Note: RPC client functionality is still under development.")
+    print("[!] For a working RPC workflow, start msfrpcd and use a compatible client.")
+    print()
     print("🐍 Python-native RPC client")
     print("RPC client functionality is under development.")
     print()
     print("For now, use the following alternatives:")
-    print("  - Python requests library with RPC API")
-    print("  - msfrpcd daemon with custom client")
+    print("  - Python requests library with the RPC HTTP/HTTPS API")
+    print("  - msfrpcd daemon with a custom client")
+    print("  - pymetasploit3 or other third-party libraries")
     print()
+
     return 0
 
 
