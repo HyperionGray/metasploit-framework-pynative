@@ -155,7 +155,7 @@ db/modules_metadata_base.pstore
 file.txt
 
 # Prevent temporary review/report files in root
-# (these should go in docs/ subdirectories)
+# These should go in docs/reviews/, docs/reports/, or docs/resolution/
 /*_REVIEW*.md
 /*_REPORT*.md
 /*_RESOLUTION*.md
