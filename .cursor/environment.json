@@ -1,0 +1,20 @@
+{
+  "build": {
+    "dockerfile": ".cursor/Dockerfile",
+    "context": "."
+  },
+  "install": "bash .cursor/install.sh",
+  "start": "bash .cursor/start.sh",
+  "env": {
+    "BUNDLE_PATH": "vendor/bundle",
+    "BUNDLE_WITHOUT": "coverage",
+    "PIP_BREAK_SYSTEM_PACKAGES": "1",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PYTHONUNBUFFERED": "1",
+    "RAILS_ENV": "development"
+  },
+  "persistedDirectories": [
+    "vendor/bundle",
+    ".bundle"
+  ]
+}
