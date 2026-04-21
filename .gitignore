@@ -153,3 +153,14 @@ db/modules_metadata_base.pstore
 
 # local scratch/log file
 file.txt
+
+# Prevent temporary review/report files in root
+# These should go in docs/reviews/, docs/reports/, or docs/resolution/
+/*_REVIEW*.md
+/*_REPORT*.md
+/*_RESOLUTION*.md
+/*_RESPONSE*.md
+/*_ACTION_ITEMS*.md
+/*_SUMMARY*.md
+/*_COMPLETE*.md
+/*_VERIFICATION*.md
